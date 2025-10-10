@@ -1,29 +1,16 @@
-import { useStore } from '@/store/store';
-import { observer } from 'mobx-react-lite';
-import { useEffect } from 'react';
 import WorkoutSessionListItem from '@/components/pages/workouts/WorkoutSessionListItem';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router';
 import { routes } from '@/lib/constants';
 import { PlayCircle, PlusCircle } from 'lucide-react';
 import EmptyState from '@/components/ui/widgets/EmptyState';
+import { useAuth } from '@/components/auth/AuthProvider';
+import { useWorkoutSessions } from '@/hooks/useWorkoutSessions';
 
-const WorkoutSessions = observer(() => {
-  const { workoutSession, auth } = useStore();
-  const { workoutSessions, fetchWorkoutSessions, isLoading } = workoutSession;
+const WorkoutSessions = () => {
+  const { userId } = useAuth();
+  const { data: workoutSessions = [], isLoading } = useWorkoutSessions(userId);
   const navigate = useNavigate();
-
-  useEffect(() => {
-    let ignore = false;
-
-    if (!ignore) {
-      fetchWorkoutSessions(auth.user!.id);
-    }
-
-    return () => {
-      ignore = true;
-    };
-  }, [fetchWorkoutSessions, auth.user]);
 
   const handleCreateSession = () => {
     navigate(routes.CreateWorkoutSession);
@@ -70,6 +57,6 @@ const WorkoutSessions = observer(() => {
       )}
     </div>
   );
-});
+};
 
 export default WorkoutSessions;

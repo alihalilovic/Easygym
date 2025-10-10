@@ -23,11 +23,10 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { titleize } from '@/lib/utils';
-import { useStore } from '@/store/store';
-import { observer } from 'mobx-react-lite';
+import { useAuth } from '@/components/auth/AuthProvider';
 
-const Register = observer(() => {
-  const { auth } = useStore();
+const Register = () => {
+  const { register } = useAuth();
 
   const FormSchema = z.object({
     name: z.string(),
@@ -58,12 +57,12 @@ const Register = observer(() => {
   });
 
   const onSubmit = async (data: z.infer<typeof FormSchema>) => {
-    const user = await auth.register(data);
+    const registerResponse = await register(data);
 
-    if (user) {
+    if (registerResponse?.id) {
       toast.success('Registered successfully');
     } else {
-      toast.error(`Failed to register: ${auth.error}`);
+      toast.error(`Failed to register: ${registerResponse}`);
     }
   };
 
@@ -161,6 +160,6 @@ const Register = observer(() => {
       </Form>
     </div>
   );
-});
+};
 
 export default Register;

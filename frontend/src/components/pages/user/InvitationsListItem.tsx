@@ -10,45 +10,39 @@ import {
   DotIcon,
 } from 'lucide-react';
 import { formatDistance } from 'date-fns';
-import { useStore } from '@/store/store';
 import { toast } from 'sonner';
 import InvitationBadge from '@/components/pages/user/InvitationBadge';
+import { useAuth } from '@/components/auth/AuthProvider';
+import { useResolveInvitation } from '@/hooks/useInvitations';
 
 interface InvitationsListItemProps {
   invitation: Invitation;
 }
 
 const InvitationsListItem = ({ invitation }: InvitationsListItemProps) => {
-  const { interactionStore, auth } = useStore();
+  const { isUserClient, userId } = useAuth();
+  const resolveInvitation = useResolveInvitation();
 
   const handleAccept = async () => {
-    await interactionStore.resolveInvitation(
-      invitation.id,
-      InvitationStatus.Accepted,
-    );
-    if (interactionStore.error) {
-      toast.error(interactionStore.error);
-    } else {
-      toast.success('Invitation accepted!');
-    }
+    await resolveInvitation.mutateAsync({
+      invitationId: invitation.id,
+      status: InvitationStatus.Accepted,
+    });
+    toast.success('Invitation accepted!');
   };
 
   const handleReject = async () => {
-    await interactionStore.resolveInvitation(
-      invitation.id,
-      InvitationStatus.Rejected,
-    );
-    if (interactionStore.error) {
-      toast.error(interactionStore.error);
-    } else {
-      toast.success('Invitation rejected');
-    }
+    await resolveInvitation.mutateAsync({
+      invitationId: invitation.id,
+      status: InvitationStatus.Rejected,
+    });
+    toast.success('Invitation rejected');
   };
 
-  const isCurrentUserInitiator = invitation.initiatorId === auth.userId;
+  const isCurrentUserInitiator = invitation.initiatorId === userId;
   const isPending = invitation.status === InvitationStatus.Pending;
 
-  const otherUser = auth.isUserClient ? invitation.trainer : invitation.client;
+  const otherUser = isUserClient ? invitation.trainer : invitation.client;
 
   const relativeDateCreated = formatDistance(
     new Date(invitation.createdAt),
@@ -58,9 +52,8 @@ const InvitationsListItem = ({ invitation }: InvitationsListItemProps) => {
 
   return (
     <div
-      className={`bg-card rounded-lg border border-border p-4 shadow-sm hover:shadow-md transition-all ${
-        invitation.status === InvitationStatus.Rejected ? 'opacity-50' : ''
-      }`}
+      className={`bg-card rounded-lg border border-border p-4 shadow-sm hover:shadow-md transition-all ${invitation.status === InvitationStatus.Rejected ? 'opacity-50' : ''
+        }`}
     >
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-3">

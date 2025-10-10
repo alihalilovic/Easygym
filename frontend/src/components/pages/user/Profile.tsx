@@ -1,16 +1,15 @@
-import { useStore } from '@/store/store';
-import { observer } from 'mobx-react-lite';
+import { useAuth } from '@/components/auth/AuthProvider';
 
-const Profile = observer(() => {
-  const { auth } = useStore();
+const Profile = () => {
+  const { user } = useAuth();
 
   return (
     <div className="flex flex-col items-center justify-center h-screen-content text-2xl">
-      {auth.user?.name && <p>Name: {auth.user?.name}</p>}
-      {auth.user?.email && <p>Email: {auth.user?.email}</p>}
-      {auth.user?.role && <p>Role: {auth.user?.role}</p>}
+      {user?.name && <p>Name: {user?.name}</p>}
+      {user?.email && <p>Email: {user?.email}</p>}
+      {user?.role && <p>Role: {user?.role}</p>}
     </div>
   );
-});
+};
 
 export default Profile;
