@@ -1,6 +1,3 @@
-import { useStore } from '@/store/store';
-import { observer } from 'mobx-react-lite';
-import { useEffect } from 'react';
 import WorkoutCard from '@/components/pages/workouts/WorkoutCard';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router';
@@ -8,24 +5,12 @@ import { routes } from '@/lib/constants';
 import { PlusCircleIcon } from 'lucide-react';
 import EmptyState from '@/components/ui/widgets/EmptyState';
 import { useAuth } from '@/components/auth/AuthProvider';
+import { useWorkouts } from '@/hooks/useWorkouts';
 
-const Workouts = observer(() => {
-  const { workout } = useStore();
+const Workouts = () => {
   const { userId } = useAuth();
-  const { workouts, fetchWorkouts, isLoading } = workout;
+  const { data: workouts = [], isLoading } = useWorkouts(userId);
   const navigate = useNavigate();
-
-  useEffect(() => {
-    let ignore = false;
-
-    if (!ignore) {
-      fetchWorkouts(userId);
-    }
-
-    return () => {
-      ignore = true;
-    };
-  }, [fetchWorkouts, userId]);
 
   const handleCreateWorkout = () => {
     navigate(routes.CreateWorkout);
@@ -56,6 +41,6 @@ const Workouts = observer(() => {
       )}
     </div>
   );
-});
+};
 
 export default Workouts;

@@ -26,6 +26,14 @@ instance.interceptors.request.use(
   },
 );
 
+instance.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const message = error.response?.data?.message || error.message || 'An unexpected error occurred';
+    return Promise.reject(new Error(message));
+  }
+);
+
 const responseBody = <T>(response: AxiosResponse<T>) => response.data;
 
 export const requests = {

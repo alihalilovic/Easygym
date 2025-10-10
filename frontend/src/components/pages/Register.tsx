@@ -24,9 +24,8 @@ import {
 } from '@/components/ui/select';
 import { titleize } from '@/lib/utils';
 import { useAuth } from '@/components/auth/AuthProvider';
-import { observer } from 'mobx-react-lite';
 
-const Register = observer(() => {
+const Register = () => {
   const { register } = useAuth();
 
   const FormSchema = z.object({
@@ -161,6 +160,6 @@ const Register = observer(() => {
       </Form>
     </div>
   );
-});
+};
 
 export default Register;

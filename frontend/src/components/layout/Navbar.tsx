@@ -1,10 +1,9 @@
 import { NavLink } from 'react-router';
 import { routes } from '@/lib/constants';
-import { observer } from 'mobx-react-lite';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/components/auth/AuthProvider';
 
-const Navbar = observer(() => {
+const Navbar = () => {
   const { userId, isUserClient, logout } = useAuth();
 
   return (
@@ -38,6 +37,6 @@ const Navbar = observer(() => {
       </div>
     </div>
   );
-});
+};
 
 export default Navbar;

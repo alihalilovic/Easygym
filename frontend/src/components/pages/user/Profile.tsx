@@ -1,7 +1,6 @@
 import { useAuth } from '@/components/auth/AuthProvider';
-import { observer } from 'mobx-react-lite';
 
-const Profile = observer(() => {
+const Profile = () => {
   const { user } = useAuth();
 
   return (
@@ -11,6 +10,6 @@ const Profile = observer(() => {
       {user?.role && <p>Role: {user?.role}</p>}
     </div>
   );
-});
+};
 
 export default Profile;

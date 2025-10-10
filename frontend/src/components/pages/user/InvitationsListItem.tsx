@@ -10,41 +10,33 @@ import {
   DotIcon,
 } from 'lucide-react';
 import { formatDistance } from 'date-fns';
-import { useStore } from '@/store/store';
 import { toast } from 'sonner';
 import InvitationBadge from '@/components/pages/user/InvitationBadge';
 import { useAuth } from '@/components/auth/AuthProvider';
+import { useResolveInvitation } from '@/hooks/useInvitations';
 
 interface InvitationsListItemProps {
   invitation: Invitation;
 }
 
 const InvitationsListItem = ({ invitation }: InvitationsListItemProps) => {
-  const { interactionStore } = useStore();
   const { isUserClient, userId } = useAuth();
+  const resolveInvitation = useResolveInvitation();
 
   const handleAccept = async () => {
-    await interactionStore.resolveInvitation(
-      invitation.id,
-      InvitationStatus.Accepted,
-    );
-    if (interactionStore.error) {
-      toast.error(interactionStore.error);
-    } else {
-      toast.success('Invitation accepted!');
-    }
+    await resolveInvitation.mutateAsync({
+      invitationId: invitation.id,
+      status: InvitationStatus.Accepted,
+    });
+    toast.success('Invitation accepted!');
   };
 
   const handleReject = async () => {
-    await interactionStore.resolveInvitation(
-      invitation.id,
-      InvitationStatus.Rejected,
-    );
-    if (interactionStore.error) {
-      toast.error(interactionStore.error);
-    } else {
-      toast.success('Invitation rejected');
-    }
+    await resolveInvitation.mutateAsync({
+      invitationId: invitation.id,
+      status: InvitationStatus.Rejected,
+    });
+    toast.success('Invitation rejected');
   };
 
   const isCurrentUserInitiator = invitation.initiatorId === userId;
