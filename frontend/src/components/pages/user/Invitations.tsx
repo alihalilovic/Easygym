@@ -29,13 +29,15 @@ import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 import { titleize } from '@/lib/utils';
 import InvitationsListItem from '@/components/pages/user/InvitationsListItem';
+import { useAuth } from '@/components/auth/AuthProvider';
 
 const Invitations = observer(() => {
-  const { interactionStore, auth } = useStore();
+  const { isUserClient } = useAuth();
+  const { interactionStore } = useStore();
   const { invitations, nonResolvedInvitations, fetchInvitations, isLoading } =
     interactionStore;
 
-  const invitee = auth.isUserClient ? UserRole.Trainer : UserRole.Client;
+  const invitee = isUserClient ? UserRole.Trainer : UserRole.Client;
   const emptyStateButtonText = `Send an invite to a ${invitee}`;
   const emptyStateDescriptionText = `You have no invitations yet. You can send an invite to start working with a ${invitee}.`;
 

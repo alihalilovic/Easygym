@@ -44,9 +44,11 @@ import {
   DialogClose,
   DialogDescription,
 } from '@/components/ui/dialog';
+import { useAuth } from '@/components/auth/AuthProvider';
 
 const WorkoutSession = observer(() => {
-  const { workoutSession: workoutSessionStore, workout, auth } = useStore();
+  const { workoutSession: workoutSessionStore, workout } = useStore();
+  const { userId } = useAuth();
   const {
     workoutSessions,
     createWorkoutSession,
@@ -93,17 +95,17 @@ const WorkoutSession = observer(() => {
     if (viewMode) return;
     let ignore = false;
 
-    if (!workouts.length && !ignore) fetchWorkouts(auth.userId);
+    if (!workouts.length && !ignore) fetchWorkouts(userId);
 
     return () => {
       ignore = true;
     };
-  }, [viewMode, workouts.length, fetchWorkouts, auth.userId]);
+  }, [viewMode, workouts.length, fetchWorkouts, userId]);
 
   useEffect(() => {
     const setupWorkouts = async () => {
       if (!viewMode) return;
-      if (!workoutSessions.length) await fetchWorkoutSessions(auth.userId);
+      if (!workoutSessions.length) await fetchWorkoutSessions(userId);
 
       const foundWorkoutSession = getWorkoutSession(Number(params.id));
       setWorkoutSession(foundWorkoutSession as WorkoutSessionType);
@@ -112,7 +114,7 @@ const WorkoutSession = observer(() => {
     setupWorkouts();
   }, [
     fetchWorkouts,
-    auth.userId,
+    userId,
     viewMode,
     params.id,
     getWorkoutSession,
@@ -174,7 +176,7 @@ const WorkoutSession = observer(() => {
 
     createWorkoutSession({
       workoutId: selectedWorkout.id,
-      traineeId: auth.userId,
+      traineeId: userId,
       startTime: sessionStartTime.toISOString(),
       endTime: new Date().toISOString(),
       notes: workoutSessionForm.getValues('notes'),
@@ -251,9 +253,8 @@ const WorkoutSession = observer(() => {
 
           <div className="flex gap-4">
             <div
-              className={`bg-card rounded-lg shadow-sm border border-border p-4 ${
-                !workoutSession?.notes ? 'w-full' : ''
-              }`}
+              className={`bg-card rounded-lg shadow-sm border border-border p-4 ${!workoutSession?.notes ? 'w-full' : ''
+                }`}
             >
               <h2 className="text-lg font-semibold mb-4">Session Details</h2>
               <div className="flex flex-col gap-3">
@@ -273,8 +274,8 @@ const WorkoutSession = observer(() => {
                     {Math.round(
                       (new Date(workoutSession?.endTime || '').getTime() -
                         new Date(workoutSession?.startTime || '').getTime()) /
-                        1000 /
-                        60,
+                      1000 /
+                      60,
                     )}{' '}
                     minutes
                   </span>

@@ -7,9 +7,11 @@ import { useNavigate } from 'react-router';
 import { routes } from '@/lib/constants';
 import { PlayCircle, PlusCircle } from 'lucide-react';
 import EmptyState from '@/components/ui/widgets/EmptyState';
+import { useAuth } from '@/components/auth/AuthProvider';
 
 const WorkoutSessions = observer(() => {
-  const { workoutSession, auth } = useStore();
+  const { workoutSession } = useStore();
+  const { userId } = useAuth();
   const { workoutSessions, fetchWorkoutSessions, isLoading } = workoutSession;
   const navigate = useNavigate();
 
@@ -17,13 +19,13 @@ const WorkoutSessions = observer(() => {
     let ignore = false;
 
     if (!ignore) {
-      fetchWorkoutSessions(auth.user!.id);
+      fetchWorkoutSessions(userId);
     }
 
     return () => {
       ignore = true;
     };
-  }, [fetchWorkoutSessions, auth.user]);
+  }, [fetchWorkoutSessions, userId]);
 
   const handleCreateSession = () => {
     navigate(routes.CreateWorkoutSession);

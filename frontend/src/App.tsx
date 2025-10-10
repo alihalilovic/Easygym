@@ -4,26 +4,21 @@ import { Toaster } from '@/components/ui/sonner';
 import ModeToggle from '@/components/theme/ModeToggle';
 import Navbar from '@/components/layout/Navbar';
 import { useEffect } from 'react';
-import { useStore } from '@/store/store';
 import { authTokenKey } from '@/lib/constants';
-import Loader from '@/components/ui/widgets/Loader';
 import { observer } from 'mobx-react-lite';
+import { useAuth } from '@/components/auth/AuthProvider';
 
 const App = observer(() => {
-  const { auth } = useStore();
+  const { setMeUser } = useAuth();
 
   useEffect(() => {
-    if (localStorage.getItem(authTokenKey)) {
-      auth.setMeUser();
-    } else {
-      auth.setLoading(false);
-    }
-  }, [auth]);
+    if (localStorage.getItem(authTokenKey))
+      setMeUser();
+  }, [setMeUser]);
 
   return (
     <ThemeProvider defaultTheme="dark" storageKey="ui-theme">
       <div className="wrapper">
-        {auth.isLoading && <Loader />}
         <Navbar />
         <ModeToggle className="absolute top-0 right-0" />
         <Toaster />

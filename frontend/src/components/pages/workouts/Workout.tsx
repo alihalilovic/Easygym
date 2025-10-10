@@ -35,11 +35,13 @@ import {
 } from '@/components/ui/dialog';
 import SetCard from '@/components/pages/workouts/SetCard';
 import { Progress } from '@/components/ui/progress';
+import { useAuth } from '@/components/auth/AuthProvider';
 
 const WorkoutForm = observer(() => {
   const params = useParams();
   const navigate = useNavigate();
-  const { workout, auth } = useStore();
+  const { workout } = useStore();
+  const { userId } = useAuth();
 
   const maxRestTimeMinutes = 10;
   const defaultRestTimeMinutes = 3;
@@ -123,7 +125,7 @@ const WorkoutForm = observer(() => {
     const fetchWorkoutAndPopulateForm = async () => {
       // On reload, workouts are cleared, so we need to fetch this workout again,
       // nothing will happen if the workout is already in the store
-      await fetchWorkout(auth.userId, workoutId);
+      await fetchWorkout(userId, workoutId);
 
       const existingWorkout = workout.workouts.find((w) => w.id === workoutId);
 
@@ -138,7 +140,7 @@ const WorkoutForm = observer(() => {
       ignore = true;
     };
   }, [
-    auth.userId,
+    userId,
     workoutId,
     workout.workouts,
     fetchWorkout,
@@ -169,14 +171,14 @@ const WorkoutForm = observer(() => {
     const workoutData = {
       ...data,
       sets,
-      traineeId: auth.userId,
+      traineeId: userId,
       restTimeSeconds: (Math.round(data.restTimeMinutes * 100) / 100) * 60,
     };
 
     if (!workoutId) {
       await createWorkout(workoutData);
     } else {
-      await updateWorkout(auth.userId, workoutId, workoutData);
+      await updateWorkout(userId, workoutId, workoutData);
     }
 
     if (workout.error) {
@@ -196,7 +198,7 @@ const WorkoutForm = observer(() => {
   const handleDeleteWorkout = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
 
-    deleteWorkout(auth.userId, workoutId);
+    deleteWorkout(userId, workoutId);
     toast.success('Workout deleted successfully');
 
     navigate(routes.Workouts);

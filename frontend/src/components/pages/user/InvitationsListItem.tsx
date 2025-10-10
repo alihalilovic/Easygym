@@ -13,13 +13,15 @@ import { formatDistance } from 'date-fns';
 import { useStore } from '@/store/store';
 import { toast } from 'sonner';
 import InvitationBadge from '@/components/pages/user/InvitationBadge';
+import { useAuth } from '@/components/auth/AuthProvider';
 
 interface InvitationsListItemProps {
   invitation: Invitation;
 }
 
 const InvitationsListItem = ({ invitation }: InvitationsListItemProps) => {
-  const { interactionStore, auth } = useStore();
+  const { interactionStore } = useStore();
+  const { isUserClient, userId } = useAuth();
 
   const handleAccept = async () => {
     await interactionStore.resolveInvitation(
@@ -45,10 +47,10 @@ const InvitationsListItem = ({ invitation }: InvitationsListItemProps) => {
     }
   };
 
-  const isCurrentUserInitiator = invitation.initiatorId === auth.userId;
+  const isCurrentUserInitiator = invitation.initiatorId === userId;
   const isPending = invitation.status === InvitationStatus.Pending;
 
-  const otherUser = auth.isUserClient ? invitation.trainer : invitation.client;
+  const otherUser = isUserClient ? invitation.trainer : invitation.client;
 
   const relativeDateCreated = formatDistance(
     new Date(invitation.createdAt),
@@ -58,9 +60,8 @@ const InvitationsListItem = ({ invitation }: InvitationsListItemProps) => {
 
   return (
     <div
-      className={`bg-card rounded-lg border border-border p-4 shadow-sm hover:shadow-md transition-all ${
-        invitation.status === InvitationStatus.Rejected ? 'opacity-50' : ''
-      }`}
+      className={`bg-card rounded-lg border border-border p-4 shadow-sm hover:shadow-md transition-all ${invitation.status === InvitationStatus.Rejected ? 'opacity-50' : ''
+        }`}
     >
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-3">
