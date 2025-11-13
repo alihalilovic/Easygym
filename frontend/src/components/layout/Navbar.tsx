@@ -1,39 +1,168 @@
-import { NavLink } from 'react-router';
+import { useState, useRef, useEffect } from 'react';
+import { NavLink, useNavigate } from 'react-router';
 import { routes } from '@/lib/constants';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/components/auth/AuthProvider';
+import {
+  Calendar,
+  Home,
+  LogIn,
+  LogOut,
+  Menu,
+  User,
+  Dumbbell,
+  UserPlus,
+  Mail,
+} from 'lucide-react';
+import clsx from 'clsx';
+
+interface NavbarLink {
+  to: string;
+  label: string;
+  icon: React.ReactNode;
+  onClick?: () => void;
+}
 
 const Navbar = () => {
-  const { userId, isUserClient, logout } = useAuth();
+  const { userId, isUserClient, isUserTrainer, logout } = useAuth();
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
+
+  const nonAuthLinks: NavbarLink[] = [
+    {
+      to: routes.Home,
+      label: 'Home',
+      icon: <Home />,
+    },
+    {
+      to: routes.Login,
+      label: 'Login',
+      icon: <LogIn />,
+    },
+    {
+      to: routes.Register,
+      label: 'Register',
+      icon: <UserPlus />,
+    },
+  ];
+
+  const authLinks: NavbarLink[] = [
+    {
+      to: routes.Profile,
+      label: 'Profile',
+      icon: <User />,
+    },
+  ];
+
+  const clientSpecificLinks: NavbarLink[] = [
+    {
+      to: routes.WorkoutSessions,
+      label: 'Sessions',
+      icon: <Calendar />,
+    },
+    {
+      to: routes.Workouts,
+      label: 'Workouts',
+      icon: <Dumbbell />,
+    },
+    {
+      to: routes.Invitations,
+      label: 'Invitations',
+      icon: <Mail />,
+    },
+  ];
+
+  const trainerSpecificLinks: NavbarLink[] = [
+    {
+      to: routes.WorkoutSessions,
+      label: 'Sessions',
+      icon: <Calendar />,
+    },
+    {
+      to: routes.Invitations,
+      label: 'Invitations',
+      icon: <Mail />,
+    },
+  ];
+
+  const allLinks: NavbarLink[] = [
+    ...(!userId ? nonAuthLinks : []),
+    ...(userId ? authLinks : []),
+    ...(isUserClient ? clientSpecificLinks : []),
+    ...(isUserTrainer ? trainerSpecificLinks : []),
+    ...(userId
+      ? [
+          {
+            to: routes.Logout,
+            label: 'Logout',
+            icon: <LogOut />,
+            onClick: logout,
+          },
+        ]
+      : []),
+  ];
+
+  const handleLinkClick = (link: NavbarLink) => {
+    setIsOpen(false);
+    if (link.onClick) link.onClick();
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsOpen(false);
+      }
+    };
+
+    if (isOpen) document.addEventListener('mousedown', handleClickOutside);
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isOpen]);
 
   return (
-    <div className="flex flex-col sm:flex-row items-center min-h-9 font-bold mb-4">
-      <h1 className="text-2xl uppercase">EasyGym</h1>
-      <div className="flex flex-col sm:flex-row items-center w-fit ml-0 mt-2 sm:mt-0 sm:ml-auto mr-0 sm:mr-16">
-        <div className="flex flex-col sm:flex-row items-center gap-4">
-          {userId ? (
-            <>
-              <NavLink to={routes.Invitations}>Invitations</NavLink>
-              {isUserClient && (
-                <>
-                  <NavLink to={''}>My trainer</NavLink>
-                  <NavLink to={routes.WorkoutSessions}>Sessions</NavLink>
-                </>
-              )}
-              <NavLink to={routes.Workouts}>Workouts</NavLink>
-              <NavLink to={routes.Profile}>Profile</NavLink>
-              <Button variant="outline" onClick={logout}>
-                Logout
-              </Button>
-            </>
-          ) : (
-            <>
-              <NavLink to={routes.Home}>Home</NavLink>
-              <NavLink to={routes.Login}>Login</NavLink>
-              <NavLink to={routes.Register}>Register</NavLink>
-            </>
-          )}
-        </div>
+    <div className="flex items-center justify-between min-h-9 font-bold mb-4 mr-12">
+      <NavLink to={routes.Home}>
+        <h1
+          onClick={() => navigate(routes.Home)}
+          className="text-2xl uppercase cursor-pointer"
+        >
+          Easygym
+        </h1>
+      </NavLink>
+      <div className="relative" ref={dropdownRef}>
+        <Button
+          variant="outline"
+          onClick={() => setIsOpen(!isOpen)}
+          className="h-9 w-9"
+        >
+          <Menu />
+        </Button>
+
+        {isOpen && (
+          <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg py-1 z-50 border border-gray-200 dark:border-gray-700">
+            {allLinks.map((link) => (
+              <NavLink
+                key={link.label}
+                to={link.to}
+                className={clsx([
+                  'block px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700',
+                  link.label === 'Logout' ? 'text-destructive' : '',
+                ])}
+                onClick={() => handleLinkClick(link)}
+              >
+                <span className="flex items-center gap-2">
+                  {link.icon} {link.label}
+                </span>
+              </NavLink>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
