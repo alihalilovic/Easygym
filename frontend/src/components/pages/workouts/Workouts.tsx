@@ -1,41 +1,16 @@
-import { useStore } from '@/store/store';
-import { observer } from 'mobx-react-lite';
-import { useEffect } from 'react';
 import WorkoutCard from '@/components/pages/workouts/WorkoutCard';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router';
 import { routes } from '@/lib/constants';
 import { PlusCircleIcon } from 'lucide-react';
 import EmptyState from '@/components/ui/widgets/EmptyState';
+import { useAuth } from '@/components/auth/AuthProvider';
+import { useWorkouts } from '@/hooks/useWorkouts';
 
-const Workouts = observer(() => {
-  const { workout, auth, interaction } = useStore();
-  const { workouts, fetchWorkouts, isLoading } = workout;
-  const { fetchClientsForTrainer } = interaction;
+const Workouts = () => {
+  const { userId } = useAuth();
+  const { data: workouts = [], isLoading } = useWorkouts(userId);
   const navigate = useNavigate();
-
-  useEffect(() => {
-    let ignore = false;
-
-    if (!ignore) {
-      fetchWorkouts(auth.user!.id);
-    }
-
-    return () => {
-      ignore = true;
-    };
-  }, [fetchWorkouts, auth.user]);
-
-  useEffect(() => {
-    let ignore = false;
-    if (!ignore) {
-      fetchClientsForTrainer(auth.userId);
-    }
-
-    return () => {
-      ignore = true;
-    };
-  }, [fetchClientsForTrainer, auth.userId]);
 
   const handleCreateWorkout = () => {
     navigate(routes.CreateWorkout);
@@ -66,6 +41,6 @@ const Workouts = observer(() => {
       )}
     </div>
   );
-});
+};
 
 export default Workouts;

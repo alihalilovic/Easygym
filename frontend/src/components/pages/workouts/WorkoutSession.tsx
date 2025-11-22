@@ -1,10 +1,8 @@
-import { useStore } from '@/store/store';
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { routes } from '@/lib/constants';
-import { observer } from 'mobx-react-lite';
 import { Workout } from '@/types/Workout';
 import { WorkoutSession as WorkoutSessionType } from '@/types/WorkoutSession';
 import { Progress } from '@/components/ui/progress';
@@ -44,21 +42,22 @@ import {
   DialogClose,
   DialogDescription,
 } from '@/components/ui/dialog';
+import { useAuth } from '@/components/auth/AuthProvider';
+import { useWorkouts } from '@/hooks/useWorkouts';
+import { useWorkoutSession, useCreateWorkoutSession, useDeleteWorkoutSession } from '@/hooks/useWorkoutSessions';
 
-const WorkoutSession = observer(() => {
-  const { workoutSession: workoutSessionStore, workout, auth } = useStore();
-  const {
-    workoutSessions,
-    createWorkoutSession,
-    getWorkoutSession,
-    fetchWorkoutSessions,
-    deleteWorkoutSession,
-  } = workoutSessionStore;
-  const { workouts, fetchWorkouts } = workout;
+const WorkoutSession = () => {
+  const { userId } = useAuth();
   const navigate = useNavigate();
 
   const params = useParams();
-  const viewMode = useMemo(() => !!params.id, [params.id]);
+  const viewMode = !!params.id;
+  const sessionId = parseInt(params.id as string);
+
+  const { data: workouts = [] } = useWorkouts(userId, !viewMode);
+  const { data: fetchedWorkoutSession } = useWorkoutSession(userId, sessionId, viewMode);
+  const createWorkoutSession = useCreateWorkoutSession();
+  const deleteWorkoutSession = useDeleteWorkoutSession();
 
   const [workoutSession, setWorkoutSession] = useState<
     WorkoutSessionType | undefined
@@ -90,35 +89,10 @@ const WorkoutSession = observer(() => {
   });
 
   useEffect(() => {
-    if (viewMode) return;
-    let ignore = false;
-
-    if (!workouts.length && !ignore) fetchWorkouts(auth.userId);
-
-    return () => {
-      ignore = true;
-    };
-  }, [viewMode, workouts.length, fetchWorkouts, auth.userId]);
-
-  useEffect(() => {
-    const setupWorkouts = async () => {
-      if (!viewMode) return;
-      if (!workoutSessions.length) await fetchWorkoutSessions(auth.userId);
-
-      const foundWorkoutSession = getWorkoutSession(Number(params.id));
-      setWorkoutSession(foundWorkoutSession as WorkoutSessionType);
-    };
-
-    setupWorkouts();
-  }, [
-    fetchWorkouts,
-    auth.userId,
-    viewMode,
-    params.id,
-    getWorkoutSession,
-    fetchWorkoutSessions,
-    workoutSessions.length,
-  ]);
+    if (viewMode && fetchedWorkoutSession) {
+      setWorkoutSession(fetchedWorkoutSession);
+    }
+  }, [viewMode, fetchedWorkoutSession]);
 
   const handleStartSession = () => {
     if (!selectedWorkout) return;
@@ -169,12 +143,12 @@ const WorkoutSession = observer(() => {
     }
   };
 
-  const handleEndSession = () => {
+  const handleEndSession = async () => {
     if (!selectedWorkout || !sessionStartTime) return;
 
-    createWorkoutSession({
+    await createWorkoutSession.mutateAsync({
       workoutId: selectedWorkout.id,
-      traineeId: auth.userId,
+      traineeId: userId,
       startTime: sessionStartTime.toISOString(),
       endTime: new Date().toISOString(),
       notes: workoutSessionForm.getValues('notes'),
@@ -210,12 +184,11 @@ const WorkoutSession = observer(() => {
     workoutSessionForm.handleSubmit(handleEndSession)();
   };
 
-  const handleDeleteSession = () => {
+  const handleDeleteSession = async () => {
     if (!viewMode) return;
 
-    deleteWorkoutSession(Number(params.id));
+    await deleteWorkoutSession.mutateAsync(Number(params.id));
     toast.success('Workout session deleted successfully');
-
     navigate(routes.WorkoutSessions);
   };
 
@@ -251,9 +224,8 @@ const WorkoutSession = observer(() => {
 
           <div className="flex gap-4">
             <div
-              className={`bg-card rounded-lg shadow-sm border border-border p-4 ${
-                !workoutSession?.notes ? 'w-full' : ''
-              }`}
+              className={`bg-card rounded-lg shadow-sm border border-border p-4 ${!workoutSession?.notes ? 'w-full' : ''
+                }`}
             >
               <h2 className="text-lg font-semibold mb-4">Session Details</h2>
               <div className="flex flex-col gap-3">
@@ -273,8 +245,8 @@ const WorkoutSession = observer(() => {
                     {Math.round(
                       (new Date(workoutSession?.endTime || '').getTime() -
                         new Date(workoutSession?.startTime || '').getTime()) /
-                        1000 /
-                        60,
+                      1000 /
+                      60,
                     )}{' '}
                     minutes
                   </span>
@@ -490,6 +462,6 @@ const WorkoutSession = observer(() => {
       )}
     </>
   );
-});
+};
 
 export default WorkoutSession;

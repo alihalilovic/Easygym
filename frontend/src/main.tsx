@@ -2,12 +2,16 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import '@/styles/index.css';
 import Router from '@/components/router/Router';
-import store, { StoreContext } from '@/store/store';
+import { AuthProvider } from '@/components/auth/AuthProvider';
+import { QueryClientProvider } from '@tanstack/react-query';
+import { queryClient } from '@/lib/queryClient';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <StoreContext.Provider value={store}>
-      <Router />
-    </StoreContext.Provider>
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <Router />
+      </AuthProvider>
+    </QueryClientProvider>
   </StrictMode>,
 );

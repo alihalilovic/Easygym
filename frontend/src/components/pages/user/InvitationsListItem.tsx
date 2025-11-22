@@ -10,46 +10,39 @@ import {
   DotIcon,
 } from 'lucide-react';
 import { formatDistance } from 'date-fns';
-import { useStore } from '@/store/store';
 import { toast } from 'sonner';
 import InvitationBadge from '@/components/pages/user/InvitationBadge';
+import { useAuth } from '@/components/auth/AuthProvider';
+import { useResolveInvitation } from '@/hooks/useInvitations';
 
 interface InvitationsListItemProps {
   invitation: Invitation;
 }
 
 const InvitationsListItem = ({ invitation }: InvitationsListItemProps) => {
-  const { interaction, auth } = useStore();
+  const { isUserClient, userId } = useAuth();
+  const resolveInvitation = useResolveInvitation();
 
   const handleAccept = async () => {
-    await interaction.resolveInvitation(
-      invitation.id,
-      InvitationStatus.Accepted,
-    );
-    if (interaction.error) {
-      toast.error(interaction.error);
-    } else {
-      toast.success('Invitation accepted!');
-      auth.setMeUser();
-    }
+    await resolveInvitation.mutateAsync({
+      invitationId: invitation.id,
+      status: InvitationStatus.Accepted,
+    });
+    toast.success('Invitation accepted!');
   };
 
   const handleReject = async () => {
-    await interaction.resolveInvitation(
-      invitation.id,
-      InvitationStatus.Rejected,
-    );
-    if (interaction.error) {
-      toast.error(interaction.error);
-    } else {
-      toast.success('Invitation rejected');
-    }
+    await resolveInvitation.mutateAsync({
+      invitationId: invitation.id,
+      status: InvitationStatus.Rejected,
+    });
+    toast.success('Invitation rejected');
   };
 
-  const isCurrentUserInitiator = invitation.initiatorId === auth.userId;
+  const isCurrentUserInitiator = invitation.initiatorId === userId;
   const isPending = invitation.status === InvitationStatus.Pending;
 
-  const otherUser = auth.isUserClient ? invitation.trainer : invitation.client;
+  const otherUser = isUserClient ? invitation.trainer : invitation.client;
 
   const relativeDateCreated = formatDistance(
     new Date(invitation.createdAt),

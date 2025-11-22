@@ -1,6 +1,4 @@
-import { useStore } from '@/store/store';
-import { observer } from 'mobx-react-lite';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import EmptyState from '@/components/ui/widgets/EmptyState';
 import { UserIcon } from 'lucide-react';
 import { UserRole } from '@/types/User';
@@ -29,13 +27,18 @@ import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 import { titleize } from '@/lib/utils';
 import InvitationsListItem from '@/components/pages/user/InvitationsListItem';
+import { useAuth } from '@/components/auth/AuthProvider';
+import {
+  useCreateInvitation,
+  useInvitationsComputed,
+} from '@/hooks/useInvitations';
 
-const Invitations = observer(() => {
-  const { interaction: interactionStore, auth } = useStore();
-  const { invitations, nonResolvedInvitations, fetchInvitations, isLoading } =
-    interactionStore;
+const Invitations = () => {
+  const { isUserClient } = useAuth();
+  const { invitations, nonResolvedInvitations } = useInvitationsComputed();
+  const createInvitation = useCreateInvitation();
 
-  const invitee = auth.isUserClient ? UserRole.Trainer : UserRole.Client;
+  const invitee = isUserClient ? UserRole.Trainer : UserRole.Client;
   const emptyStateButtonText = `Send an invite to a ${invitee}`;
   const emptyStateDescriptionText = `You have no invitations yet. You can send an invite to start working with a ${invitee}.`;
 
@@ -59,19 +62,14 @@ const Invitations = observer(() => {
   };
 
   const onInviteFormSubmit = async (data: z.infer<typeof InviteFormSchema>) => {
-    await interactionStore.createInvitation({
+    await createInvitation.mutateAsync({
       [`${invitee}Email`]: data.email,
       message: (data.message ?? '').trim(),
     });
 
-    if (interactionStore.error) {
-      toast.error(interactionStore.error);
-      return;
-    }
-
     toast.success(`${titleize(invitee)} invited successfully`);
-
     setIsInviteModalOpen(false);
+    inviteForm.reset();
   };
 
   const handleInviteModalOpenChange = (open: boolean) => {
@@ -81,10 +79,6 @@ const Invitations = observer(() => {
 
     inviteForm.reset();
   };
-
-  useEffect(() => {
-    fetchInvitations();
-  }, [fetchInvitations]);
 
   return (
     <div>
@@ -142,7 +136,7 @@ const Invitations = observer(() => {
         </DialogContent>
       </Dialog>
 
-      {invitations.length === 0 && !isLoading && (
+      {invitations.length === 0 && (
         <EmptyState
           title="No invitations"
           description={emptyStateDescriptionText}
@@ -152,7 +146,7 @@ const Invitations = observer(() => {
         />
       )}
 
-      {invitations.length > 0 && !isLoading && (
+      {invitations.length > 0 && (
         <div className="flex flex-col gap-4">
           <p className="text-sm text-muted-foreground">
             You have {nonResolvedInvitations.length} pending invitations.
@@ -167,6 +161,6 @@ const Invitations = observer(() => {
       )}
     </div>
   );
-});
+};
 
 export default Invitations;

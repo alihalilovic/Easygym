@@ -17,10 +17,8 @@ import FormWrapper from '@/components/ui/widgets/FormWrapper';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Set, Workout } from '@/types/Workout';
 import { Plus } from 'lucide-react';
-import { useStore } from '@/store/store';
 import { routes } from '@/lib/constants';
 import { useNavigate, useParams } from 'react-router';
-import { observer } from 'mobx-react-lite';
 import {
   Dialog,
   DialogTrigger,
@@ -35,11 +33,13 @@ import {
 } from '@/components/ui/dialog';
 import SetCard from '@/components/pages/workouts/SetCard';
 import { Progress } from '@/components/ui/progress';
+import { useAuth } from '@/components/auth/AuthProvider';
+import { useWorkout, useCreateWorkout, useUpdateWorkout, useDeleteWorkout } from '@/hooks/useWorkouts';
 
-const WorkoutForm = observer(() => {
+const WorkoutForm = () => {
   const params = useParams();
   const navigate = useNavigate();
-  const { workout, auth } = useStore();
+  const { userId } = useAuth();
 
   const maxRestTimeMinutes = 10;
   const defaultRestTimeMinutes = 3;
@@ -52,7 +52,11 @@ const WorkoutForm = observer(() => {
     [workoutId],
   );
 
-  const { createWorkout, updateWorkout, deleteWorkout, fetchWorkout } = workout;
+  const { data: existingWorkout } = useWorkout(userId, workoutId, !!workoutId);
+  const createWorkout = useCreateWorkout();
+  const updateWorkout = useUpdateWorkout();
+  const deleteWorkout = useDeleteWorkout();
+
   const [sets, setSets] = useState<Omit<Set, 'id'>[] | Set[]>([]);
   const [dialogSetDetails, setDialogSetDetails] = useState<Omit<
     Set,
@@ -116,34 +120,9 @@ const WorkoutForm = observer(() => {
   );
 
   useEffect(() => {
-    if (!workoutId) return;
-
-    let ignore = false;
-
-    const fetchWorkoutAndPopulateForm = async () => {
-      // On reload, workouts are cleared, so we need to fetch this workout again,
-      // nothing will happen if the workout is already in the store
-      await fetchWorkout(auth.userId, workoutId);
-
-      const existingWorkout = workout.workouts.find((w) => w.id === workoutId);
-
-      if (!ignore) {
-        populateFormCached(existingWorkout);
-      }
-    };
-
-    fetchWorkoutAndPopulateForm();
-
-    return () => {
-      ignore = true;
-    };
-  }, [
-    auth.userId,
-    workoutId,
-    workout.workouts,
-    fetchWorkout,
-    populateFormCached,
-  ]);
+    if (!workoutId || !existingWorkout) return;
+    populateFormCached(existingWorkout);
+  }, [workoutId, existingWorkout, populateFormCached]);
 
   const addSet = (data: z.infer<typeof setFormSchema>) => {
     setSets([...sets, data]);
@@ -169,19 +148,16 @@ const WorkoutForm = observer(() => {
     const workoutData = {
       ...data,
       sets,
-      traineeId: auth.userId,
+      traineeId: userId,
       restTimeSeconds: (Math.round(data.restTimeMinutes * 100) / 100) * 60,
     };
 
     if (!workoutId) {
-      await createWorkout(workoutData);
+      await createWorkout.mutateAsync(workoutData);
     } else {
-      await updateWorkout(auth.userId, workoutId, workoutData);
-    }
-
-    if (workout.error) {
-      toast.error(workout.error);
-      return;
+      await updateWorkout.mutateAsync({
+        traineeId: userId, workoutId, workout: workoutData,
+      });
     }
 
     toast.success(`Workout ${workoutId ? 'updated' : 'created'} successfully`);
@@ -193,12 +169,11 @@ const WorkoutForm = observer(() => {
     setForm.handleSubmit(addSet)();
   };
 
-  const handleDeleteWorkout = (e: React.MouseEvent<HTMLButtonElement>) => {
+  const handleDeleteWorkout = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
 
-    deleteWorkout(auth.userId, workoutId);
+    await deleteWorkout.mutateAsync({ traineeId: userId, workoutId });
     toast.success('Workout deleted successfully');
-
     navigate(routes.Workouts);
   };
 
@@ -448,6 +423,6 @@ const WorkoutForm = observer(() => {
       </div>
     </div>
   );
-});
+};
 
 export default WorkoutForm;
