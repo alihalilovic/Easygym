@@ -22,6 +22,7 @@ import {
   DumbbellIcon,
   UserIcon,
 } from 'lucide-react';
+import { PasswordStrengthIndicator } from '@/components/ui/PasswordStrengthIndicator';
 
 const Register = () => {
   const { register } = useAuth();
@@ -156,6 +157,7 @@ const Register = () => {
                           {...field}
                         />
                       </FormControl>
+                      <PasswordStrengthIndicator password={field.value} />
                       <div className="min-h-6">
                         <FormMessage />
                       </div>
