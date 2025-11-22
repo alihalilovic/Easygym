@@ -13,9 +13,14 @@ export interface User {
   createdAt: Date;
 }
 
-export interface CurrentUser extends User {
-  trainer: User | null;
-  invitationAcceptedAt: Date;
+export interface TrainerConnection {
+  trainer: User;
+  invitationAcceptedAt: Date | null;
+}
+
+export interface ClientConnection {
+  client: User;
+  invitationAcceptedAt: Date | null;
 }
 
 export interface UserRegisterRequest {

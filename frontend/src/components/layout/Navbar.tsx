@@ -71,6 +71,11 @@ const Navbar = () => {
       label: 'Invitations',
       icon: <Mail />,
     },
+    {
+      to: routes.MyTrainer,
+      label: 'My Trainer',
+      icon: <User />,
+    },
   ];
 
   const trainerSpecificLinks: NavbarLink[] = [

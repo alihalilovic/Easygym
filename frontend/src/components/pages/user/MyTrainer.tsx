@@ -1,20 +1,22 @@
-import { useStore } from '@/store/store';
-import { observer } from 'mobx-react-lite';
-import { User, Mail, Calendar, UserCheck, Users } from 'lucide-react';
+import {
+  User as UserIcon,
+  Mail,
+  Calendar,
+  UserCheck,
+  Users,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import EmptyState from '@/components/ui/widgets/EmptyState';
+import { useMyTrainer } from '@/hooks/useConnections';
 
-const MyTrainer = observer(() => {
-  const { auth } = useStore();
-
-  const trainer = auth.user?.trainer;
-  const invitationAcceptedAt = auth.user?.invitationAcceptedAt;
+const MyTrainer = () => {
+  const { data: trainerConnection } = useMyTrainer();
 
   const handleRemoveTrainer = () => {
     // TODO: Implement removing trainer
   };
 
-  if (!trainer) {
+  if (!trainerConnection) {
     return (
       <div className="flex flex-col gap-4">
         <EmptyState
@@ -28,6 +30,8 @@ const MyTrainer = observer(() => {
     );
   }
 
+  const { trainer, invitationAcceptedAt } = trainerConnection;
+
   return (
     <div className="flex flex-col gap-6">
       <h2 className="text-2xl font-bold mb-4 pb-2 border-b border-solid">
@@ -37,7 +41,7 @@ const MyTrainer = observer(() => {
       <div className="bg-card rounded-2xl p-6 shadow-sm border hover:shadow-md transition-shadow">
         <div className="flex items-start gap-6">
           <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-            <User className="h-8 w-8 text-primary" />
+            <UserIcon className="h-8 w-8 text-primary" />
           </div>
 
           <div className="flex-1 space-y-4">
@@ -135,6 +139,6 @@ const MyTrainer = observer(() => {
       </div>
     </div>
   );
-});
+};
 
 export default MyTrainer;

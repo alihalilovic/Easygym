@@ -40,6 +40,8 @@ builder.Services.AddScoped<WorkoutService>();
 builder.Services.AddScoped<WorkoutSessionService>();
 builder.Services.AddScoped<InvitationService>();
 builder.Services.AddScoped<InteractionService>();
+builder.Services.AddScoped<ClientService>();
+builder.Services.AddScoped<TrainerService>();
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("CorsPolicy", policy =>

@@ -3,10 +3,10 @@ using Easygym.Domain.Entities;
 
 namespace Easygym.Domain.Models.Responses
 {
-    public class CurrentUserResponse : User
+    public class ClientConnectionResponse
     {
-        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public User? Trainer { get; set; }
+        public User Client { get; set; } = null!;
+
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public DateTime? InvitationAcceptedAt { get; set; }
     }
