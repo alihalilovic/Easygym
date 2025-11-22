@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -25,6 +25,7 @@ import {
 } from 'lucide-react';
 import { useWorkouts } from '@/hooks/useWorkouts';
 import { Badge } from '@/components/ui/badge';
+import { useDebounce } from '@/hooks/useDebounce';
 
 interface WorkoutSessionFiltersProps {
   filters: WorkoutSessionQueryParams;
@@ -39,6 +40,18 @@ export const WorkoutSessionFilters = ({
 }: WorkoutSessionFiltersProps) => {
   const { data: workouts = [] } = useWorkouts();
   const [showFilters, setShowFilters] = useState(false);
+  const [searchValue, setSearchValue] = useState(filters.searchTerm || '');
+  const debouncedSearchValue = useDebounce(searchValue, 500);
+
+  useEffect(() => {
+    setSearchValue(filters.searchTerm || '');
+  }, [filters.searchTerm]);
+
+  useEffect(() => {
+    if (debouncedSearchValue !== filters.searchTerm) {
+      handleFilterChange('searchTerm', debouncedSearchValue);
+    }
+  }, [debouncedSearchValue]);
 
   const handleFilterChange = (
     key: keyof WorkoutSessionQueryParams,
@@ -72,7 +85,11 @@ export const WorkoutSessionFilters = ({
   ].filter(Boolean).length;
 
   return (
-    <div className={`space-y-4 ${disabled ? 'opacity-50 pointer-events-none' : ''}`}>
+    <div
+      className={`space-y-4 ${
+        disabled ? 'opacity-50 pointer-events-none' : ''
+      }`}
+    >
       <div className="flex flex-wrap items-center gap-2">
         <Button
           variant={showFilters ? 'default' : 'outline'}
@@ -162,8 +179,8 @@ export const WorkoutSessionFilters = ({
             <Input
               id="search"
               placeholder="Search by workout name or notes..."
-              value={filters.searchTerm || ''}
-              onChange={(e) => handleFilterChange('searchTerm', e.target.value)}
+              value={searchValue}
+              onChange={(e) => setSearchValue(e.target.value)}
               className="bg-background"
             />
           </div>
