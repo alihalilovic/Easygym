@@ -13,14 +13,16 @@ namespace Easygym.Application.Services
         private readonly IUserRepository _userRepository;
         private readonly IGenericRepository<Client> _clientRepository;
         private readonly ITrainerRepository _trainerRepository;
+        private readonly IGenericRepository<TrainerClientHistory> _historyRepository;
 
-        public InvitationService(IInvitationRepository invitationRepository, CurrentUserService currentUserService, IUserRepository userRepository, IGenericRepository<Client> clientRepository, ITrainerRepository trainerRepository)
+        public InvitationService(IInvitationRepository invitationRepository, CurrentUserService currentUserService, IUserRepository userRepository, IGenericRepository<Client> clientRepository, ITrainerRepository trainerRepository, IGenericRepository<TrainerClientHistory> historyRepository)
         {
             _invitationRepository = invitationRepository;
             _currentUserService = currentUserService;
             _userRepository = userRepository;
             _clientRepository = clientRepository;
             _trainerRepository = trainerRepository;
+            _historyRepository = historyRepository;
         }
 
         private async Task<Invitation> GetInvitation(int id)
@@ -119,6 +121,16 @@ namespace Easygym.Application.Services
                 client.TrainerId = invitation.TrainerId;
                 client.InvitationAcceptedAt = DateTime.UtcNow;
                 await _clientRepository.UpdateAsync(client);
+
+                // Create a history record for the start of this relationship
+                var history = new TrainerClientHistory
+                {
+                    TrainerId = invitation.TrainerId,
+                    ClientId = invitation.ClientId,
+                    StartedAt = client.InvitationAcceptedAt,
+                    EndedAt = null
+                };
+                await _historyRepository.AddAsync(history);
             }
 
             invitation.Status = status;

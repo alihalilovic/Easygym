@@ -10,15 +10,18 @@ namespace Easygym.Application.Services
     {
         private readonly IGenericRepository<Client> _clientRepository;
         private readonly IGenericRepository<User> _userRepository;
+        private readonly ITrainerClientHistoryRepository _historyRepository;
         private readonly CurrentUserService _currentUserService;
 
         public ClientService(
             IGenericRepository<Client> clientRepository,
             IGenericRepository<User> userRepository,
+            ITrainerClientHistoryRepository historyRepository,
             CurrentUserService currentUserService)
         {
             _clientRepository = clientRepository;
             _userRepository = userRepository;
+            _historyRepository = historyRepository;
             _currentUserService = currentUserService;
         }
 
@@ -56,9 +59,32 @@ namespace Easygym.Application.Services
                 throw new ValidationException("You don't have a trainer assigned.");
             }
 
+            // Save the history record
+            var history = new TrainerClientHistory
+            {
+                TrainerId = client.TrainerId.Value,
+                ClientId = client.Id,
+                StartedAt = client.InvitationAcceptedAt,
+                EndedAt = DateTime.UtcNow
+            };
+            await _historyRepository.AddAsync(history);
+
             client.TrainerId = null;
             client.InvitationAcceptedAt = default;
             await _clientRepository.UpdateAsync(client);
+        }
+
+        public async Task<List<TrainerConnectionResponse>> GetMyTrainerHistoryAsync()
+        {
+            var currentUser = await _currentUserService.GetCurrentUserAsync();
+            var history = await _historyRepository.GetClientHistoryAsync(currentUser.Id);
+
+            return history.Select(h => new TrainerConnectionResponse
+            {
+                Trainer = h.Trainer!,
+                InvitationAcceptedAt = h.StartedAt,
+                ConnectionEndedAt = h.EndedAt
+            }).ToList();
         }
     }
 }

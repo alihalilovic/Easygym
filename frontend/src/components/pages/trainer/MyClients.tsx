@@ -8,7 +8,8 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import EmptyState from '@/components/ui/widgets/EmptyState';
-import { useMyClients, useRemoveClient } from '@/hooks/useConnections';
+import ConnectionHistory from '@/components/ui/widgets/ConnectionHistory';
+import { useMyClients, useRemoveClient, useMyClientHistory } from '@/hooks/useConnections';
 import { useNavigate } from 'react-router';
 import { routes } from '@/lib/constants';
 import { toast } from 'sonner';
@@ -25,6 +26,7 @@ import {
 
 const MyClients = () => {
   const { data: clients = [] } = useMyClients();
+  const { data: clientHistory = [] } = useMyClientHistory();
   const removeClient = useRemoveClient();
   const navigate = useNavigate();
 
@@ -45,13 +47,22 @@ const MyClients = () => {
 
   if (clients.length === 0) {
     return (
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-6">
         <EmptyState
           title="No clients yet"
           description="You don't have any clients yet. Send invitations to potential clients to grow your training business."
           buttonText="Send Invitations"
           buttonAction={handleFindClients}
           buttonIcon={<Users className="h-4 w-4" />}
+        />
+
+        <ConnectionHistory
+          title="Previous Clients"
+          history={clientHistory.map((h) => ({
+            user: h.client,
+            invitationAcceptedAt: h.invitationAcceptedAt,
+            connectionEndedAt: h.connectionEndedAt,
+          }))}
         />
       </div>
     );
@@ -180,6 +191,15 @@ const MyClients = () => {
           </div>
         ))}
       </div>
+
+      <ConnectionHistory
+        title="Previous Clients"
+        history={clientHistory.map((h) => ({
+          user: h.client,
+          invitationAcceptedAt: h.invitationAcceptedAt,
+          connectionEndedAt: h.connectionEndedAt,
+        }))}
+      />
     </div>
   );
 };
