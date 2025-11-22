@@ -4,12 +4,10 @@ import { useNavigate } from 'react-router';
 import { routes } from '@/lib/constants';
 import { PlusCircleIcon } from 'lucide-react';
 import EmptyState from '@/components/ui/widgets/EmptyState';
-import { useAuth } from '@/components/auth/AuthProvider';
 import { useWorkouts } from '@/hooks/useWorkouts';
 
 const Workouts = () => {
-  const { userId } = useAuth();
-  const { data: workouts = [], isLoading } = useWorkouts(userId);
+  const { data: workouts = [], isLoading } = useWorkouts();
   const navigate = useNavigate();
 
   const handleCreateWorkout = () => {
@@ -31,14 +29,14 @@ const Workouts = () => {
         </div>
       )}
       {workouts.length === 0 && !isLoading && (
-        <EmptyState
-          title="No workouts yet"
-          description="Create your first workout to get started with your training program."
-          buttonText="Create Your First Workout"
-          buttonAction={handleCreateWorkout}
-          buttonIcon={<PlusCircleIcon className="h-4 w-4" />}
-        />
-      )}
+          <EmptyState
+            title="No workouts yet"
+            description="Create your first workout to get started with your training program."
+            buttonText="Create Your First Workout"
+            buttonAction={handleCreateWorkout}
+            buttonIcon={<PlusCircleIcon className="h-4 w-4" />}
+          />
+        )}
     </div>
   );
 };

@@ -4,6 +4,9 @@ import authService from '@/api/services/authService';
 import userService from '@/api/services/userService';
 import workoutService from '@/api/services/workoutService';
 import workoutSessionService from '@/api/services/workoutSessionService';
+import interactionService from './services/interactionService';
+import clientService from './services/clientService';
+import trainerService from './services/trainerService';
 
 axios.defaults.baseURL = import.meta.env.VITE_APP_API_URL;
 
@@ -29,9 +32,12 @@ instance.interceptors.request.use(
 instance.interceptors.response.use(
   (response) => response,
   (error) => {
-    const message = error.response?.data?.message || error.message || 'An unexpected error occurred';
+    const message =
+      error.response?.data?.message ||
+      error.message ||
+      'An unexpected error occurred';
     return Promise.reject(new Error(message));
-  }
+  },
 );
 
 const responseBody = <T>(response: AxiosResponse<T>) => response.data;
@@ -50,6 +56,9 @@ const api = {
   auth: authService,
   workouts: workoutService,
   workoutSessions: workoutSessionService,
+  interactions: interactionService,
+  clients: clientService,
+  trainers: trainerService,
 };
 
 export default api;

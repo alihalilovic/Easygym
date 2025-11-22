@@ -1,9 +1,18 @@
 import { Workout } from '@/types/Workout';
 import { formatDistance } from 'date-fns';
-import { Dumbbell, Calendar, Info, ChevronRight, Clock } from 'lucide-react';
+import {
+  Dumbbell,
+  Calendar,
+  Info,
+  ChevronRight,
+  Clock,
+  UserCheck,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { routes } from '@/lib/constants';
 import { useNavigate } from 'react-router';
+import { Badge } from '@/components/ui/badge';
+import { useAuth } from '@/components/auth/AuthProvider';
 
 interface WorkoutCardProps {
   workout: Workout;
@@ -21,7 +30,7 @@ const WorkoutCard = ({
   onSelect,
 }: WorkoutCardProps) => {
   const navigate = useNavigate();
-
+  const { isUserTrainer } = useAuth();
   const formattedDate = workout.createdAt
     ? formatDistance(new Date(workout.createdAt), new Date(), {
         addSuffix: true,
@@ -39,10 +48,19 @@ const WorkoutCard = ({
   return (
     <div className="bg-card rounded-lg shadow-sm border border-border p-4 mb-4 hover:shadow-md transition-all">
       <div className="flex items-start justify-between">
-        <div>
+        <div className="flex flex-col gap-2">
           <h3 className="text-xl font-semibold">
             {workout.name || 'Unnamed Workout'}
           </h3>
+          {workout.trainerId && workout.trainer && !isUserTrainer && (
+            <Badge
+              variant="secondary"
+              className="flex items-center gap-1 self-start cursor-pointer"
+            >
+              <UserCheck className="h-3 w-3" />
+              <span>By {workout.trainer.name}</span>
+            </Badge>
+          )}
           {!compact && (
             <div className="flex items-center text-muted-foreground mt-1 text-sm">
               <Calendar className="h-4 w-4 mr-1" />

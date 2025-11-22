@@ -490,3 +490,6 @@ $RECYCLE.BIN/
 
 # Vite config and cache
 frontend/.vite/
+
+# Markdown files
+*.md

@@ -7,11 +7,17 @@ const authService = {
     return user;
   },
   login: async (body: { email: string; password: string }) => {
-    const { token } = await requests.post<AuthTokenResponse>('/auth/login', body);
+    const { token } = await requests.post<AuthTokenResponse>(
+      '/auth/login',
+      body,
+    );
     return token;
   },
   register: async (body: UserRegisterRequest) => {
-    const { token } = await requests.post<AuthTokenResponse>('/auth/register', body);
+    const { token } = await requests.post<AuthTokenResponse>(
+      '/auth/register',
+      body,
+    );
     return token;
   },
 };

@@ -1,29 +1,32 @@
 import { requests } from '@/api/api';
-import { CreateWorkoutRequest, UpdateWorkoutRequest, Workout } from '@/types/Workout';
+import {
+  CreateWorkoutRequest,
+  UpdateWorkoutRequest,
+  Workout,
+} from '@/types/Workout';
 
 const workoutService = {
-  getWorkoutsForTrainee: async (traineeId: number) => {
-    const workouts = await requests.get<Workout[]>(
-      `/workout/trainee/${traineeId}`,
-    );
+  getWorkouts: async () => {
+    const workouts = await requests.get<Workout[]>(`/workout`);
     return workouts;
   },
-  getWorkoutForTrainee: async (traineeId: number, workoutId: number) => {
-    const workout = await requests.get<Workout>(
-      `/workout/trainee/${traineeId}/${workoutId}`,
-    );
+  getWorkout: async (workoutId: number) => {
+    const workout = await requests.get<Workout>(`/workout/${workoutId}`);
     return workout;
   },
   createWorkout: async (workout: CreateWorkoutRequest) => {
     const newWorkout = await requests.post<Workout>(`/workout`, workout);
     return newWorkout;
   },
-  updateWorkout: async (traineeId: number, workoutId: number, workout: UpdateWorkoutRequest) => {
-    const updatedWorkout = await requests.put<Workout>(`/workout/trainee/${traineeId}/${workoutId}`, workout);
+  updateWorkout: async (workoutId: number, workout: UpdateWorkoutRequest) => {
+    const updatedWorkout = await requests.put<Workout>(
+      `/workout/${workoutId}`,
+      workout,
+    );
     return updatedWorkout;
   },
-  deleteWorkout: async (traineeId: number, workoutId: number) => {
-    await requests.delete(`/workout/trainee/${traineeId}/${workoutId}`);
+  deleteWorkout: async (workoutId: number) => {
+    await requests.delete(`/workout/${workoutId}`);
   },
 };
 

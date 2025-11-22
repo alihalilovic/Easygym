@@ -117,6 +117,7 @@ namespace Easygym.Application.Services
 
                 // Store the trainer id in the client - EF will automatically handle the relationship
                 client.TrainerId = invitation.TrainerId;
+                client.InvitationAcceptedAt = DateTime.UtcNow;
                 await _clientRepository.UpdateAsync(client);
             }
 

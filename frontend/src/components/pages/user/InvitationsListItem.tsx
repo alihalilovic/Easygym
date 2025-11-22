@@ -52,8 +52,9 @@ const InvitationsListItem = ({ invitation }: InvitationsListItemProps) => {
 
   return (
     <div
-      className={`bg-card rounded-lg border border-border p-4 shadow-sm hover:shadow-md transition-all ${invitation.status === InvitationStatus.Rejected ? 'opacity-50' : ''
-        }`}
+      className={`bg-card rounded-lg border border-border p-4 shadow-sm hover:shadow-md transition-all ${
+        invitation.status === InvitationStatus.Rejected ? 'opacity-50' : ''
+      }`}
     >
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-3">

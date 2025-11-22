@@ -1,5 +1,6 @@
 import { requests } from '@/api/api';
 import { CreateInvitationRequest, Invitation, InvitationStatus } from '@/types/Interaction';
+import { User } from '@/types/User';
 
 const connectionService = {
   getInvitations: async () => {
@@ -16,6 +17,10 @@ const connectionService = {
   },
   deleteInvitation: async (invitationId: number) => {
     await requests.delete(`/invitation/${invitationId}`);
+  },
+  getClientsForTrainer: async (trainerId: number) => {
+    const clients = await requests.get<User[]>(`/interaction/trainer/${trainerId}/clients`);
+    return clients;
   },
 };
 

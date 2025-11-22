@@ -8,12 +8,12 @@ namespace Easygym.Application.Services
     public class WorkoutSessionService
     {
         private readonly IWorkoutSessionRepository _workoutSessionRepository;
-        private readonly WorkoutService _workoutService;
+        private readonly IWorkoutRepository _workoutRepository;
         private readonly CurrentUserService _currentUserService;
-        public WorkoutSessionService(IWorkoutSessionRepository workoutSessionRepository, WorkoutService workoutService, CurrentUserService currentUserService)
+        public WorkoutSessionService(IWorkoutSessionRepository workoutSessionRepository, IWorkoutRepository workoutRepository, CurrentUserService currentUserService)
         {
             _workoutSessionRepository = workoutSessionRepository;
-            _workoutService = workoutService;
+            _workoutRepository = workoutRepository;
             _currentUserService = currentUserService;
         }
 
@@ -31,23 +31,29 @@ namespace Easygym.Application.Services
 
         public async Task<WorkoutSession> GetWorkoutSessionAsync(int workoutSessionId)
         {
+            var currentUser = await _currentUserService.GetCurrentUserAsync();
             var workoutSession = await _workoutSessionRepository.GetByIdAsync(workoutSessionId) ?? throw new WorkoutSessionNotFoundException();
 
-            await _workoutService.CanAccessWorkout(workoutSession.TraineeId);
+            ValidateWorkoutSessionAccess(currentUser, workoutSession);
+
             return workoutSession;
         }
 
         public async Task<WorkoutSession> CreateWorkoutSessionAsync(WorkoutSession workoutSession)
         {
-            await _workoutService.CanAccessWorkout(workoutSession.TraineeId);
+            var currentUser = await _currentUserService.GetCurrentUserAsync();
+
+            ValidateWorkoutSessionAccess(currentUser, workoutSession);
+
             return await _workoutSessionRepository.AddAsync(workoutSession);
         }
 
         public async Task UpdateWorkoutSessionAsync(UpdateWorkoutSessionRequest workoutSession)
         {
-            await _workoutService.CanAccessWorkout(workoutSession.TraineeId);
-
+            var currentUser = await _currentUserService.GetCurrentUserAsync();
             var existingWorkoutSession = await _workoutSessionRepository.GetByIdAsync(workoutSession.Id) ?? throw new WorkoutSessionNotFoundException();
+
+            ValidateWorkoutSessionAccess(currentUser, existingWorkoutSession);
 
             if (workoutSession.PerceivedDifficulty != null)
             {
@@ -64,10 +70,25 @@ namespace Easygym.Application.Services
 
         public async Task DeleteWorkoutSessionAsync(int workoutSessionId)
         {
+            // GetWorkoutSessionAsync already validates access
             var workoutSession = await GetWorkoutSessionAsync(workoutSessionId);
 
-            await _workoutService.CanAccessWorkout(workoutSession.TraineeId);
             await _workoutSessionRepository.DeleteAsync(workoutSession);
+        }
+
+        private static void ValidateWorkoutSessionAccess(User currentUser, WorkoutSession workoutSession)
+        {
+            // Clients can only access their own workout sessions
+            if (currentUser.Role == Role.Client && workoutSession.TraineeId != currentUser.Id)
+            {
+                throw new ForbiddenAccessException();
+            }
+
+            // Trainers and admins can't access or create workout sessions
+            if (Role.Admin == currentUser.Role || Role.Trainer == currentUser.Role)
+            {
+                throw new ForbiddenAccessException();
+            }
         }
     }
 }

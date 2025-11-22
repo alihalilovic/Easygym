@@ -44,7 +44,11 @@ import {
 } from '@/components/ui/dialog';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { useWorkouts } from '@/hooks/useWorkouts';
-import { useWorkoutSession, useCreateWorkoutSession, useDeleteWorkoutSession } from '@/hooks/useWorkoutSessions';
+import {
+  useWorkoutSession,
+  useCreateWorkoutSession,
+  useDeleteWorkoutSession,
+} from '@/hooks/useWorkoutSessions';
 
 const WorkoutSession = () => {
   const { userId } = useAuth();
@@ -54,8 +58,12 @@ const WorkoutSession = () => {
   const viewMode = !!params.id;
   const sessionId = parseInt(params.id as string);
 
-  const { data: workouts = [] } = useWorkouts(userId, !viewMode);
-  const { data: fetchedWorkoutSession } = useWorkoutSession(userId, sessionId, viewMode);
+  const { data: workouts = [] } = useWorkouts();
+  const { data: fetchedWorkoutSession } = useWorkoutSession(
+    userId,
+    sessionId,
+    viewMode,
+  );
   const createWorkoutSession = useCreateWorkoutSession();
   const deleteWorkoutSession = useDeleteWorkoutSession();
 
@@ -224,8 +232,9 @@ const WorkoutSession = () => {
 
           <div className="flex gap-4">
             <div
-              className={`bg-card rounded-lg shadow-sm border border-border p-4 ${!workoutSession?.notes ? 'w-full' : ''
-                }`}
+              className={`bg-card rounded-lg shadow-sm border border-border p-4 ${
+                !workoutSession?.notes ? 'w-full' : ''
+              }`}
             >
               <h2 className="text-lg font-semibold mb-4">Session Details</h2>
               <div className="flex flex-col gap-3">
@@ -245,8 +254,8 @@ const WorkoutSession = () => {
                     {Math.round(
                       (new Date(workoutSession?.endTime || '').getTime() -
                         new Date(workoutSession?.startTime || '').getTime()) /
-                      1000 /
-                      60,
+                        1000 /
+                        60,
                     )}{' '}
                     minutes
                   </span>

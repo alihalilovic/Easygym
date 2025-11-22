@@ -3,6 +3,7 @@ using System;
 using Easygym.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Easygym.Infrastructure.Migrations
 {
     [DbContext(typeof(EasygymDbContext))]
-    partial class EasygymDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250611202409_IncreaseDescriptionLimitOnSet")]
+    partial class IncreaseDescriptionLimitOnSet
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.3");
@@ -175,14 +178,9 @@ namespace Easygym.Infrastructure.Migrations
                     b.Property<int>("TraineeId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int?>("TrainerId")
-                        .HasColumnType("INTEGER");
-
                     b.HasKey("Id");
 
                     b.HasIndex("TraineeId");
-
-                    b.HasIndex("TrainerId");
 
                     b.ToTable("Workouts");
                 });
@@ -263,13 +261,7 @@ namespace Easygym.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Easygym.Domain.Entities.User", "Trainer")
-                        .WithMany()
-                        .HasForeignKey("TrainerId");
-
                     b.Navigation("Trainee");
-
-                    b.Navigation("Trainer");
                 });
 
             modelBuilder.Entity("Easygym.Domain.Entities.WorkoutSession", b =>
@@ -283,7 +275,7 @@ namespace Easygym.Infrastructure.Migrations
                     b.HasOne("Easygym.Domain.Entities.Workout", "Workout")
                         .WithMany()
                         .HasForeignKey("WorkoutId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Trainee");

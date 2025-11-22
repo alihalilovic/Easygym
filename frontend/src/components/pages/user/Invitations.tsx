@@ -28,7 +28,10 @@ import { toast } from 'sonner';
 import { titleize } from '@/lib/utils';
 import InvitationsListItem from '@/components/pages/user/InvitationsListItem';
 import { useAuth } from '@/components/auth/AuthProvider';
-import { useCreateInvitation, useInvitationsComputed } from '@/hooks/useInvitations';
+import {
+  useCreateInvitation,
+  useInvitationsComputed,
+} from '@/hooks/useInvitations';
 
 const Invitations = () => {
   const { isUserClient } = useAuth();
