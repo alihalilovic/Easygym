@@ -3,6 +3,8 @@ import {
   CreateWorkoutSessionRequest,
   UpdateWorkoutSessionRequest,
   WorkoutSession,
+  PagedResult,
+  WorkoutSessionQueryParams,
 } from '@/types/WorkoutSession';
 
 const workoutSessionService = {
@@ -11,6 +13,24 @@ const workoutSessionService = {
       `/workoutsession/trainee/${traineeId}`,
     );
     return sessions;
+  },
+  getPagedWorkoutSessionsForTrainee: async (
+    traineeId: number,
+    queryParams: WorkoutSessionQueryParams,
+  ) => {
+    const params = new URLSearchParams();
+
+    for (const param of Object.keys(queryParams)) {
+      params.append(
+        param,
+        queryParams[param as keyof WorkoutSessionQueryParams]?.toString() ?? '',
+      );
+    }
+
+    const pagedSessions = await requests.get<PagedResult<WorkoutSession>>(
+      `/workoutsession/trainee/${traineeId}/paged?${params.toString()}`,
+    );
+    return pagedSessions;
   },
   getWorkoutSessionForTrainee: async (sessionId: number) => {
     const session = await requests.get<WorkoutSession>(

@@ -2,6 +2,7 @@ using Easygym.Domain.Entities;
 using Easygym.Domain.Interfaces;
 using Easygym.Domain.Exceptions;
 using Easygym.Domain.Models.Requests;
+using Easygym.Domain.Models.Common;
 using Easygym.Domain.Constants;
 namespace Easygym.Application.Services
 {
@@ -27,6 +28,18 @@ namespace Easygym.Application.Services
             }
 
             return (await _workoutSessionRepository.GetAllAsync()).Where(w => w.TraineeId == traineeId);
+        }
+
+        public async Task<PagedResult<WorkoutSession>> GetPagedWorkoutSessionsForTraineeAsync(int traineeId, WorkoutSessionQueryParams queryParams)
+        {
+            var currentUser = await _currentUserService.GetCurrentUserAsync();
+            // Only allow trainees to see their own workout sessions
+            if (currentUser.Id != traineeId && currentUser.Role == Role.Client)
+            {
+                throw new ForbiddenAccessException();
+            }
+
+            return await _workoutSessionRepository.GetPagedAsync(traineeId, queryParams);
         }
 
         public async Task<WorkoutSession> GetWorkoutSessionAsync(int workoutSessionId)
