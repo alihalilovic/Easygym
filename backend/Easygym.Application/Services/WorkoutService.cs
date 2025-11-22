@@ -10,34 +10,48 @@ namespace Easygym.Application.Services
         private readonly IWorkoutRepository _workoutRepository;
         private readonly CurrentUserService _currentUserService;
         private readonly IGenericRepository<Client> _clientRepository;
-
-        public WorkoutService(IWorkoutRepository workoutRepository, CurrentUserService currentUserService, IGenericRepository<Client> clientRepository)
+        private readonly WorkoutSessionService _workoutSessionService;
+        public WorkoutService(IWorkoutRepository workoutRepository, CurrentUserService currentUserService, IGenericRepository<Client> clientRepository, WorkoutSessionService workoutSessionService)
         {
             _workoutRepository = workoutRepository;
             _currentUserService = currentUserService;
             _clientRepository = clientRepository;
+            _workoutSessionService = workoutSessionService;
         }
-        public async Task<List<Workout>> GetWorkoutsForTraineeAsync(int traineeId)
+        public async Task<List<Workout>> GetWorkoutsAsync()
         {
-            await CanAccessWorkout(traineeId);
+            var currentUser = await _currentUserService.GetCurrentUserAsync();
 
-            var workouts = await _workoutRepository.GetWorkoutsForTraineeAsync(traineeId);
-            return workouts;
+            // Clients get their own workouts
+            if (currentUser.Role == Role.Client)
+            {
+                var workouts = await _workoutRepository.GetWorkoutsForTraineeAsync(currentUser.Id);
+                return workouts;
+            }
+
+            // Trainers get all workouts they created for their clients
+            if (currentUser.Role == Role.Trainer)
+            {
+                var workouts = await _workoutRepository.GetWorkoutsByTrainerAsync(currentUser.Id);
+                return workouts;
+            }
+
+            // Admins can see all workouts (need to implement in repository)
+            return new List<Workout>();
         }
 
-        public async Task<List<Workout>> GetWorkoutsCreatedByTrainerAsync(int trainerId)
+        public async Task<Workout> GetWorkoutAsync(int workoutId)
         {
-            await CanAccessWorkout(null, trainerId);
+            var currentUser = await _currentUserService.GetCurrentUserAsync();
+            var workout = await _workoutRepository.GetWorkoutAsync(workoutId);
 
-            var workouts = await _workoutRepository.GetWorkoutsByTrainerAsync(trainerId);
-            return workouts;
-        }
+            if (workout == null)
+            {
+                throw new WorkoutNotFoundException();
+            }
 
-        public async Task<Workout> GetWorkoutForTraineeAsync(int workoutId, int traineeId)
-        {
-            await CanAccessWorkout(traineeId);
+            ValidateWorkoutAccess(currentUser, workout);
 
-            var workout = await _workoutRepository.GetWorkoutForTraineeAsync(workoutId, traineeId);
             return workout;
         }
 
@@ -45,23 +59,27 @@ namespace Easygym.Application.Services
         {
             var currentUser = await _currentUserService.GetCurrentUserAsync();
 
-            // Validate trainee access
-            await CanAccessWorkout(request.TraineeId);
-
             if (request.Sets.Count == 0)
             {
                 throw new ValidationException("Workout must have at least one set");
             }
 
-            // If the current user is a trainer, verify they are connected to the trainee
             int? trainerId = null;
+
+            // Clients can only create workouts for themselves
+            if (currentUser.Role == Role.Client && request.TraineeId != currentUser.Id)
+            {
+                throw new ForbiddenAccessException();
+            }
+
+            // Trainers can create workouts for their clients
             if (currentUser.Role == Role.Trainer)
             {
                 var client = await _clientRepository.GetByIdAsync(request.TraineeId);
 
                 if (client == null)
                 {
-                    throw new ValidationException("Trainee must be provided");
+                    throw new ValidationException("Client not found");
                 }
 
                 if (client.TrainerId != currentUser.Id)
@@ -71,6 +89,8 @@ namespace Easygym.Application.Services
 
                 trainerId = currentUser.Id;
             }
+
+            // Admins can create workouts for any user
 
             var workout = new Workout
             {
@@ -87,55 +107,59 @@ namespace Easygym.Application.Services
         }
 
 
-        public async Task<Workout> UpdateWorkoutAsync(int traineeId, int workoutId, UpdateWorkoutRequest workout)
+        public async Task<Workout> UpdateWorkoutAsync(int workoutId, UpdateWorkoutRequest request)
         {
-            await CanAccessWorkout(traineeId);
-            return await _workoutRepository.UpdateWorkoutAsync(workoutId, workout);
+            var currentUser = await _currentUserService.GetCurrentUserAsync();
+            var workout = await _workoutRepository.GetWorkoutAsync(workoutId);
+
+            if (workout == null)
+            {
+                throw new WorkoutNotFoundException();
+            }
+
+            ValidateWorkoutAccess(currentUser, workout);
+
+            return await _workoutRepository.UpdateWorkoutAsync(workoutId, request);
         }
 
 
-        public async Task DeleteWorkoutAsync(int traineeId, int workoutId)
+        public async Task DeleteWorkoutAsync(int workoutId)
         {
-            await CanAccessWorkout(traineeId);
+            var currentUser = await _currentUserService.GetCurrentUserAsync();
+            var workout = await _workoutRepository.GetWorkoutAsync(workoutId);
+
+            if (workout == null)
+            {
+                throw new WorkoutNotFoundException();
+            }
+
+            ValidateWorkoutAccess(currentUser, workout);
+
+            // Check if there are any workout sessions associated with the workout
+            var workoutSessions = await _workoutSessionService.GetWorkoutSessionsForTraineeAsync(workout.TraineeId);
+            if (workoutSessions.Any())
+            {
+                throw new ValidationException("Workout has workout sessions associated with it. Please delete the workout sessions first.");
+            }
+
             await _workoutRepository.DeleteWorkoutAsync(workoutId);
         }
 
-        public async Task CanAccessWorkout(int? traineeId, int? trainerId = null)
+        private void ValidateWorkoutAccess(User currentUser, Workout workout)
         {
-            var currentUser = await _currentUserService.GetCurrentUserAsync();
-
-            // If the current user is a trainer, verify they are connected to the trainee
-            if (currentUser.Role == Role.Trainer)
-            {
-                if (trainerId != null && traineeId == null)
-                {
-                    // Verify that the trainer is accessing their own workouts only
-                    if (trainerId != currentUser.Id)
-                    {
-                        throw new ForbiddenAccessException();
-                    }
-                    return;
-                }
-
-                if (traineeId == null)
-                {
-                    throw new ValidationException("Trainee must be provided");
-                }
-
-                var client = await _clientRepository.GetByIdAsync((int)traineeId) ?? throw new ValidationException("Trainee must be provided");
-                if (client.TrainerId != currentUser.Id)
-                {
-                    throw new ForbiddenAccessException();
-                }
-            }
-
-            // Only allow clients to see their own workouts
-            if (currentUser.Role == Role.Client && currentUser.Id != traineeId)
+            // Clients can only access their own workouts
+            if (currentUser.Role == Role.Client && workout.TraineeId != currentUser.Id)
             {
                 throw new ForbiddenAccessException();
             }
 
-            // Allow admins to see all workouts
+            // Trainers can only access workouts they created
+            if (currentUser.Role == Role.Trainer && workout.TrainerId != currentUser.Id)
+            {
+                throw new ForbiddenAccessException();
+            }
+
+            // Admins can access all workouts
         }
     }
 }

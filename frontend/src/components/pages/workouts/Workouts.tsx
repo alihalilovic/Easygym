@@ -4,22 +4,11 @@ import { useNavigate } from 'react-router';
 import { routes } from '@/lib/constants';
 import { PlusCircleIcon } from 'lucide-react';
 import EmptyState from '@/components/ui/widgets/EmptyState';
-import { useAuth } from '@/components/auth/AuthProvider';
-import { useWorkouts, useTrainerWorkouts } from '@/hooks/useWorkouts';
-import { useMemo } from 'react';
+import { useWorkouts } from '@/hooks/useWorkouts';
 
 const Workouts = () => {
-  const { userId, isUserTrainer } = useAuth();
-  const { data: myWorkouts = [], isLoading: isLoadingMyWorkouts } = useWorkouts(
-    isUserTrainer ? 0 : userId,
-  );
-  const { data: trainerWorkouts = [], isLoading: isLoadingTrainerWorkouts } =
-    useTrainerWorkouts(isUserTrainer ? userId : 0);
+  const { data: workouts = [], isLoading } = useWorkouts();
   const navigate = useNavigate();
-
-  const workouts = useMemo(() => {
-    return isUserTrainer ? [...myWorkouts, ...trainerWorkouts] : myWorkouts;
-  }, [isUserTrainer, myWorkouts, trainerWorkouts]);
 
   const handleCreateWorkout = () => {
     navigate(routes.CreateWorkout);
@@ -39,9 +28,7 @@ const Workouts = () => {
           </div>
         </div>
       )}
-      {workouts.length === 0 &&
-        !isLoadingMyWorkouts &&
-        !isLoadingTrainerWorkouts && (
+      {workouts.length === 0 && !isLoading && (
           <EmptyState
             title="No workouts yet"
             description="Create your first workout to get started with your training program."

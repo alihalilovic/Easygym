@@ -16,27 +16,19 @@ namespace Easygym.Api.Controllers
             _workoutService = workoutService;
         }
 
-        [HttpGet("trainee/{traineeId}")]
+        [HttpGet]
         [Authorize(Roles = Role.All)]
-        public async Task<IActionResult> GetWorkoutsForTrainee(int traineeId)
+        public async Task<IActionResult> GetWorkouts()
         {
-            var workouts = await _workoutService.GetWorkoutsForTraineeAsync(traineeId);
+            var workouts = await _workoutService.GetWorkoutsAsync();
             return Ok(workouts);
         }
 
-        [HttpGet("trainer/{trainerId}")]
-        [Authorize(Roles = Role.Trainer)]
-        public async Task<IActionResult> GetWorkoutsCreatedByTrainer(int trainerId)
-        {
-            var workouts = await _workoutService.GetWorkoutsCreatedByTrainerAsync(trainerId);
-            return Ok(workouts);
-        }
-
-        [HttpGet("trainee/{traineeId}/{workoutId}")]
+        [HttpGet("{workoutId}")]
         [Authorize(Roles = Role.All)]
-        public async Task<IActionResult> GetWorkoutForTrainee(int traineeId, int workoutId)
+        public async Task<IActionResult> GetWorkout(int workoutId)
         {
-            var workout = await _workoutService.GetWorkoutForTraineeAsync(workoutId, traineeId);
+            var workout = await _workoutService.GetWorkoutAsync(workoutId);
             return Ok(workout);
         }
 
@@ -48,19 +40,19 @@ namespace Easygym.Api.Controllers
             return Ok(newWorkout);
         }
 
-        [HttpPut("trainee/{traineeId}/{workoutId}")]
+        [HttpPut("{workoutId}")]
         [Authorize(Roles = $"{Role.Client}, {Role.Trainer}")]
-        public async Task<IActionResult> UpdateWorkout(int traineeId, int workoutId, [FromBody] UpdateWorkoutRequest workout)
+        public async Task<IActionResult> UpdateWorkout(int workoutId, [FromBody] UpdateWorkoutRequest workout)
         {
-            var updatedWorkout = await _workoutService.UpdateWorkoutAsync(traineeId, workoutId, workout);
+            var updatedWorkout = await _workoutService.UpdateWorkoutAsync(workoutId, workout);
             return Ok(updatedWorkout);
         }
 
-        [HttpDelete("trainee/{traineeId}/{workoutId}")]
+        [HttpDelete("{workoutId}")]
         [Authorize(Roles = $"{Role.Client}, {Role.Trainer}")]
-        public async Task<IActionResult> DeleteWorkout(int traineeId, int workoutId)
+        public async Task<IActionResult> DeleteWorkout(int workoutId)
         {
-            await _workoutService.DeleteWorkoutAsync(traineeId, workoutId);
+            await _workoutService.DeleteWorkoutAsync(workoutId);
             return Ok();
         }
     }

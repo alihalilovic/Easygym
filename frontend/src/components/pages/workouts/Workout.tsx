@@ -79,9 +79,8 @@ const WorkoutForm = () => {
     number | undefined
   >(undefined);
 
-  // For editing, we need to fetch with the traineeId from the route or query params
-  // For now, let's use userId for fetching, and we'll update selectedTraineeId when workout loads
-  const { data: existingWorkout } = useWorkout(userId, workoutId, !!workoutId);
+  // For editing, fetch the workout by ID
+  const { data: existingWorkout } = useWorkout(workoutId, !!workoutId);
 
   useEffect(() => {
     if (existingWorkout) {
@@ -187,7 +186,6 @@ const WorkoutForm = () => {
       await createWorkout.mutateAsync(workoutData);
     } else {
       await updateWorkout.mutateAsync({
-        traineeId: selectedTraineeId!!,
         workoutId,
         workout: workoutData,
       });
@@ -207,10 +205,7 @@ const WorkoutForm = () => {
   ) => {
     e.preventDefault();
 
-    await deleteWorkout.mutateAsync({
-      traineeId: selectedTraineeId!!,
-      workoutId,
-    });
+    await deleteWorkout.mutateAsync(workoutId);
     toast.success('Workout deleted successfully');
     navigate(routes.Workouts);
   };

@@ -6,41 +6,27 @@ import {
 } from '@/types/Workout';
 
 const workoutService = {
-  getWorkoutsForTrainee: async (traineeId: number) => {
-    const workouts = await requests.get<Workout[]>(
-      `/workout/trainee/${traineeId}`,
-    );
+  getWorkouts: async () => {
+    const workouts = await requests.get<Workout[]>(`/workout`);
     return workouts;
   },
-  getWorkoutsCreatedByTrainer: async (trainerId: number) => {
-    const workouts = await requests.get<Workout[]>(
-      `/workout/trainer/${trainerId}`,
-    );
-    return workouts;
-  },
-  getWorkoutForTrainee: async (traineeId: number, workoutId: number) => {
-    const workout = await requests.get<Workout>(
-      `/workout/trainee/${traineeId}/${workoutId}`,
-    );
+  getWorkout: async (workoutId: number) => {
+    const workout = await requests.get<Workout>(`/workout/${workoutId}`);
     return workout;
   },
   createWorkout: async (workout: CreateWorkoutRequest) => {
     const newWorkout = await requests.post<Workout>(`/workout`, workout);
     return newWorkout;
   },
-  updateWorkout: async (
-    traineeId: number,
-    workoutId: number,
-    workout: UpdateWorkoutRequest,
-  ) => {
+  updateWorkout: async (workoutId: number, workout: UpdateWorkoutRequest) => {
     const updatedWorkout = await requests.put<Workout>(
-      `/workout/trainee/${traineeId}/${workoutId}`,
+      `/workout/${workoutId}`,
       workout,
     );
     return updatedWorkout;
   },
-  deleteWorkout: async (traineeId: number, workoutId: number) => {
-    await requests.delete(`/workout/trainee/${traineeId}/${workoutId}`);
+  deleteWorkout: async (workoutId: number) => {
+    await requests.delete(`/workout/${workoutId}`);
   },
 };
 
