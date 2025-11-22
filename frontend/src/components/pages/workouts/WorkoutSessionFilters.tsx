@@ -29,11 +29,13 @@ import { Badge } from '@/components/ui/badge';
 interface WorkoutSessionFiltersProps {
   filters: WorkoutSessionQueryParams;
   onFiltersChange: (filters: WorkoutSessionQueryParams) => void;
+  disabled?: boolean;
 }
 
 export const WorkoutSessionFilters = ({
   filters,
   onFiltersChange,
+  disabled = false,
 }: WorkoutSessionFiltersProps) => {
   const { data: workouts = [] } = useWorkouts();
   const [showFilters, setShowFilters] = useState(false);
@@ -70,13 +72,14 @@ export const WorkoutSessionFilters = ({
   ].filter(Boolean).length;
 
   return (
-    <div className="space-y-4">
+    <div className={`space-y-4 ${disabled ? 'opacity-50 pointer-events-none' : ''}`}>
       <div className="flex flex-wrap items-center gap-2">
         <Button
           variant={showFilters ? 'default' : 'outline'}
           size="sm"
           onClick={() => setShowFilters(!showFilters)}
           className="gap-2"
+          disabled={disabled}
         >
           <Filter className="h-4 w-4" />
           Filters
@@ -98,6 +101,7 @@ export const WorkoutSessionFilters = ({
             size="sm"
             onClick={clearFilters}
             className="gap-2"
+            disabled={disabled}
           >
             <X className="h-4 w-4" />
             Clear All
@@ -108,6 +112,7 @@ export const WorkoutSessionFilters = ({
           <Select
             value={filters.sortBy || 'StartTime'}
             onValueChange={(value) => handleFilterChange('sortBy', value)}
+            disabled={disabled}
           >
             <SelectTrigger className="min-w-[140px] h-9">
               <SortAsc className="h-4 w-4 mr-2" />
@@ -130,6 +135,7 @@ export const WorkoutSessionFilters = ({
               )
             }
             className="h-9 flex items-center justify-center gap-2"
+            disabled={disabled}
           >
             {filters.sortOrder === 'asc' ? (
               <>

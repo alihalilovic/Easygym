@@ -60,6 +60,7 @@ const WorkoutSessions = () => {
       <WorkoutSessionFilters
         filters={queryParams}
         onFiltersChange={handleFiltersChange}
+        disabled={totalCount === 0}
       />
 
       {totalCount > 0 && (
