@@ -9,5 +9,8 @@ namespace Easygym.Domain.Models.Responses
 
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public DateTime? InvitationAcceptedAt { get; set; }
+
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public DateTime? ConnectionEndedAt { get; set; }
     }
 }

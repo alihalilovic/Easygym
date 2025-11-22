@@ -29,5 +29,13 @@ namespace Easygym.Api.Controllers
             await _clientService.RemoveMyTrainerAsync();
             return NoContent();
         }
+
+        [Authorize(Roles = Role.Client)]
+        [HttpGet("me/trainer/history")]
+        public async Task<IActionResult> GetMyTrainerHistory()
+        {
+            var history = await _clientService.GetMyTrainerHistoryAsync();
+            return Ok(history);
+        }
     }
 }

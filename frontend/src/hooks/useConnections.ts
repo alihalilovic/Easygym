@@ -6,6 +6,8 @@ export const connectionKeys = {
   all: ['connections'] as const,
   myTrainer: () => [...connectionKeys.all, 'my-trainer'] as const,
   myClients: () => [...connectionKeys.all, 'my-clients'] as const,
+  myTrainerHistory: () => [...connectionKeys.all, 'my-trainer-history'] as const,
+  myClientHistory: () => [...connectionKeys.all, 'my-client-history'] as const,
 };
 
 export const useMyTrainer = () => {
@@ -28,6 +30,7 @@ export const useRemoveMyTrainer = () => {
     mutationFn: clientService.removeMyTrainer,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: connectionKeys.myTrainer() });
+      queryClient.invalidateQueries({ queryKey: connectionKeys.myTrainerHistory() });
     },
   });
 };
@@ -38,6 +41,21 @@ export const useRemoveClient = () => {
     mutationFn: (clientId: number) => trainerService.removeClient(clientId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: connectionKeys.myClients() });
+      queryClient.invalidateQueries({ queryKey: connectionKeys.myClientHistory() });
     },
+  });
+};
+
+export const useMyTrainerHistory = () => {
+  return useQuery({
+    queryKey: connectionKeys.myTrainerHistory(),
+    queryFn: clientService.getMyTrainerHistory,
+  });
+};
+
+export const useMyClientHistory = () => {
+  return useQuery({
+    queryKey: connectionKeys.myClientHistory(),
+    queryFn: trainerService.getMyClientHistory,
   });
 };

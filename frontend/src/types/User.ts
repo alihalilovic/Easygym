@@ -16,11 +16,13 @@ export interface User {
 export interface TrainerConnection {
   trainer: User;
   invitationAcceptedAt: Date | null;
+  connectionEndedAt?: Date | null;
 }
 
 export interface ClientConnection {
   client: User;
   invitationAcceptedAt: Date | null;
+  connectionEndedAt?: Date | null;
 }
 
 export interface UserRegisterRequest {

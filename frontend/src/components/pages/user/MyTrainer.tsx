@@ -7,7 +7,8 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import EmptyState from '@/components/ui/widgets/EmptyState';
-import { useMyTrainer, useRemoveMyTrainer } from '@/hooks/useConnections';
+import ConnectionHistory from '@/components/ui/widgets/ConnectionHistory';
+import { useMyTrainer, useRemoveMyTrainer, useMyTrainerHistory } from '@/hooks/useConnections';
 import { useNavigate } from 'react-router';
 import { routes } from '@/lib/constants';
 import { toast } from 'sonner';
@@ -24,6 +25,7 @@ import {
 
 const MyTrainer = () => {
   const { data: trainerConnection } = useMyTrainer();
+  const { data: trainerHistory } = useMyTrainerHistory();
   const removeTrainer = useRemoveMyTrainer();
   const navigate = useNavigate();
 
@@ -44,13 +46,24 @@ const MyTrainer = () => {
 
   if (!trainerConnection) {
     return (
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-6">
         <EmptyState
           title="No trainer assigned"
           description="You don't have a trainer yet. Connect with a professional trainer to get personalized workout plans and guidance."
           buttonText="Find a Trainer"
           buttonAction={handleFindTrainer}
           buttonIcon={<Users className="h-4 w-4" />}
+        />
+
+        <ConnectionHistory
+          title="Previous Trainers"
+          history={
+            trainerHistory?.map((h) => ({
+              user: h.trainer,
+              invitationAcceptedAt: h.invitationAcceptedAt,
+              connectionEndedAt: h.connectionEndedAt,
+            })) || []
+          }
         />
       </div>
     );
@@ -193,6 +206,17 @@ const MyTrainer = () => {
           </div>
         </div>
       </div>
+
+      <ConnectionHistory
+        title="Previous Trainers"
+        history={
+          trainerHistory?.map((h) => ({
+            user: h.trainer,
+            invitationAcceptedAt: h.invitationAcceptedAt,
+            connectionEndedAt: h.connectionEndedAt,
+          })) || []
+        }
+      />
     </div>
   );
 };

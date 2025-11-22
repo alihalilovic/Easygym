@@ -11,17 +11,20 @@ namespace Easygym.Application.Services
         private readonly ITrainerRepository _trainerRepository;
         private readonly IGenericRepository<User> _userRepository;
         private readonly IGenericRepository<Client> _clientRepository;
+        private readonly ITrainerClientHistoryRepository _historyRepository;
         private readonly CurrentUserService _currentUserService;
 
         public TrainerService(
             ITrainerRepository trainerRepository,
             IGenericRepository<User> userRepository,
             IGenericRepository<Client> clientRepository,
+            ITrainerClientHistoryRepository historyRepository,
             CurrentUserService currentUserService)
         {
             _trainerRepository = trainerRepository;
             _userRepository = userRepository;
             _clientRepository = clientRepository;
+            _historyRepository = historyRepository;
             _currentUserService = currentUserService;
         }
 
@@ -64,9 +67,32 @@ namespace Easygym.Application.Services
                 throw new ForbiddenAccessException();
             }
 
+            // Save the history record
+            var history = new TrainerClientHistory
+            {
+                TrainerId = client.TrainerId.Value,
+                ClientId = client.Id,
+                StartedAt = client.InvitationAcceptedAt,
+                EndedAt = DateTime.UtcNow
+            };
+            await _historyRepository.AddAsync(history);
+
             client.TrainerId = null;
             client.InvitationAcceptedAt = default;
             await _clientRepository.UpdateAsync(client);
+        }
+
+        public async Task<List<ClientConnectionResponse>> GetMyClientHistoryAsync()
+        {
+            var currentUser = await _currentUserService.GetCurrentUserAsync();
+            var history = await _historyRepository.GetTrainerHistoryAsync(currentUser.Id);
+
+            return history.Select(h => new ClientConnectionResponse
+            {
+                Client = h.Client!,
+                InvitationAcceptedAt = h.StartedAt,
+                ConnectionEndedAt = h.EndedAt
+            }).ToList();
         }
     }
 }
