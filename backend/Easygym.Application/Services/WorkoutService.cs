@@ -137,7 +137,7 @@ namespace Easygym.Application.Services
 
             // Check if there are any workout sessions associated with the workout
             var workoutSessions = await _workoutSessionService.GetWorkoutSessionsForTraineeAsync(workout.TraineeId);
-            if (workoutSessions.Any())
+            if (workoutSessions.Any(ws => ws.WorkoutId == workoutId))
             {
                 throw new ValidationException("Workout has workout sessions associated with it. Please delete the workout sessions first.");
             }
