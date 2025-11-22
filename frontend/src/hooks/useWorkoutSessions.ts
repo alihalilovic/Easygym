@@ -4,6 +4,7 @@ import {
   CreateWorkoutSessionRequest,
   UpdateWorkoutSessionRequest,
   WorkoutSession,
+  WorkoutSessionQueryParams,
 } from '@/types/WorkoutSession';
 
 export const workoutSessionKeys = {
@@ -11,6 +12,9 @@ export const workoutSessionKeys = {
   lists: () => [...workoutSessionKeys.all, 'lists'] as const,
   list: (traineeId: number) =>
     [...workoutSessionKeys.lists(), traineeId] as const,
+  pagedLists: () => [...workoutSessionKeys.all, 'pagedLists'] as const,
+  pagedList: (traineeId: number, params: WorkoutSessionQueryParams) =>
+    [...workoutSessionKeys.pagedLists(), traineeId, params] as const,
   details: () => [...workoutSessionKeys.all, 'detail'] as const,
   detail: (traineeId: number, sessionId: number) =>
     [...workoutSessionKeys.details(), traineeId, sessionId] as const,
@@ -21,6 +25,19 @@ export const useWorkoutSessions = (traineeId: number, enabled = true) => {
     queryKey: workoutSessionKeys.list(traineeId),
     queryFn: () =>
       workoutSessionService.getWorkoutSessionsForTrainee(traineeId),
+    enabled: enabled && traineeId > 0,
+  });
+};
+
+export const usePagedWorkoutSessions = (
+  traineeId: number,
+  queryParams: WorkoutSessionQueryParams,
+  enabled = true,
+) => {
+  return useQuery({
+    queryKey: workoutSessionKeys.pagedList(traineeId, queryParams),
+    queryFn: () =>
+      workoutSessionService.getPagedWorkoutSessionsForTrainee(traineeId, queryParams),
     enabled: enabled && traineeId > 0,
   });
 };
@@ -44,8 +61,9 @@ export const useCreateWorkoutSession = () => {
     mutationFn: (session: CreateWorkoutSessionRequest) =>
       workoutSessionService.createWorkoutSession(session),
     onSuccess: () => {
-      // Invalidate all workout session lists
+      // Invalidate all workout session lists (both paged and non-paged)
       queryClient.invalidateQueries({ queryKey: workoutSessionKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: workoutSessionKeys.pagedLists() });
     },
   });
 };
@@ -88,8 +106,9 @@ export const useDeleteWorkoutSession = () => {
     mutationFn: (sessionId: number) =>
       workoutSessionService.deleteWorkoutSession(sessionId),
     onSuccess: (_, sessionId) => {
-      // Invalidate all lists since we don't know the traineeId
+      // Invalidate all lists (both paged and non-paged) since we don't know the traineeId
       queryClient.invalidateQueries({ queryKey: workoutSessionKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: workoutSessionKeys.pagedLists() });
 
       // Remove all detail queries for this session
       queryClient.removeQueries({

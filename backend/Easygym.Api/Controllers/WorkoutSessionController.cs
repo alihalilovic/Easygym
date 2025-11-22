@@ -28,6 +28,16 @@ namespace Easygym.Api.Controllers
             return Ok(workoutSessions);
         }
 
+        [HttpGet("trainee/{traineeId}/paged")]
+        [Authorize(Roles = Role.All)]
+        public async Task<IActionResult> GetPagedWorkoutSessionsForTrainee(
+            int traineeId,
+            [FromQuery] WorkoutSessionQueryParams queryParams)
+        {
+            var pagedSessions = await _workoutSessionService.GetPagedWorkoutSessionsForTraineeAsync(traineeId, queryParams);
+            return Ok(pagedSessions);
+        }
+
         [HttpGet("{id}")]
         [Authorize(Roles = Role.All)]
         public async Task<IActionResult> GetWorkoutSession(int id)
