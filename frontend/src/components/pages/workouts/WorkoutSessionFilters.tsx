@@ -30,13 +30,13 @@ import { useDebounce } from '@/hooks/useDebounce';
 interface WorkoutSessionFiltersProps {
   filters: WorkoutSessionQueryParams;
   onFiltersChange: (filters: WorkoutSessionQueryParams) => void;
-  disabled?: boolean;
+  totalItemsShown: number;
 }
 
 export const WorkoutSessionFilters = ({
   filters,
   onFiltersChange,
-  disabled = false,
+  totalItemsShown,
 }: WorkoutSessionFiltersProps) => {
   const { data: workouts = [] } = useWorkouts();
   const [showFilters, setShowFilters] = useState(false);
@@ -83,6 +83,8 @@ export const WorkoutSessionFilters = ({
     filters.minPerceivedDifficulty,
     filters.maxPerceivedDifficulty,
   ].filter(Boolean).length;
+
+  const disabled = totalItemsShown === 0 && activeFilterCount === 0;
 
   return (
     <div
