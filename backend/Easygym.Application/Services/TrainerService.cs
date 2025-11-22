@@ -10,15 +10,18 @@ namespace Easygym.Application.Services
     {
         private readonly ITrainerRepository _trainerRepository;
         private readonly IGenericRepository<User> _userRepository;
+        private readonly IGenericRepository<Client> _clientRepository;
         private readonly CurrentUserService _currentUserService;
 
         public TrainerService(
             ITrainerRepository trainerRepository,
             IGenericRepository<User> userRepository,
+            IGenericRepository<Client> clientRepository,
             CurrentUserService currentUserService)
         {
             _trainerRepository = trainerRepository;
             _userRepository = userRepository;
+            _clientRepository = clientRepository;
             _currentUserService = currentUserService;
         }
 
@@ -49,6 +52,21 @@ namespace Easygym.Application.Services
             }
 
             return clientConnections;
+        }
+
+        public async Task RemoveClientAsync(int clientId)
+        {
+            var currentUser = await _currentUserService.GetCurrentUserAsync();
+            var client = await _clientRepository.GetByIdAsync(clientId) ?? throw new UserNotFoundException();
+
+            if (client.TrainerId != currentUser.Id)
+            {
+                throw new ForbiddenAccessException();
+            }
+
+            client.TrainerId = null;
+            client.InvitationAcceptedAt = default;
+            await _clientRepository.UpdateAsync(client);
         }
     }
 }

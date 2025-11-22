@@ -7,13 +7,39 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import EmptyState from '@/components/ui/widgets/EmptyState';
-import { useMyTrainer } from '@/hooks/useConnections';
+import { useMyTrainer, useRemoveMyTrainer } from '@/hooks/useConnections';
+import { useNavigate } from 'react-router';
+import { routes } from '@/lib/constants';
+import { toast } from 'sonner';
+import {
+  Dialog,
+  DialogTrigger,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+  DialogClose,
+} from '@/components/ui/dialog';
 
 const MyTrainer = () => {
   const { data: trainerConnection } = useMyTrainer();
+  const removeTrainer = useRemoveMyTrainer();
+  const navigate = useNavigate();
 
   const handleRemoveTrainer = () => {
-    // TODO: Implement removing trainer
+    removeTrainer.mutate(undefined, {
+      onSuccess: () => {
+        toast.success('Your trainer has been successfully removed.');
+      },
+      onError: (error) => {
+        toast.error(error.message || 'Failed to remove trainer.');
+      },
+    });
+  };
+
+  const handleFindTrainer = () => {
+    navigate(routes.Invitations);
   };
 
   if (!trainerConnection) {
@@ -23,7 +49,7 @@ const MyTrainer = () => {
           title="No trainer assigned"
           description="You don't have a trainer yet. Connect with a professional trainer to get personalized workout plans and guidance."
           buttonText="Find a Trainer"
-          buttonAction={handleRemoveTrainer}
+          buttonAction={handleFindTrainer}
           buttonIcon={<Users className="h-4 w-4" />}
         />
       </div>
@@ -100,10 +126,40 @@ const MyTrainer = () => {
             <Mail className="h-4 w-4 mr-2" />
             Contact Trainer
           </Button>
-          <Button variant="destructive" onClick={handleRemoveTrainer}>
-            <Users className="h-4 w-4 mr-2" />
-            Remove trainer
-          </Button>
+          <Dialog>
+            <Button
+              variant="destructive"
+              asChild
+              disabled={removeTrainer.isPending}
+            >
+              <DialogTrigger>
+                <Users className="h-4 w-4 mr-2" />
+                {removeTrainer.isPending ? 'Removing...' : 'Remove trainer'}
+              </DialogTrigger>
+            </Button>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Remove trainer?</DialogTitle>
+                <DialogDescription>
+                  Are you sure you want to remove {trainer.name} as your
+                  trainer? This action cannot be undone and will disconnect your
+                  training relationship.
+                </DialogDescription>
+              </DialogHeader>
+              <DialogFooter>
+                <Button
+                  variant="destructive"
+                  onClick={handleRemoveTrainer}
+                  disabled={removeTrainer.isPending}
+                >
+                  {removeTrainer.isPending ? 'Removing...' : 'Remove Trainer'}
+                </Button>
+                <DialogClose asChild>
+                  <Button variant="outline">Cancel</Button>
+                </DialogClose>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
 

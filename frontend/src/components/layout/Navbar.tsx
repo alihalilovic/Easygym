@@ -13,6 +13,7 @@ import {
   Dumbbell,
   UserPlus,
   Mail,
+  Users,
 } from 'lucide-react';
 import clsx from 'clsx';
 
@@ -80,14 +81,14 @@ const Navbar = () => {
 
   const trainerSpecificLinks: NavbarLink[] = [
     {
-      to: routes.WorkoutSessions,
-      label: 'Sessions',
-      icon: <Calendar />,
-    },
-    {
       to: routes.Invitations,
       label: 'Invitations',
       icon: <Mail />,
+    },
+    {
+      to: routes.MyClients,
+      label: 'My Clients',
+      icon: <Users />,
     },
   ];
 

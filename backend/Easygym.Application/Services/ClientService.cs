@@ -45,5 +45,20 @@ namespace Easygym.Application.Services
                 InvitationAcceptedAt = client.InvitationAcceptedAt
             };
         }
+
+        public async Task RemoveMyTrainerAsync()
+        {
+            var currentUser = await _currentUserService.GetCurrentUserAsync();
+            var client = await _clientRepository.GetByIdAsync(currentUser.Id) ?? throw new UserNotFoundException();
+
+            if (client.TrainerId == null)
+            {
+                throw new ValidationException("You don't have a trainer assigned.");
+            }
+
+            client.TrainerId = null;
+            client.InvitationAcceptedAt = default;
+            await _clientRepository.UpdateAsync(client);
+        }
     }
 }

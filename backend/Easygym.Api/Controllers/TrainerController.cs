@@ -21,5 +21,13 @@ namespace Easygym.Api.Controllers
             var clients = await _trainerService.GetMyClientsAsync();
             return Ok(clients);
         }
+
+        [Authorize(Roles = Role.Trainer)]
+        [HttpDelete("me/clients/{clientId}")]
+        public async Task<IActionResult> RemoveClient(int clientId)
+        {
+            await _trainerService.RemoveClientAsync(clientId);
+            return NoContent();
+        }
     }
 }
