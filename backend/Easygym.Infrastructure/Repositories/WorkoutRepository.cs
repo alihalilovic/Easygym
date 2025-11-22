@@ -96,5 +96,14 @@ namespace Easygym.Infrastructure.Repositories
             await _context.SaveChangesAsync();
         }
 
+        public async Task<List<Workout>> GetWorkoutsByTrainerAsync(int trainerId)
+        {
+            return await _context.Workouts
+                .Include(w => w.Sets)
+                .Include(w => w.Trainee)
+                .Where(w => w.TrainerId == trainerId)
+                .ToListAsync();
+        }
+
     }
 }

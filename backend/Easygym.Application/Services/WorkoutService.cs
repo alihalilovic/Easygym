@@ -9,17 +9,27 @@ namespace Easygym.Application.Services
     {
         private readonly IWorkoutRepository _workoutRepository;
         private readonly CurrentUserService _currentUserService;
+        private readonly IGenericRepository<Client> _clientRepository;
 
-        public WorkoutService(IWorkoutRepository workoutRepository, CurrentUserService currentUserService)
+        public WorkoutService(IWorkoutRepository workoutRepository, CurrentUserService currentUserService, IGenericRepository<Client> clientRepository)
         {
             _workoutRepository = workoutRepository;
             _currentUserService = currentUserService;
+            _clientRepository = clientRepository;
         }
         public async Task<List<Workout>> GetWorkoutsForTraineeAsync(int traineeId)
         {
             await CanAccessWorkout(traineeId);
 
             var workouts = await _workoutRepository.GetWorkoutsForTraineeAsync(traineeId);
+            return workouts;
+        }
+
+        public async Task<List<Workout>> GetWorkoutsCreatedByTrainerAsync(int trainerId)
+        {
+            await CanAccessWorkout(null, trainerId);
+
+            var workouts = await _workoutRepository.GetWorkoutsByTrainerAsync(trainerId);
             return workouts;
         }
 
@@ -31,14 +41,46 @@ namespace Easygym.Application.Services
             return workout;
         }
 
-        public async Task<Workout> CreateWorkoutAsync(Workout workout)
+        public async Task<Workout> CreateWorkoutAsync(CreateWorkoutRequest request)
         {
-            await CanAccessWorkout(workout.TraineeId);
+            var currentUser = await _currentUserService.GetCurrentUserAsync();
 
-            if (workout.Sets.Count == 0)
+            // Validate trainee access
+            await CanAccessWorkout(request.TraineeId);
+
+            if (request.Sets.Count == 0)
             {
                 throw new ValidationException("Workout must have at least one set");
             }
+
+            // If the current user is a trainer, verify they are connected to the trainee
+            int? trainerId = null;
+            if (currentUser.Role == Role.Trainer)
+            {
+                var client = await _clientRepository.GetByIdAsync(request.TraineeId);
+
+                if (client == null)
+                {
+                    throw new ValidationException("Trainee must be provided");
+                }
+
+                if (client.TrainerId != currentUser.Id)
+                {
+                    throw new ForbiddenAccessException();
+                }
+
+                trainerId = currentUser.Id;
+            }
+
+            var workout = new Workout
+            {
+                TraineeId = request.TraineeId,
+                Name = request.Name,
+                Description = request.Description,
+                Sets = request.Sets,
+                RestTimeSeconds = request.RestTimeSeconds,
+                TrainerId = trainerId
+            };
 
             await _workoutRepository.AddWorkoutAsync(workout);
             return workout;
@@ -58,16 +100,42 @@ namespace Easygym.Application.Services
             await _workoutRepository.DeleteWorkoutAsync(workoutId);
         }
 
-        public async Task CanAccessWorkout(int traineeId)
+        public async Task CanAccessWorkout(int? traineeId, int? trainerId = null)
         {
             var currentUser = await _currentUserService.GetCurrentUserAsync();
 
-            // Only allow trainers and admins to see other users' workouts,
-            // while clients can only see their own workouts
+            // If the current user is a trainer, verify they are connected to the trainee
+            if (currentUser.Role == Role.Trainer)
+            {
+                if (trainerId != null && traineeId == null)
+                {
+                    // Verify that the trainer is accessing their own workouts only
+                    if (trainerId != currentUser.Id)
+                    {
+                        throw new ForbiddenAccessException();
+                    }
+                    return;
+                }
+
+                if (traineeId == null)
+                {
+                    throw new ValidationException("Trainee must be provided");
+                }
+
+                var client = await _clientRepository.GetByIdAsync((int)traineeId) ?? throw new ValidationException("Trainee must be provided");
+                if (client.TrainerId != currentUser.Id)
+                {
+                    throw new ForbiddenAccessException();
+                }
+            }
+
+            // Only allow clients to see their own workouts
             if (currentUser.Role == Role.Client && currentUser.Id != traineeId)
             {
                 throw new ForbiddenAccessException();
             }
+
+            // Allow admins to see all workouts
         }
     }
 }

@@ -34,12 +34,26 @@ import {
 import SetCard from '@/components/pages/workouts/SetCard';
 import { Progress } from '@/components/ui/progress';
 import { useAuth } from '@/components/auth/AuthProvider';
-import { useWorkout, useCreateWorkout, useUpdateWorkout, useDeleteWorkout } from '@/hooks/useWorkouts';
+import {
+  useWorkout,
+  useCreateWorkout,
+  useUpdateWorkout,
+  useDeleteWorkout,
+} from '@/hooks/useWorkouts';
+import { useMyClients } from '@/hooks/useConnections';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 const WorkoutForm = () => {
   const params = useParams();
   const navigate = useNavigate();
-  const { userId } = useAuth();
+  const { userId, isUserTrainer } = useAuth();
+  const { data: myClients = [] } = useMyClients();
 
   const maxRestTimeMinutes = 10;
   const defaultRestTimeMinutes = 3;
@@ -52,7 +66,6 @@ const WorkoutForm = () => {
     [workoutId],
   );
 
-  const { data: existingWorkout } = useWorkout(userId, workoutId, !!workoutId);
   const createWorkout = useCreateWorkout();
   const updateWorkout = useUpdateWorkout();
   const deleteWorkout = useDeleteWorkout();
@@ -62,6 +75,19 @@ const WorkoutForm = () => {
     Set,
     'id'
   > | null>(null);
+  const [selectedTraineeId, setSelectedTraineeId] = useState<
+    number | undefined
+  >(undefined);
+
+  // For editing, we need to fetch with the traineeId from the route or query params
+  // For now, let's use userId for fetching, and we'll update selectedTraineeId when workout loads
+  const { data: existingWorkout } = useWorkout(userId, workoutId, !!workoutId);
+
+  useEffect(() => {
+    if (existingWorkout) {
+      setSelectedTraineeId(existingWorkout.traineeId);
+    }
+  }, [existingWorkout]);
 
   const setFormSchema = z.object({
     name: z.string().min(1, { message: 'Name is required' }),
@@ -145,10 +171,15 @@ const WorkoutForm = () => {
       return;
     }
 
+    if (isUserTrainer && !selectedTraineeId) {
+      toast.error('Please select a client to assign this workout to');
+      return;
+    }
+
     const workoutData = {
       ...data,
       sets,
-      traineeId: userId,
+      traineeId: selectedTraineeId || userId,
       restTimeSeconds: (Math.round(data.restTimeMinutes * 100) / 100) * 60,
     };
 
@@ -156,7 +187,9 @@ const WorkoutForm = () => {
       await createWorkout.mutateAsync(workoutData);
     } else {
       await updateWorkout.mutateAsync({
-        traineeId: userId, workoutId, workout: workoutData,
+        traineeId: selectedTraineeId!!,
+        workoutId,
+        workout: workoutData,
       });
     }
 
@@ -169,10 +202,15 @@ const WorkoutForm = () => {
     setForm.handleSubmit(addSet)();
   };
 
-  const handleDeleteWorkout = async (e: React.MouseEvent<HTMLButtonElement>) => {
+  const handleDeleteWorkout = async (
+    e: React.MouseEvent<HTMLButtonElement>,
+  ) => {
     e.preventDefault();
 
-    await deleteWorkout.mutateAsync({ traineeId: userId, workoutId });
+    await deleteWorkout.mutateAsync({
+      traineeId: selectedTraineeId!!,
+      workoutId,
+    });
     toast.success('Workout deleted successfully');
     navigate(routes.Workouts);
   };
@@ -208,6 +246,31 @@ const WorkoutForm = () => {
         <h2 className="text-2xl font-bold mb-4 pb-2 border-b border-solid">
           {formNameText}
         </h2>
+        {isUserTrainer && !workoutId && myClients.length > 0 && (
+          <div className="mb-4">
+            <label className="text-sm font-medium mb-2 block">
+              Assign to Client
+            </label>
+            <Select
+              value={selectedTraineeId?.toString()}
+              onValueChange={(value) => setSelectedTraineeId(parseInt(value))}
+            >
+              <SelectTrigger className="w-full max-w-md">
+                <SelectValue placeholder="Choose a client" />
+              </SelectTrigger>
+              <SelectContent>
+                {myClients.map((clientConnection) => (
+                  <SelectItem
+                    key={clientConnection.client.id}
+                    value={clientConnection.client.id.toString()}
+                  >
+                    {clientConnection.client.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
         <Form {...workoutForm}>
           <FormWrapper
             className="w-full"

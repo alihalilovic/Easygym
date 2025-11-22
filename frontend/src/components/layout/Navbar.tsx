@@ -81,6 +81,11 @@ const Navbar = () => {
 
   const trainerSpecificLinks: NavbarLink[] = [
     {
+      to: routes.Workouts,
+      label: 'Workouts',
+      icon: <Dumbbell />,
+    },
+    {
       to: routes.Invitations,
       label: 'Invitations',
       icon: <Mail />,

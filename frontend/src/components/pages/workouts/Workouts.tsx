@@ -5,12 +5,21 @@ import { routes } from '@/lib/constants';
 import { PlusCircleIcon } from 'lucide-react';
 import EmptyState from '@/components/ui/widgets/EmptyState';
 import { useAuth } from '@/components/auth/AuthProvider';
-import { useWorkouts } from '@/hooks/useWorkouts';
+import { useWorkouts, useTrainerWorkouts } from '@/hooks/useWorkouts';
+import { useMemo } from 'react';
 
 const Workouts = () => {
-  const { userId } = useAuth();
-  const { data: workouts = [], isLoading } = useWorkouts(userId);
+  const { userId, isUserTrainer } = useAuth();
+  const { data: myWorkouts = [], isLoading: isLoadingMyWorkouts } = useWorkouts(
+    isUserTrainer ? 0 : userId,
+  );
+  const { data: trainerWorkouts = [], isLoading: isLoadingTrainerWorkouts } =
+    useTrainerWorkouts(isUserTrainer ? userId : 0);
   const navigate = useNavigate();
+
+  const workouts = useMemo(() => {
+    return isUserTrainer ? [...myWorkouts, ...trainerWorkouts] : myWorkouts;
+  }, [isUserTrainer, myWorkouts, trainerWorkouts]);
 
   const handleCreateWorkout = () => {
     navigate(routes.CreateWorkout);
@@ -30,15 +39,17 @@ const Workouts = () => {
           </div>
         </div>
       )}
-      {workouts.length === 0 && !isLoading && (
-        <EmptyState
-          title="No workouts yet"
-          description="Create your first workout to get started with your training program."
-          buttonText="Create Your First Workout"
-          buttonAction={handleCreateWorkout}
-          buttonIcon={<PlusCircleIcon className="h-4 w-4" />}
-        />
-      )}
+      {workouts.length === 0 &&
+        !isLoadingMyWorkouts &&
+        !isLoadingTrainerWorkouts && (
+          <EmptyState
+            title="No workouts yet"
+            description="Create your first workout to get started with your training program."
+            buttonText="Create Your First Workout"
+            buttonAction={handleCreateWorkout}
+            buttonIcon={<PlusCircleIcon className="h-4 w-4" />}
+          />
+        )}
     </div>
   );
 };

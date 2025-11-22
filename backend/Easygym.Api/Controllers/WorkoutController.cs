@@ -24,6 +24,14 @@ namespace Easygym.Api.Controllers
             return Ok(workouts);
         }
 
+        [HttpGet("trainer/{trainerId}")]
+        [Authorize(Roles = Role.Trainer)]
+        public async Task<IActionResult> GetWorkoutsCreatedByTrainer(int trainerId)
+        {
+            var workouts = await _workoutService.GetWorkoutsCreatedByTrainerAsync(trainerId);
+            return Ok(workouts);
+        }
+
         [HttpGet("trainee/{traineeId}/{workoutId}")]
         [Authorize(Roles = Role.All)]
         public async Task<IActionResult> GetWorkoutForTrainee(int traineeId, int workoutId)
@@ -34,7 +42,7 @@ namespace Easygym.Api.Controllers
 
         [HttpPost]
         [Authorize(Roles = $"{Role.Client}, {Role.Trainer}")]
-        public async Task<IActionResult> CreateWorkout(Workout workout)
+        public async Task<IActionResult> CreateWorkout([FromBody] CreateWorkoutRequest workout)
         {
             var newWorkout = await _workoutService.CreateWorkoutAsync(workout);
             return Ok(newWorkout);
