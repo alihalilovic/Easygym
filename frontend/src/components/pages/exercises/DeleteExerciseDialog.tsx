@@ -26,13 +26,9 @@ const DeleteExerciseDialog = ({
   const deleteExercise = useDeleteExercise();
 
   const handleDelete = async () => {
-    try {
-      await deleteExercise.mutateAsync(exercise.id);
-      toast.success('Exercise deleted successfully');
-      onOpenChange(false);
-    } catch (error) {
-      toast.error('Failed to delete exercise. It may be in use by a workout.');
-    }
+    await deleteExercise.mutateAsync(exercise.id);
+    toast.success('Exercise deleted successfully');
+    onOpenChange(false);
   };
 
   return (
@@ -51,7 +47,7 @@ const DeleteExerciseDialog = ({
           <AlertDialogAction
             onClick={handleDelete}
             disabled={deleteExercise.isPending}
-            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            className="bg-destructive text-white hover:bg-destructive/90"
           >
             {deleteExercise.isPending ? 'Deleting...' : 'Delete'}
           </AlertDialogAction>

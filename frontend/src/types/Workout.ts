@@ -4,7 +4,7 @@ import { Exercise } from '@/types/Exercise';
 export interface Set {
   id: number;
   exerciseId: number;
-  exercise?: Exercise;
+  exercise: Exercise;
   repetitions: number;
   weight?: number;
 }

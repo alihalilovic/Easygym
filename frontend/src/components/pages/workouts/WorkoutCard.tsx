@@ -100,7 +100,7 @@ const WorkoutCard = ({
                 key={set.id}
                 className="flex items-center justify-between bg-background rounded p-2 text-sm"
               >
-                <span>{set.name || `Set ${set.id}`}</span>
+                <span>{set.exercise.name}</span>
                 <span className="text-muted-foreground">
                   {set.repetitions} reps {set.weight ? `• ${set.weight}kg` : ''}
                 </span>
