@@ -72,6 +72,16 @@ namespace Easygym.Domain.Exceptions
         public InvitationAlreadyExistsException() : base("Invitation already exists") { }
     }
 
+    public class ExerciseNotFoundException : AppException
+    {
+        public ExerciseNotFoundException() : base("Exercise not found") { }
+    }
+
+    public class ExerciseInUseException : AppException
+    {
+        public ExerciseInUseException() : base("Exercise is currently in use and cannot be deleted") { }
+    }
+
     // For general validation errors
     public class ValidationException : AppException
     {

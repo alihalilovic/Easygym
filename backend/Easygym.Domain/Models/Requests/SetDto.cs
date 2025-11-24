@@ -1,12 +1,10 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace Easygym.Domain.Entities
+namespace Easygym.Domain.Models.Requests
 {
-    public class Set
+    public class SetDto
     {
-        public int Id { get; set; }
         public required int ExerciseId { get; set; }
-        public Exercise? Exercise { get; set; }
         public required int Repetitions { get; set; }
         public int? Weight { get; set; }
     }

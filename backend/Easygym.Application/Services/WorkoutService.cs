@@ -97,7 +97,12 @@ namespace Easygym.Application.Services
                 TraineeId = request.TraineeId,
                 Name = request.Name,
                 Description = request.Description,
-                Sets = request.Sets,
+                Sets = request.Sets.Select(setDto => new Set
+                {
+                    ExerciseId = setDto.ExerciseId,
+                    Repetitions = setDto.Repetitions,
+                    Weight = setDto.Weight
+                }).ToList(),
                 RestTimeSeconds = request.RestTimeSeconds,
                 TrainerId = trainerId
             };

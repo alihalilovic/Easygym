@@ -34,6 +34,7 @@ builder.Services.AddScoped<IInvitationRepository, InvitationRepository>();
 builder.Services.AddScoped<ITrainerRepository, TrainerRepository>();
 builder.Services.AddScoped<IInteractionRepository, InteractionRepository>();
 builder.Services.AddScoped<ITrainerClientHistoryRepository, TrainerClientHistoryRepository>();
+builder.Services.AddScoped<IExerciseRepository, ExerciseRepository>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<JwtService>();
 builder.Services.AddScoped<CurrentUserService>();
@@ -43,6 +44,7 @@ builder.Services.AddScoped<InvitationService>();
 builder.Services.AddScoped<InteractionService>();
 builder.Services.AddScoped<ClientService>();
 builder.Services.AddScoped<TrainerService>();
+builder.Services.AddScoped<ExerciseService>();
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("CorsPolicy", policy =>

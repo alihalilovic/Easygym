@@ -34,11 +34,20 @@ namespace Easygym.Infrastructure.Persistence
                 .WithMany()
                 .HasForeignKey(ws => ws.WorkoutId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            // Configure Set-Exercise relationship
+            // Sets cannot exist without a valid Exercise
+            modelBuilder.Entity<Set>()
+                .HasOne(s => s.Exercise)
+                .WithMany()
+                .HasForeignKey(s => s.ExerciseId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
 
         public DbSet<User> Users { get; set; }
         public DbSet<Workout> Workouts { get; set; }
         public DbSet<Set> Sets { get; set; }
+        public DbSet<Exercise> Exercises { get; set; }
         public DbSet<WorkoutSession> WorkoutSessions { get; set; }
         public DbSet<Invitation> Invitations { get; set; }
         public DbSet<Trainer> Trainers { get; set; }

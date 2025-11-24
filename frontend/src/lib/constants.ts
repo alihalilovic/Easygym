@@ -10,6 +10,7 @@ export const routes = {
   Workout: '/workout',
   CreateWorkout: '/workout/create',
   EditWorkout: (id: number) => `/workout/${id}/edit`,
+  Exercises: '/exercises',
   WorkoutSessions: '/workout-sessions',
   WorkoutSession: '/workout-session',
   CreateWorkoutSession: '/workout-session/create',

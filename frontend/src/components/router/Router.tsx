@@ -16,6 +16,7 @@ import ProtectedTrainerRoute from '@/components/router/ProtectedTrainerRoute';
 import Invitations from '@/components/pages/user/Invitations';
 import MyTrainer from '@/components/pages/user/MyTrainer';
 import MyClients from '@/components/pages/trainer/MyClients';
+import Exercises from '@/components/pages/exercises/Exercises';
 
 const Router = () => {
   return (
@@ -39,6 +40,7 @@ const Router = () => {
               <Route path=":id/edit" element={<Workout />} />
             </Route>
             <Route element={<ProtectedClientRoute />}>
+              <Route path={routes.Exercises} element={<Exercises />} />
               <Route
                 path={routes.WorkoutSessions}
                 element={<WorkoutSessions />}
