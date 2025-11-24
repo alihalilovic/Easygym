@@ -17,12 +17,15 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
+  FormDescription,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
 import { Exercise } from '@/types/Exercise';
 import { useCreateExercise, useUpdateExercise } from '@/hooks/useExercises';
+import { useAuth } from '@/components/auth/AuthProvider';
 import { toast } from 'sonner';
 
 const exerciseSchema = z.object({
@@ -30,6 +33,7 @@ const exerciseSchema = z.object({
   description: z.string().max(1000, 'Description is too long').optional(),
   muscleGroup: z.string().max(50, 'Muscle group is too long').optional(),
   instructions: z.string().max(2000, 'Instructions are too long').optional(),
+  isPublic: z.boolean().optional(),
 });
 
 type ExerciseFormValues = z.infer<typeof exerciseSchema>;
@@ -49,6 +53,7 @@ const ExerciseDialog = ({
 }: ExerciseDialogProps) => {
   const createExercise = useCreateExercise();
   const updateExercise = useUpdateExercise();
+  const { isUserTrainer } = useAuth();
 
   const form = useForm<ExerciseFormValues>({
     resolver: zodResolver(exerciseSchema),
@@ -57,6 +62,7 @@ const ExerciseDialog = ({
       description: '',
       muscleGroup: '',
       instructions: '',
+      isPublic: false,
     },
   });
 
@@ -67,6 +73,7 @@ const ExerciseDialog = ({
       description: isEditMode ? exercise.description : '',
       muscleGroup: isEditMode ? exercise.muscleGroup : '',
       instructions: isEditMode ? exercise.instructions : '',
+      isPublic: isEditMode ? exercise.isPublic : false,
     });
   }, [mode, exercise, form]);
 
@@ -166,6 +173,30 @@ const ExerciseDialog = ({
                 </FormItem>
               )}
             />
+            {isUserTrainer && (
+              <FormField
+                control={form.control}
+                name="isPublic"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                    <div className="space-y-0.5">
+                      <FormLabel className="text-base">
+                        Share with clients
+                      </FormLabel>
+                      <FormDescription>
+                        Make this exercise available to your clients
+                      </FormDescription>
+                    </div>
+                    <FormControl>
+                      <Switch
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+            )}
             <DialogFooter>
               <Button
                 type="button"

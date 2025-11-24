@@ -309,7 +309,7 @@ const WorkoutSession = () => {
                   key={set.id}
                   className="flex flex-col gap-2 p-3 rounded-md bg-muted/50"
                 >
-                  <div className="font-medium">{set.name}</div>
+                  <div className="font-medium">{set.exercise.name}</div>
                   <div className="flex flex-col gap-1 text-sm text-muted-foreground">
                     <div className="flex gap-2 items-center">
                       <RepeatIcon className="h-4 w-4" />
@@ -321,8 +321,8 @@ const WorkoutSession = () => {
                         <span>{set.weight} kg</span>
                       </div>
                     )}
-                    {set.description && (
-                      <p className="mt-1">{set.description}</p>
+                    {set.exercise.description && (
+                      <p className="mt-1">{set.exercise.description}</p>
                     )}
                   </div>
                 </div>
@@ -375,7 +375,7 @@ const WorkoutSession = () => {
               <h3 className="text-xl font-semibold">
                 {showingRest
                   ? 'Rest Time'
-                  : currentExercise?.name || 'Exercise'}
+                  : currentExercise?.exercise.name || 'Exercise'}
               </h3>
             </div>
             <div className="mb-4">
@@ -405,9 +405,9 @@ const WorkoutSession = () => {
                     </span>
                   </div>
 
-                  {currentExercise?.description && (
+                  {currentExercise?.exercise.description && (
                     <div className="text-sm text-muted-foreground">
-                      {currentExercise.description}
+                      {currentExercise.exercise.description}
                     </div>
                   )}
                 </div>

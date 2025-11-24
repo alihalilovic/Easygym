@@ -55,14 +55,6 @@ const Navbar = () => {
       label: 'Profile',
       icon: <User />,
     },
-  ];
-
-  const clientSpecificLinks: NavbarLink[] = [
-    {
-      to: routes.WorkoutSessions,
-      label: 'Sessions',
-      icon: <Calendar />,
-    },
     {
       to: routes.Workouts,
       label: 'Workouts',
@@ -78,6 +70,14 @@ const Navbar = () => {
       label: 'Invitations',
       icon: <Mail />,
     },
+  ];
+
+  const clientSpecificLinks: NavbarLink[] = [
+    {
+      to: routes.WorkoutSessions,
+      label: 'Sessions',
+      icon: <Calendar />,
+    },
     {
       to: routes.MyTrainer,
       label: 'My Trainer',
@@ -86,16 +86,6 @@ const Navbar = () => {
   ];
 
   const trainerSpecificLinks: NavbarLink[] = [
-    {
-      to: routes.Workouts,
-      label: 'Workouts',
-      icon: <Dumbbell />,
-    },
-    {
-      to: routes.Invitations,
-      label: 'Invitations',
-      icon: <Mail />,
-    },
     {
       to: routes.MyClients,
       label: 'My Clients',

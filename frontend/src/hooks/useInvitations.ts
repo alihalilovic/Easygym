@@ -6,6 +6,7 @@ import {
   InvitationStatus,
 } from '@/types/Interaction';
 import { useAuth } from '@/components/auth/AuthProvider';
+import { exerciseKeys } from './useExercises';
 
 export const invitationKeys = {
   all: ['invitations'] as const,
@@ -46,6 +47,8 @@ export const useResolveInvitation = () => {
       status: InvitationStatus;
     }) => interactionService.resolveInvitation(invitationId, status),
     onSuccess: (updatedInvitation) => {
+      // Update the exercises list as it might contain public exercises from trainer
+      queryClient.invalidateQueries({ queryKey: exerciseKeys.lists() });
       queryClient.setQueryData<Invitation[]>(
         invitationKeys.list(),
         (old) =>

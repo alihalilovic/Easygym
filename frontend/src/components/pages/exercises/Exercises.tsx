@@ -2,15 +2,17 @@ import { useState } from 'react';
 import ExerciseDialog from '@/components/pages/exercises/ExerciseDialog';
 import DeleteExerciseDialog from '@/components/pages/exercises/DeleteExerciseDialog';
 import { Button } from '@/components/ui/button';
-import { PlusCircleIcon, Pencil, Trash2 } from 'lucide-react';
+import { PlusCircleIcon, Pencil, Trash2, Users } from 'lucide-react';
 import EmptyState from '@/components/ui/widgets/EmptyState';
 import { useExercises } from '@/hooks/useExercises';
 import { SortableTable, Column } from '@/components/ui/widgets/SortableTable';
 import { Exercise } from '@/types/Exercise';
 import { Badge } from '@/components/ui/badge';
+import { useAuth } from '@/components/auth/AuthProvider';
 
 const Exercises = () => {
   const { data: exercises = [], isLoading } = useExercises();
+  const { userId } = useAuth();
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -37,7 +39,18 @@ const Exercises = () => {
       key: 'name',
       label: 'Name',
       sortable: true,
-      className: 'font-medium max-w-[200px]',
+      render: (exercise) => (
+        <div className="flex items-center gap-2">
+          <span className="font-medium">{exercise.name}</span>
+          {exercise.isPublic && (
+            <Badge variant="secondary" className="gap-1">
+              <Users className="h-3 w-3" />
+              Shared
+            </Badge>
+          )}
+        </div>
+      ),
+      className: 'max-w-[200px]',
     },
     {
       key: 'description',
@@ -68,30 +81,35 @@ const Exercises = () => {
       key: 'actions',
       label: 'Actions',
       sortable: false,
-      render: (exercise) => (
-        <div className="flex gap-2">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={(e) => {
-              e.stopPropagation();
-              handleEditExercise(exercise);
-            }}
-          >
-            <Pencil className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={(e) => {
-              e.stopPropagation();
-              handleDeleteExercise(exercise);
-            }}
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
-        </div>
-      ),
+      render: (exercise) => {
+        const isOwnExercise = exercise.createdById === userId;
+        return isOwnExercise ? (
+          <div className="flex gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleEditExercise(exercise);
+              }}
+            >
+              <Pencil className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleDeleteExercise(exercise);
+              }}
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </div>
+        ) : (
+          <span className="text-muted-foreground text-sm">View only</span>
+        );
+      },
       className: 'w-[120px]',
     },
   ];

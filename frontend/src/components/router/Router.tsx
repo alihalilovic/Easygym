@@ -39,8 +39,8 @@ const Router = () => {
               <Route path="create" element={<Workout />} />
               <Route path=":id/edit" element={<Workout />} />
             </Route>
+            <Route path={routes.Exercises} element={<Exercises />} />
             <Route element={<ProtectedClientRoute />}>
-              <Route path={routes.Exercises} element={<Exercises />} />
               <Route
                 path={routes.WorkoutSessions}
                 element={<WorkoutSessions />}

@@ -13,5 +13,6 @@ namespace Easygym.Domain.Models.Requests
         public string? MuscleGroup { get; set; }
         [StringLength(2000)]
         public string? Instructions { get; set; }
+        public bool IsPublic { get; set; } = false;
     }
 }

@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import api from '@/api/api';
 import { authTokenKey } from '@/lib/constants';
 import { UserRegisterRequest, UserRole, User } from '@/types/User';
@@ -20,6 +21,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const [user, setUser] = useState<User | null>(null);
+    const queryClient = useQueryClient();
 
     // Computed properties
     const userId = user?.id || 0;
@@ -66,7 +68,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const logout = useCallback(() => {
         localStorage.removeItem(authTokenKey);
         setUser(null);
-    }, []);
+        // Clear all cached queries when logging out
+        queryClient.clear();
+    }, [queryClient]);
 
     // Initialize auth state on mount
     useEffect(() => {

@@ -17,6 +17,7 @@ export interface CreateExerciseRequest {
   description?: string;
   muscleGroup?: string;
   instructions?: string;
+  isPublic?: boolean;
 }
 
 export interface UpdateExerciseRequest {
@@ -24,4 +25,5 @@ export interface UpdateExerciseRequest {
   description?: string;
   muscleGroup?: string;
   instructions?: string;
+  isPublic?: boolean;
 }

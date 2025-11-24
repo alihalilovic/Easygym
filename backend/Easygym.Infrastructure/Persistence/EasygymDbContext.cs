@@ -27,6 +27,20 @@ namespace Easygym.Infrastructure.Persistence
                 .Property(a => a.Id)
                 .ValueGeneratedNever();
 
+            // Configure User-Client relationship (one-to-one)
+            modelBuilder.Entity<User>()
+                .HasOne(u => u.Client)
+                .WithOne()
+                .HasForeignKey<Client>(c => c.Id)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Configure User-Trainer relationship (one-to-one)
+            modelBuilder.Entity<User>()
+                .HasOne(u => u.Trainer)
+                .WithOne()
+                .HasForeignKey<Trainer>(t => t.Id)
+                .OnDelete(DeleteBehavior.Cascade);
+
             // Configure WorkoutSession to NOT cascade delete when Workout is deleted
             // This preserves workout session history even after workouts are removed
             modelBuilder.Entity<WorkoutSession>()
