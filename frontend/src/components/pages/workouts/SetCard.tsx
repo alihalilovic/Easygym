@@ -1,4 +1,5 @@
 import { Set } from '@/types/Workout';
+import { Exercise } from '@/types/Exercise';
 import { Button } from '@/components/ui/button';
 import {
   Clipboard,
@@ -9,6 +10,7 @@ import {
 interface SetCardProps {
   set: Omit<Set, 'id'>;
   index: number;
+  exercises: Exercise[];
   setDisplaySetDetails: (set: Omit<Set, 'id'>) => void;
   duplicateSet: (
     set: Omit<Set, 'id'>,
@@ -21,10 +23,12 @@ interface SetCardProps {
 const SetCard = ({
   set,
   index,
+  exercises,
   setDisplaySetDetails,
   removeSet,
   duplicateSet,
 }: SetCardProps) => {
+  const exercise = exercises.find((ex) => ex.id === set.exerciseId);
 
   return (
     <div
@@ -34,7 +38,7 @@ const SetCard = ({
       <div className="flex flex-col gap-2 w-full">
         <div className="flex gap-4 w-full justify-between">
           <span className="font-bold mt-1">
-            {set.name || `Set ${index + 1}`}
+            {exercise?.name || `Set ${index + 1}`}
           </span>
 
           <div className="flex gap-2 cursor-pointer">
@@ -55,10 +59,10 @@ const SetCard = ({
           </div>
         </div>
 
-        {set.description && (
+        {exercise?.category && (
           <div className="truncate">
             <span className="text-sm truncate text-gray-500">
-              {set.description}
+              {exercise.category}
             </span>
           </div>
         )}

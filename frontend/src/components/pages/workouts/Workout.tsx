@@ -48,12 +48,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { useExercises } from '@/hooks/useExercises';
 
 const WorkoutForm = () => {
   const params = useParams();
   const navigate = useNavigate();
   const { userId, isUserTrainer } = useAuth();
   const { data: myClients = [] } = useMyClients();
+  const { data: exercises = [] } = useExercises();
 
   const maxRestTimeMinutes = 10;
   const defaultRestTimeMinutes = 3;
@@ -89,8 +91,7 @@ const WorkoutForm = () => {
   }, [existingWorkout]);
 
   const setFormSchema = z.object({
-    name: z.string().min(1, { message: 'Name is required' }),
-    description: z.string().optional(),
+    exerciseId: z.coerce.number().min(1, { message: 'Exercise is required' }),
     repetitions: z.coerce
       .number()
       .min(1, { message: 'Repetitions is required' }),
@@ -120,8 +121,7 @@ const WorkoutForm = () => {
   const setForm = useForm<z.infer<typeof setFormSchema>>({
     resolver: zodResolver(setFormSchema),
     defaultValues: {
-      name: '',
-      description: '',
+      exerciseId: 0,
       repetitions: 1,
       weight: 0,
     },
@@ -224,8 +224,7 @@ const WorkoutForm = () => {
     e.stopPropagation();
 
     const newSet: Omit<Set, 'id'> = {
-      name: set.name,
-      description: set.description,
+      exerciseId: set.exerciseId,
       repetitions: set.repetitions,
       weight: set.weight,
     };
@@ -333,6 +332,7 @@ const WorkoutForm = () => {
                       key={index}
                       set={set}
                       index={index}
+                      exercises={exercises}
                       setDisplaySetDetails={handleSetDisplaySetDetails}
                       duplicateSet={handleDuplicateSet}
                       removeSet={removeSet}
@@ -344,16 +344,30 @@ const WorkoutForm = () => {
             <div className="grid grid-cols-2 gap-4 w-[50%]">
               <FormField
                 control={setForm.control}
-                name="name"
+                name="exerciseId"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Set Name</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="e.g., Warm-up, Main set..."
-                        {...field}
-                      />
-                    </FormControl>
+                    <FormLabel>Exercise</FormLabel>
+                    <Select
+                      value={field.value?.toString()}
+                      onValueChange={(value) => field.onChange(parseInt(value))}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select an exercise" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {exercises.map((exercise) => (
+                          <SelectItem
+                            key={exercise.id}
+                            value={exercise.id.toString()}
+                          >
+                            {exercise.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -384,24 +398,19 @@ const WorkoutForm = () => {
                   </FormItem>
                 )}
               />
-              <FormField
-                control={setForm.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Description (optional)</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Any notes about this set..."
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
             </div>
-            <Button onClick={handleAddSet} variant="outline" className="mt-2">
+            {exercises.length === 0 && (
+              <p className="text-sm text-muted-foreground mt-2">
+                No exercises available. Please create exercises first by visiting
+                the Exercises page.
+              </p>
+            )}
+            <Button
+              onClick={handleAddSet}
+              variant="outline"
+              className="mt-2"
+              disabled={exercises.length === 0}
+            >
               <Plus className="h-4 w-4 mr-2" /> Add Set
             </Button>
             <div className="flex gap-2">
@@ -447,15 +456,16 @@ const WorkoutForm = () => {
               <DialogContent>
                 <DialogHeader>
                   <DialogTitle>
-                    Set Details - {dialogSetDetails?.name}
+                    Set Details -{' '}
+                    {exercises.find((ex) => ex.id === dialogSetDetails?.exerciseId)
+                      ?.name || 'Unknown Exercise'}
                   </DialogTitle>
                   <DialogDescription className="flex flex-col gap-2 break-all">
-                    {dialogSetDetails?.description && (
-                      <span>
-                        <span className="font-bold">Description:</span>{' '}
-                        {dialogSetDetails.description}
-                      </span>
-                    )}
+                    <span>
+                      <span className="font-bold">Exercise:</span>{' '}
+                      {exercises.find((ex) => ex.id === dialogSetDetails?.exerciseId)
+                        ?.name || 'Unknown'}
+                    </span>
                     <span>
                       <span className="font-bold">Repetitions:</span>{' '}
                       {dialogSetDetails?.repetitions}

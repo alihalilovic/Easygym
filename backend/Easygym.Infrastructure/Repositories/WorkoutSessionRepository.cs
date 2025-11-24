@@ -21,6 +21,7 @@ namespace Easygym.Infrastructure.Repositories
             return await _context.WorkoutSessions
                 .Include(ws => ws.Workout!)
                     .ThenInclude(w => w.Sets)
+                        .ThenInclude(s => s.Exercise)
                 .ToListAsync();
         }
 
@@ -29,6 +30,7 @@ namespace Easygym.Infrastructure.Repositories
             return await _context.WorkoutSessions
                 .Include(ws => ws.Workout!)
                     .ThenInclude(w => w.Sets)
+                        .ThenInclude(s => s.Exercise)
                 .FirstOrDefaultAsync(ws => ws.Id == id);
         }
 
@@ -37,6 +39,7 @@ namespace Easygym.Infrastructure.Repositories
             var query = _context.WorkoutSessions
                 .Include(ws => ws.Workout!)
                     .ThenInclude(w => w.Sets)
+                        .ThenInclude(s => s.Exercise)
                 .Where(ws => ws.TraineeId == traineeId)
                 .AsQueryable();
 

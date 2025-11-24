@@ -14,6 +14,7 @@ import {
   UserPlus,
   Mail,
   Users,
+  BookOpen,
 } from 'lucide-react';
 import clsx from 'clsx';
 
@@ -66,6 +67,11 @@ const Navbar = () => {
       to: routes.Workouts,
       label: 'Workouts',
       icon: <Dumbbell />,
+    },
+    {
+      to: routes.Exercises,
+      label: 'Exercises',
+      icon: <BookOpen />,
     },
     {
       to: routes.Invitations,

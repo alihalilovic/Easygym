@@ -1,9 +1,10 @@
 import { User } from '@/types/User';
+import { Exercise } from '@/types/Exercise';
 
 export interface Set {
   id: number;
-  name: string;
-  description?: string;
+  exerciseId: number;
+  exercise?: Exercise;
   repetitions: number;
   weight?: number;
 }

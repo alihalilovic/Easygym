@@ -20,6 +20,7 @@ namespace Easygym.Infrastructure.Repositories
         {
             return await _context.Workouts
             .Include(w => w.Sets)
+                .ThenInclude(s => s.Exercise)
             .Include(w => w.Trainer)
             .Where(w => w.TraineeId == traineeId)
             .ToListAsync();
@@ -29,6 +30,7 @@ namespace Easygym.Infrastructure.Repositories
         {
             return await _context.Workouts
             .Include(w => w.Sets)
+                .ThenInclude(s => s.Exercise)
             .Include(w => w.Trainer)
             .FirstOrDefaultAsync(w => w.Id == workoutId && w.TraineeId == traineeId) ?? throw new WorkoutNotFoundException();
         }
@@ -37,6 +39,7 @@ namespace Easygym.Infrastructure.Repositories
         {
             return await _context.Workouts
             .Include(w => w.Sets)
+                .ThenInclude(s => s.Exercise)
             .Include(w => w.Trainer)
             .FirstOrDefaultAsync(w => w.Id == workoutId) ?? throw new WorkoutNotFoundException();
         }
@@ -103,6 +106,7 @@ namespace Easygym.Infrastructure.Repositories
         {
             return await _context.Workouts
                 .Include(w => w.Sets)
+                    .ThenInclude(s => s.Exercise)
                 .Include(w => w.Trainee)
                 .Where(w => w.TrainerId == trainerId)
                 .ToListAsync();
