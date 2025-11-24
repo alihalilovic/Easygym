@@ -42,6 +42,12 @@ namespace Easygym.Application.Services
         {
             var currentUser = await _currentUserService.GetCurrentUserAsync();
 
+            // Don't allow toggling public status for clients
+            if (currentUser.Role == Role.Client && request.IsPublic)
+            {
+                throw new ValidationException("Clients cannot toggle public status for exercises");
+            }
+
             var exercise = new Exercise
             {
                 Name = request.Name,
@@ -49,7 +55,7 @@ namespace Easygym.Application.Services
                 MuscleGroup = request.MuscleGroup,
                 Instructions = request.Instructions,
                 CreatedById = currentUser.Id,
-                IsPublic = false // For now, all exercises are private
+                IsPublic = request.IsPublic
             };
 
             await _exerciseRepository.AddExerciseAsync(exercise);
@@ -93,18 +99,29 @@ namespace Easygym.Application.Services
             await _exerciseRepository.DeleteExerciseAsync(exerciseId);
         }
 
-        private void ValidateExerciseAccess(User currentUser, Exercise exercise)
+        private static void ValidateExerciseAccess(User currentUser, Exercise exercise)
         {
-            // For now, clients can only access their own exercises
-            // In the future, trainers will be able to share exercises with clients
-            if (currentUser.Role == Role.Client && exercise.CreatedById != currentUser.Id && !exercise.IsPublic)
+            // Users can always access their own exercises
+            if (exercise.CreatedById == currentUser.Id)
             {
+                return;
+            }
+
+            // If exercise is not owned by user, check if they have access
+            if (currentUser.Role == Role.Client)
+            {
+                if (currentUser.Client?.TrainerId != null &&
+                    exercise.CreatedById == currentUser.Client.TrainerId &&
+                    exercise.IsPublic)
+                {
+                    return;
+                }
                 throw new ForbiddenAccessException();
             }
 
-            // Trainers can only access their own exercises (for now)
-            if (currentUser.Role == Role.Trainer && exercise.CreatedById != currentUser.Id && !exercise.IsPublic)
+            if (currentUser.Role == Role.Trainer)
             {
+                // Trainers can only access their own exercises
                 throw new ForbiddenAccessException();
             }
         }

@@ -18,8 +18,29 @@ namespace Easygym.Infrastructure.Repositories
 
         public async Task<List<Exercise>> GetExercisesForUserAsync(int userId)
         {
-            return await _context.Exercises
-                .Where(e => e.CreatedById == userId || e.IsPublic)
+            // Get the user to check their role
+            var user = await _context.Users
+                .Include(u => u.Client)
+                .FirstOrDefaultAsync(u => u.Id == userId);
+
+            if (user == null)
+            {
+                return [];
+            }
+
+            // Base query: user's own exercises
+            var query = _context.Exercises.Where(e => e.CreatedById == userId);
+
+            // If user is a client with a trainer, also show trainer's public exercises
+            if (user.Client?.TrainerId != null)
+            {
+                var trainerId = user.Client.TrainerId.Value;
+                query = query.Union(
+                    _context.Exercises.Where(e => e.CreatedById == trainerId && e.IsPublic)
+                );
+            }
+
+            return await query
                 .OrderByDescending(e => e.CreatedAt)
                 .ToListAsync();
         }
@@ -38,13 +59,7 @@ namespace Easygym.Infrastructure.Repositories
 
         public async Task<Exercise> UpdateExerciseAsync(int exerciseId, UpdateExerciseRequest request)
         {
-            var exercise = await GetExerciseAsync(exerciseId);
-
-            if (exercise == null)
-            {
-                throw new ExerciseNotFoundException();
-            }
-
+            var exercise = await GetExerciseAsync(exerciseId) ?? throw new ExerciseNotFoundException();
             if (request.Name != null)
             {
                 exercise.Name = request.Name;
@@ -65,6 +80,11 @@ namespace Easygym.Infrastructure.Repositories
                 exercise.Instructions = request.Instructions;
             }
 
+            if (request.IsPublic.HasValue)
+            {
+                exercise.IsPublic = request.IsPublic.Value;
+            }
+
             _context.Exercises.Update(exercise);
             await _context.SaveChangesAsync();
 
@@ -73,13 +93,7 @@ namespace Easygym.Infrastructure.Repositories
 
         public async Task DeleteExerciseAsync(int exerciseId)
         {
-            var exercise = await GetExerciseAsync(exerciseId);
-
-            if (exercise == null)
-            {
-                throw new ExerciseNotFoundException();
-            }
-
+            var exercise = await GetExerciseAsync(exerciseId) ?? throw new ExerciseNotFoundException();
             _context.Exercises.Remove(exercise);
             await _context.SaveChangesAsync();
         }

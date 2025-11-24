@@ -16,6 +16,10 @@ namespace Easygym.Domain.Entities
         public required string Role { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.Now;
 
+        // Navigation properties
+        public Client? Client { get; set; }
+        public Trainer? Trainer { get; set; }
+
         // Parameterless constructor for deserialization
         public User() { }
 
