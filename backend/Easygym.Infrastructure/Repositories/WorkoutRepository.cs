@@ -71,8 +71,14 @@ namespace Easygym.Infrastructure.Repositories
                     _context.Sets.Remove(set);
                 }
 
-                foreach (var newSet in workout.Sets)
+                foreach (var setDto in workout.Sets)
                 {
+                    var newSet = new Set
+                    {
+                        ExerciseId = setDto.ExerciseId,
+                        Repetitions = setDto.Repetitions,
+                        Weight = setDto.Weight
+                    };
                     existingWorkout.Sets.Add(newSet);
                 }
             }

@@ -33,13 +33,13 @@ export interface CreateWorkoutRequest {
   name?: string;
   description?: string;
   traineeId: number;
-  sets: Omit<Set, 'id'>[];
+  sets: Omit<Set, 'id' | 'exercise'>[];
   restTimeSeconds?: number;
 }
 
 export interface UpdateWorkoutRequest {
   name?: string;
   description?: string;
-  sets?: Set[] | Omit<Set, 'id'>[];
+  sets?: Set[] | Omit<Set, 'id' | 'exercise'>[];
   restTimeSeconds?: number;
 }

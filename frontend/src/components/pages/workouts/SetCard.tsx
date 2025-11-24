@@ -1,19 +1,17 @@
 import { Set } from '@/types/Workout';
 import { Exercise } from '@/types/Exercise';
 import { Button } from '@/components/ui/button';
-import {
-  Clipboard,
-  Dumbbell,
-  XCircleIcon,
-} from 'lucide-react';
+import { Clipboard, Dumbbell, XCircleIcon } from 'lucide-react';
 
 interface SetCardProps {
-  set: Omit<Set, 'id'>;
+  set: Omit<Set, 'id'> | Omit<Set, 'id' | 'exercise'>;
   index: number;
   exercises: Exercise[];
-  setDisplaySetDetails: (set: Omit<Set, 'id'>) => void;
+  setDisplaySetDetails: (
+    set: Omit<Set, 'id'> | Omit<Set, 'id' | 'exercise'>,
+  ) => void;
   duplicateSet: (
-    set: Omit<Set, 'id'>,
+    set: Omit<Set, 'id'> | Omit<Set, 'id' | 'exercise'>,
     index: number,
     e: React.MouseEvent<HTMLButtonElement>,
   ) => void;

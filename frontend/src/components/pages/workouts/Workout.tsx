@@ -72,10 +72,10 @@ const WorkoutForm = () => {
   const updateWorkout = useUpdateWorkout();
   const deleteWorkout = useDeleteWorkout();
 
-  const [sets, setSets] = useState<Omit<Set, 'id'>[] | Set[]>([]);
+  const [sets, setSets] = useState<Omit<Set, 'id' | 'exercise'>[] | Set[]>([]);
   const [dialogSetDetails, setDialogSetDetails] = useState<Omit<
     Set,
-    'id'
+    'id' | 'exercise'
   > | null>(null);
   const [selectedTraineeId, setSelectedTraineeId] = useState<
     number | undefined
@@ -121,7 +121,7 @@ const WorkoutForm = () => {
   const setForm = useForm<z.infer<typeof setFormSchema>>({
     resolver: zodResolver(setFormSchema),
     defaultValues: {
-      exerciseId: 0,
+      exerciseId: undefined,
       repetitions: 1,
       weight: 0,
     },
@@ -210,20 +210,20 @@ const WorkoutForm = () => {
     navigate(routes.Workouts);
   };
 
-  const handleSetDisplaySetDetails = (set: Omit<Set, 'id'>) => {
+  const handleSetDisplaySetDetails = (set: Omit<Set, 'id' | 'exercise'>) => {
     setDialogSetDetails(set);
     setDisplayDetailsRef.current?.click();
   };
 
   const handleDuplicateSet = (
-    set: Omit<Set, 'id'> | Set,
+    set: Omit<Set, 'id' | 'exercise'> | Set,
     index: number,
     e: React.MouseEvent<HTMLButtonElement>,
   ) => {
     e.preventDefault();
     e.stopPropagation();
 
-    const newSet: Omit<Set, 'id'> = {
+    const newSet: Omit<Set, 'id' | 'exercise'> = {
       exerciseId: set.exerciseId,
       repetitions: set.repetitions,
       weight: set.weight,
@@ -235,259 +235,333 @@ const WorkoutForm = () => {
   };
 
   return (
-    <div className="space-y-8 mx-auto">
-      <div>
-        <h2 className="text-2xl font-bold mb-4 pb-2 border-b border-solid">
-          {formNameText}
-        </h2>
-        {isUserTrainer && !workoutId && myClients.length > 0 && (
-          <div className="mb-4">
-            <label className="text-sm font-medium mb-2 block">
-              Assign to Client
-            </label>
-            <Select
-              value={selectedTraineeId?.toString()}
-              onValueChange={(value) => setSelectedTraineeId(parseInt(value))}
+    <div className="space-y-6 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
+      <div className="bg-card rounded-lg border shadow-sm">
+        <div className="p-6 border-b">
+          <h2 className="text-3xl font-bold tracking-tight">{formNameText}</h2>
+          <p className="text-muted-foreground mt-1">
+            {workoutId
+              ? 'Modify your workout details and sets'
+              : 'Create a new workout program with custom exercises'}
+          </p>
+        </div>
+
+        <div className="p-6">
+          {isUserTrainer && !workoutId && myClients.length > 0 && (
+            <div className="mb-6 p-4 bg-accent/50 rounded-lg border">
+              <label className="text-sm font-semibold mb-3 block">
+                Assign to Client
+              </label>
+              <Select
+                value={selectedTraineeId?.toString()}
+                onValueChange={(value) => setSelectedTraineeId(parseInt(value))}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Choose a client" />
+                </SelectTrigger>
+                <SelectContent>
+                  {myClients.map((clientConnection) => (
+                    <SelectItem
+                      key={clientConnection.client.id}
+                      value={clientConnection.client.id.toString()}
+                    >
+                      {clientConnection.client.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
+          <Form {...workoutForm}>
+            <FormWrapper
+              className="w-full space-y-6"
+              onSubmit={workoutForm.handleSubmit(onSubmit)}
             >
-              <SelectTrigger className="w-full max-w-md">
-                <SelectValue placeholder="Choose a client" />
-              </SelectTrigger>
-              <SelectContent>
-                {myClients.map((clientConnection) => (
-                  <SelectItem
-                    key={clientConnection.client.id}
-                    value={clientConnection.client.id.toString()}
-                  >
-                    {clientConnection.client.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        )}
-        <Form {...workoutForm}>
-          <FormWrapper
-            className="w-full"
-            onSubmit={workoutForm.handleSubmit(onSubmit)}
-          >
-            <FormField
-              control={workoutForm.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem fullWidth>
-                  <FormLabel>Workout Name</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Enter workout name..." {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={workoutForm.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem fullWidth>
-                  <FormLabel>Description</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="Describe your workout..."
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={workoutForm.control}
-              name="restTimeMinutes"
-              render={({ field }) => (
-                <FormItem fullWidth>
-                  <FormLabel>Rest Time (minutes)</FormLabel>
-                  <FormControl>
-                    <div className="flex flex-col gap-1 max-w-[50%]">
-                      <Input
-                        type="number"
-                        min={0}
-                        step={0.5}
-                        max={maxRestTimeMinutes}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <FormField
+                  control={workoutForm.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-base font-semibold">
+                        Workout Name
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="e.g., Upper Body Strength"
+                          className="h-11"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={workoutForm.control}
+                  name="restTimeMinutes"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-base font-semibold">
+                        Rest Time (minutes)
+                      </FormLabel>
+                      <FormControl>
+                        <div className="space-y-2">
+                          <Input
+                            type="number"
+                            min={0}
+                            step={0.5}
+                            max={maxRestTimeMinutes}
+                            className="h-11"
+                            {...field}
+                          />
+                          <div className="flex items-center gap-2">
+                            <Progress
+                              value={field.value * maxRestTimeMinutes}
+                              className="flex-1"
+                            />
+                            <span className="text-sm text-muted-foreground min-w-[3rem] text-right">
+                              {field.value} min
+                            </span>
+                          </div>
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <FormField
+                control={workoutForm.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem fullWidth>
+                    <FormLabel className="text-base font-semibold">
+                      Description
+                    </FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Describe the workout goals, intensity, or any special notes..."
+                        className="min-h-[100px]"
                         {...field}
                       />
-                      <div className="w-full">
-                        <Progress value={field.value * maxRestTimeMinutes} />
-                      </div>
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <div className="mt-8">
-              <h3 className="text-xl font-bold">Sets</h3>
-              {sets.length > 0 && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 mb-6 mt-4">
-                  {sets.map((set, index) => (
-                    <SetCard
-                      key={index}
-                      set={set}
-                      index={index}
-                      exercises={exercises}
-                      setDisplaySetDetails={handleSetDisplaySetDetails}
-                      duplicateSet={handleDuplicateSet}
-                      removeSet={removeSet}
-                    />
-                  ))}
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <div className="border-t pt-6">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <h3 className="text-xl font-bold">Exercise Sets</h3>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {sets.length === 0
+                        ? 'Add exercises to your workout'
+                        : `${sets.length} set${
+                            sets.length !== 1 ? 's' : ''
+                          } added`}
+                    </p>
+                  </div>
                 </div>
-              )}
-            </div>
-            <div className="grid grid-cols-2 gap-4 w-[50%]">
-              <FormField
-                control={setForm.control}
-                name="exerciseId"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Exercise</FormLabel>
-                    <Select
-                      value={field.value?.toString()}
-                      onValueChange={(value) => field.onChange(parseInt(value))}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select an exercise" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {exercises.map((exercise) => (
-                          <SelectItem
-                            key={exercise.id}
-                            value={exercise.id.toString()}
+
+                {sets.length > 0 && (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 mb-6">
+                    {sets.map((set, index) => (
+                      <SetCard
+                        key={index}
+                        set={set}
+                        index={index}
+                        exercises={exercises}
+                        setDisplaySetDetails={handleSetDisplaySetDetails}
+                        duplicateSet={handleDuplicateSet}
+                        removeSet={removeSet}
+                      />
+                    ))}
+                  </div>
+                )}
+
+                <div className="bg-muted/50 rounded-lg p-4 border-2 border-dashed">
+                  <h4 className="font-semibold mb-4 text-sm uppercase tracking-wide text-muted-foreground">
+                    Add New Set
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <FormField
+                      control={setForm.control}
+                      name="exerciseId"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Exercise</FormLabel>
+                          <Select
+                            value={field.value?.toString()}
+                            onValueChange={(value) =>
+                              field.onChange(parseInt(value))
+                            }
                           >
-                            {exercise.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={setForm.control}
-                name="repetitions"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Repetitions</FormLabel>
-                    <FormControl>
-                      <Input type="number" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={setForm.control}
-                name="weight"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Weight (kg, optional)</FormLabel>
-                    <FormControl>
-                      <Input type="number" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-            {exercises.length === 0 && (
-              <p className="text-sm text-muted-foreground mt-2">
-                No exercises available. Please create exercises first by visiting
-                the Exercises page.
-              </p>
-            )}
-            <Button
-              onClick={handleAddSet}
-              variant="outline"
-              className="mt-2"
-              disabled={exercises.length === 0}
-            >
-              <Plus className="h-4 w-4 mr-2" /> Add Set
-            </Button>
-            <div className="flex gap-2">
-              <Button type="submit" className="mt-6">
-                {workoutId ? 'Update' : 'Create'}
-              </Button>
-              {!!workoutId && (
-                <Dialog>
-                  <Button variant="destructive" className="mt-6" asChild>
-                    <DialogTrigger>Delete</DialogTrigger>
-                  </Button>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>Are you absolutely sure?</DialogTitle>
-                      <DialogDescription>
-                        This action cannot be undone. This will permanently
-                        delete your workout program and its related data from
-                        our servers.
-                      </DialogDescription>
-                    </DialogHeader>
-                    <DialogFooter>
-                      <Button
-                        variant="destructive"
-                        onClick={handleDeleteWorkout}
-                      >
-                        Delete Workout
-                      </Button>
-                      <DialogClose asChild>
-                        <Button variant="outline">Cancel</Button>
-                      </DialogClose>
-                    </DialogFooter>
-                  </DialogContent>
-                </Dialog>
-              )}
-            </div>
-            <Dialog>
-              <Button variant="destructive" className="mt-6" asChild>
-                <DialogTrigger
-                  className="invisible"
-                  ref={setDisplayDetailsRef}
-                />
-              </Button>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>
-                    Set Details -{' '}
-                    {exercises.find((ex) => ex.id === dialogSetDetails?.exerciseId)
-                      ?.name || 'Unknown Exercise'}
-                  </DialogTitle>
-                  <DialogDescription className="flex flex-col gap-2 break-all">
-                    <span>
-                      <span className="font-bold">Exercise:</span>{' '}
-                      {exercises.find((ex) => ex.id === dialogSetDetails?.exerciseId)
-                        ?.name || 'Unknown'}
-                    </span>
-                    <span>
-                      <span className="font-bold">Repetitions:</span>{' '}
-                      {dialogSetDetails?.repetitions}
-                    </span>
-                    {!!dialogSetDetails?.weight &&
-                      dialogSetDetails.weight > 0 && (
-                        <span>
-                          <span className="font-bold">Weight:</span>{' '}
-                          {dialogSetDetails.weight} kg
-                        </span>
+                            <FormControl>
+                              <SelectTrigger className="h-11">
+                                <SelectValue placeholder="Select exercise" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {exercises.map((exercise) => (
+                                <SelectItem
+                                  key={exercise.id}
+                                  value={exercise.id.toString()}
+                                >
+                                  {exercise.name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
                       )}
-                  </DialogDescription>
-                </DialogHeader>
-                <DialogFooter>
-                  <DialogClose asChild>
-                    <Button variant="outline">Cancel</Button>
-                  </DialogClose>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-          </FormWrapper>
-        </Form>
+                    />
+                    <FormField
+                      control={setForm.control}
+                      name="repetitions"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Repetitions</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              placeholder="12"
+                              className="h-11"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={setForm.control}
+                      name="weight"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Weight (kg)</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              placeholder="Optional"
+                              className="h-11"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  {exercises.length === 0 ? (
+                    <div className="mt-4 p-3 bg-background rounded border">
+                      <p className="text-sm text-muted-foreground">
+                        No exercises available. Please create exercises first by
+                        visiting the Exercises page.
+                      </p>
+                    </div>
+                  ) : (
+                    <Button
+                      onClick={handleAddSet}
+                      variant="secondary"
+                      className="mt-4 w-full h-11"
+                      disabled={exercises.length === 0}
+                    >
+                      <Plus className="h-4 w-4 mr-2" /> Add Set to Workout
+                    </Button>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex gap-3 pt-6 border-t">
+                <Button type="submit" className="h-11 px-8" size="lg">
+                  {workoutId ? 'Update Workout' : 'Create Workout'}
+                </Button>
+                {!!workoutId && (
+                  <Dialog>
+                    <Button
+                      variant="destructive"
+                      className="h-11"
+                      size="lg"
+                      asChild
+                    >
+                      <DialogTrigger>Delete Workout</DialogTrigger>
+                    </Button>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Are you absolutely sure?</DialogTitle>
+                        <DialogDescription>
+                          This action cannot be undone. This will permanently
+                          delete your workout program and its related data from
+                          our servers.
+                        </DialogDescription>
+                      </DialogHeader>
+                      <DialogFooter>
+                        <DialogClose asChild>
+                          <Button variant="outline">Cancel</Button>
+                        </DialogClose>
+                        <Button
+                          variant="destructive"
+                          onClick={handleDeleteWorkout}
+                        >
+                          Delete Workout
+                        </Button>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
+                )}
+              </div>
+              <Dialog>
+                <Button variant="destructive" className="mt-6" asChild>
+                  <DialogTrigger
+                    className="invisible"
+                    ref={setDisplayDetailsRef}
+                  />
+                </Button>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>
+                      Set Details -{' '}
+                      {exercises.find(
+                        (ex) => ex.id === dialogSetDetails?.exerciseId,
+                      )?.name || 'Unknown Exercise'}
+                    </DialogTitle>
+                    <DialogDescription className="flex flex-col gap-2 break-all">
+                      <span>
+                        <span className="font-bold">Exercise:</span>{' '}
+                        {exercises.find(
+                          (ex) => ex.id === dialogSetDetails?.exerciseId,
+                        )?.name || 'Unknown'}
+                      </span>
+                      <span>
+                        <span className="font-bold">Repetitions:</span>{' '}
+                        {dialogSetDetails?.repetitions}
+                      </span>
+                      {!!dialogSetDetails?.weight &&
+                        dialogSetDetails.weight > 0 && (
+                          <span>
+                            <span className="font-bold">Weight:</span>{' '}
+                            {dialogSetDetails.weight} kg
+                          </span>
+                        )}
+                    </DialogDescription>
+                  </DialogHeader>
+                  <DialogFooter>
+                    <DialogClose asChild>
+                      <Button variant="outline">Cancel</Button>
+                    </DialogClose>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+            </FormWrapper>
+          </Form>
+        </div>
       </div>
     </div>
   );
