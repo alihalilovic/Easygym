@@ -53,18 +53,6 @@ const Exercises = () => {
       className: 'max-w-[300px] truncate',
     },
     {
-      key: 'category',
-      label: 'Category',
-      sortable: true,
-      render: (exercise) =>
-        exercise.category ? (
-          <Badge variant="secondary">{exercise.category}</Badge>
-        ) : (
-          '-'
-        ),
-      className: 'w-[150px]',
-    },
-    {
       key: 'muscleGroup',
       label: 'Muscle Group',
       sortable: true,

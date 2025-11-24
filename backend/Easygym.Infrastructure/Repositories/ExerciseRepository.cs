@@ -55,11 +55,6 @@ namespace Easygym.Infrastructure.Repositories
                 exercise.Description = request.Description;
             }
 
-            if (request.Category != null)
-            {
-                exercise.Category = request.Category;
-            }
-
             if (request.MuscleGroup != null)
             {
                 exercise.MuscleGroup = request.MuscleGroup;

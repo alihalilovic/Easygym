@@ -46,7 +46,6 @@ namespace Easygym.Application.Services
             {
                 Name = request.Name,
                 Description = request.Description,
-                Category = request.Category,
                 MuscleGroup = request.MuscleGroup,
                 Instructions = request.Instructions,
                 CreatedById = currentUser.Id,

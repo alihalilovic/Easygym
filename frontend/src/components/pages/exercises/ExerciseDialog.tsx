@@ -28,7 +28,6 @@ import { toast } from 'sonner';
 const exerciseSchema = z.object({
   name: z.string().min(1, 'Name is required').max(100, 'Name is too long'),
   description: z.string().max(1000, 'Description is too long').optional(),
-  category: z.string().max(50, 'Category is too long').optional(),
   muscleGroup: z.string().max(50, 'Muscle group is too long').optional(),
   instructions: z.string().max(2000, 'Instructions are too long').optional(),
 });
@@ -56,7 +55,6 @@ const ExerciseDialog = ({
     defaultValues: {
       name: '',
       description: '',
-      category: '',
       muscleGroup: '',
       instructions: '',
     },
@@ -67,7 +65,6 @@ const ExerciseDialog = ({
     form.reset({
       name: isEditMode ? exercise.name : '',
       description: isEditMode ? exercise.description : '',
-      category: isEditMode ? exercise.category : '',
       muscleGroup: isEditMode ? exercise.muscleGroup : '',
       instructions: isEditMode ? exercise.instructions : '',
     });
@@ -139,34 +136,19 @@ const ExerciseDialog = ({
                 </FormItem>
               )}
             />
-            <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="category"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Category</FormLabel>
-                    <FormControl>
-                      <Input placeholder="e.g., Strength" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="muscleGroup"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Muscle Group</FormLabel>
-                    <FormControl>
-                      <Input placeholder="e.g., Biceps" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
+            <FormField
+              control={form.control}
+              name="muscleGroup"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Muscle Group</FormLabel>
+                  <FormControl>
+                    <Input placeholder="e.g., Biceps" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <FormField
               control={form.control}
               name="instructions"

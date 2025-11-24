@@ -4,7 +4,6 @@ export interface Exercise {
   id: number;
   name: string;
   description?: string;
-  category?: string;
   muscleGroup?: string;
   instructions?: string;
   createdById: number;
@@ -16,7 +15,6 @@ export interface Exercise {
 export interface CreateExerciseRequest {
   name: string;
   description?: string;
-  category?: string;
   muscleGroup?: string;
   instructions?: string;
 }
@@ -24,7 +22,6 @@ export interface CreateExerciseRequest {
 export interface UpdateExerciseRequest {
   name?: string;
   description?: string;
-  category?: string;
   muscleGroup?: string;
   instructions?: string;
 }

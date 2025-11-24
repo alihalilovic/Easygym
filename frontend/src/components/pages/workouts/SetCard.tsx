@@ -59,13 +59,6 @@ const SetCard = ({
           </div>
         </div>
 
-        {exercise?.category && (
-          <div className="truncate">
-            <span className="text-sm truncate text-gray-500">
-              {exercise.category}
-            </span>
-          </div>
-        )}
         <div className="flex gap-2 justify-between">
           <p>{set.repetitions} Reps</p>
           {!!set.weight && set.weight > 0 && (
