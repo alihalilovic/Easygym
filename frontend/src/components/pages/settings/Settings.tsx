@@ -1,10 +1,12 @@
 import ExercisesImporter from '@/components/pages/settings/sections/ExercisesImporter';
+import ExercisesExporter from '@/components/pages/settings/sections/ExercisesExporter';
 import { useState } from 'react';
 import Profile from '../user/Profile';
 import { Button } from '@/components/ui/button';
 
 enum SettingsSection {
   Importer = 'importer',
+  Exporter = 'exporter',
   Profile = 'profile',
 }
 
@@ -25,6 +27,12 @@ const settingsSections: {
     description: 'Import exercises from CSV or JSON files.',
     component: <ExercisesImporter />,
     key: SettingsSection.Importer,
+  },
+  {
+    title: 'Exporter',
+    description: 'Export exercises to CSV or JSON files.',
+    component: <ExercisesExporter />,
+    key: SettingsSection.Exporter,
   },
 ];
 
