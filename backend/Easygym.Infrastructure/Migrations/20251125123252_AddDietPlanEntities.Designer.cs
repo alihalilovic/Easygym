@@ -3,6 +3,7 @@ using System;
 using Easygym.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Easygym.Infrastructure.Migrations
 {
     [DbContext(typeof(EasygymDbContext))]
-    partial class EasygymDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251125123252_AddDietPlanEntities")]
+    partial class AddDietPlanEntities
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.3");
@@ -51,49 +54,30 @@ namespace Easygym.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<int>("ClientId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("TrainerId")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("TrainerId");
-
-                    b.ToTable("DietPlans");
-                });
-
-            modelBuilder.Entity("Easygym.Domain.Entities.DietPlanAssignment", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<DateTime>("AssignedAt")
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("ClientId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("DietPlanId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("IsActive")
+                    b.Property<int?>("TrainerId")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
                     b.HasIndex("ClientId");
 
-                    b.HasIndex("DietPlanId");
+                    b.HasIndex("TrainerId");
 
-                    b.ToTable("DietPlanAssignments");
+                    b.ToTable("DietPlans");
                 });
 
             modelBuilder.Entity("Easygym.Domain.Entities.DietPlanDay", b =>
@@ -403,32 +387,19 @@ namespace Easygym.Infrastructure.Migrations
 
             modelBuilder.Entity("Easygym.Domain.Entities.DietPlan", b =>
                 {
-                    b.HasOne("Easygym.Domain.Entities.User", "Trainer")
-                        .WithMany()
-                        .HasForeignKey("TrainerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Trainer");
-                });
-
-            modelBuilder.Entity("Easygym.Domain.Entities.DietPlanAssignment", b =>
-                {
                     b.HasOne("Easygym.Domain.Entities.User", "Client")
                         .WithMany()
                         .HasForeignKey("ClientId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Easygym.Domain.Entities.DietPlan", "DietPlan")
-                        .WithMany("Assignments")
-                        .HasForeignKey("DietPlanId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.HasOne("Easygym.Domain.Entities.User", "Trainer")
+                        .WithMany()
+                        .HasForeignKey("TrainerId");
 
                     b.Navigation("Client");
 
-                    b.Navigation("DietPlan");
+                    b.Navigation("Trainer");
                 });
 
             modelBuilder.Entity("Easygym.Domain.Entities.DietPlanDay", b =>
@@ -556,8 +527,6 @@ namespace Easygym.Infrastructure.Migrations
 
             modelBuilder.Entity("Easygym.Domain.Entities.DietPlan", b =>
                 {
-                    b.Navigation("Assignments");
-
                     b.Navigation("Days");
                 });
 

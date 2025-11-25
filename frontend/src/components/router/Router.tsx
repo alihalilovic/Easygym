@@ -18,6 +18,8 @@ import MyTrainer from '@/components/pages/user/MyTrainer';
 import MyClients from '@/components/pages/trainer/MyClients';
 import Exercises from '@/components/pages/exercises/Exercises';
 import Settings from '@/components/pages/settings/Settings';
+import DietPlans from '@/components/pages/diet-plans/DietPlans';
+import DietPlan from '@/components/pages/diet-plans/DietPlan';
 
 const Router = () => {
   return (
@@ -42,6 +44,14 @@ const Router = () => {
             </Route>
             <Route path={routes.Exercises} element={<Exercises />} />
             <Route path={routes.Settings} element={<Settings />} />
+            <Route path={routes.DietPlans} element={<DietPlans />} />
+            <Route path="/diet-plan/:id" element={<DietPlan />} />
+            <Route element={<ProtectedTrainerRoute />}>
+              <Route path="/diet-plan">
+                <Route path="create" element={<DietPlan />} />
+                <Route path=":id/edit" element={<DietPlan />} />
+              </Route>
+            </Route>
             <Route element={<ProtectedClientRoute />}>
               <Route
                 path={routes.WorkoutSessions}

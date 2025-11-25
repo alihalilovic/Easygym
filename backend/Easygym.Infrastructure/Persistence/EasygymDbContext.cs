@@ -68,5 +68,9 @@ namespace Easygym.Infrastructure.Persistence
         public DbSet<Client> Clients { get; set; }
         public DbSet<Admin> Admins { get; set; }
         public DbSet<TrainerClientHistory> TrainerClientHistories { get; set; }
+        public DbSet<DietPlan> DietPlans { get; set; }
+        public DbSet<DietPlanDay> DietPlanDays { get; set; }
+        public DbSet<Meal> Meals { get; set; }
+        public DbSet<DietPlanAssignment> DietPlanAssignments { get; set; }
     }
 }

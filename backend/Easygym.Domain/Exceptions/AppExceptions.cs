@@ -82,6 +82,16 @@ namespace Easygym.Domain.Exceptions
         public ExerciseInUseException() : base("Exercise is currently in use and cannot be deleted") { }
     }
 
+    public class DietPlanNotFoundException : AppException
+    {
+        public DietPlanNotFoundException() : base("Diet plan not found") { }
+    }
+
+    public class DietPlansNotFoundException : AppException
+    {
+        public DietPlansNotFoundException() : base("Diet plans not found") { }
+    }
+
     // For general validation errors
     public class ValidationException : AppException
     {
