@@ -15,6 +15,7 @@ import {
   Mail,
   Users,
   BookOpen,
+  Settings as SettingsIcon,
 } from 'lucide-react';
 import clsx from 'clsx';
 
@@ -51,11 +52,6 @@ const Navbar = () => {
 
   const authLinks: NavbarLink[] = [
     {
-      to: routes.Profile,
-      label: 'Profile',
-      icon: <User />,
-    },
-    {
       to: routes.Workouts,
       label: 'Workouts',
       icon: <Dumbbell />,
@@ -69,6 +65,16 @@ const Navbar = () => {
       to: routes.Invitations,
       label: 'Invitations',
       icon: <Mail />,
+    },
+    {
+      to: routes.Profile,
+      label: 'Profile',
+      icon: <User />,
+    },
+    {
+      to: routes.Settings,
+      label: 'Settings',
+      icon: <SettingsIcon />,
     },
   ];
 
@@ -95,9 +101,9 @@ const Navbar = () => {
 
   const allLinks: NavbarLink[] = [
     ...(!userId ? nonAuthLinks : []),
-    ...(userId ? authLinks : []),
     ...(isUserClient ? clientSpecificLinks : []),
     ...(isUserTrainer ? trainerSpecificLinks : []),
+    ...(userId ? authLinks : []),
     ...(userId
       ? [
           {

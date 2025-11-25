@@ -1,4 +1,3 @@
-using Easygym.Domain.Constants;
 using Easygym.Domain.Entities;
 using Easygym.Domain.Exceptions;
 using Easygym.Domain.Interfaces;

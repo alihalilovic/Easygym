@@ -18,4 +18,5 @@ export const routes = {
   Invitations: '/invitations',
   MyTrainer: '/my-trainer',
   MyClients: '/my-clients',
+  Settings: '/settings',
 };

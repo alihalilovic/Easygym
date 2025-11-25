@@ -4,7 +4,7 @@ const Profile = () => {
   const { user } = useAuth();
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen-content text-2xl">
+    <div className="flex flex-col items-center justify-center h-screen-content text-2xl w-full">
       {user?.name && <p>Name: {user?.name}</p>}
       {user?.email && <p>Email: {user?.email}</p>}
       {user?.role && <p>Role: {user?.role}</p>}
