@@ -16,6 +16,7 @@ import {
   Users,
   BookOpen,
   Settings as SettingsIcon,
+  UtensilsCrossed,
 } from 'lucide-react';
 import clsx from 'clsx';
 
@@ -55,6 +56,11 @@ const Navbar = () => {
       to: routes.Workouts,
       label: 'Workouts',
       icon: <Dumbbell />,
+    },
+    {
+      to: routes.DietPlans,
+      label: 'Diet Plans',
+      icon: <UtensilsCrossed />,
     },
     {
       to: routes.Exercises,
