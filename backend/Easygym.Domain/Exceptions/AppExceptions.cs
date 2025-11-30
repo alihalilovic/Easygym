@@ -92,6 +92,31 @@ namespace Easygym.Domain.Exceptions
         public DietPlansNotFoundException() : base("Diet plans not found") { }
     }
 
+    public class MealLogNotFoundException : AppException
+    {
+        public MealLogNotFoundException() : base("Meal log not found") { }
+    }
+
+    public class NoActiveDietPlanException : AppException
+    {
+        public NoActiveDietPlanException() : base("Client has no active diet plan assignment") { }
+    }
+
+    public class MealNotInDietPlanException : AppException
+    {
+        public MealNotInDietPlanException() : base("Meal is not part of the active diet plan for this day") { }
+    }
+
+    public class MealAlreadyLoggedException : AppException
+    {
+        public MealAlreadyLoggedException() : base("Meal is already logged for this date") { }
+    }
+
+    public class InvalidLogDateException : AppException
+    {
+        public InvalidLogDateException(string message = "Invalid log date") : base(message) { }
+    }
+
     // For general validation errors
     public class ValidationException : AppException
     {
