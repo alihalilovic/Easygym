@@ -57,6 +57,12 @@ namespace Easygym.Infrastructure.Persistence
                 .HasForeignKey(s => s.ExerciseId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            // Configure DietPlanDay-Meal relationship
+            modelBuilder.Entity<DietPlanDay>()
+                .HasMany(d => d.Meals)
+                .WithOne()
+                .OnDelete(DeleteBehavior.Cascade);
+
             // Configure MealLog indexes for efficient querying
             modelBuilder.Entity<MealLog>()
                 .HasIndex(ml => new { ml.ClientId, ml.LogDate, ml.MealId });

@@ -74,9 +74,9 @@ namespace Easygym.Api.Controllers
 
         [HttpPut("{dietPlanId}/assignment/{clientId}/active")]
         [Authorize(Roles = Role.Trainer)]
-        public async Task<IActionResult> UpdateAssignmentActiveStatus(int dietPlanId, int clientId, [FromBody] bool isActive)
+        public async Task<IActionResult> UpdateAssignmentActiveStatus(int dietPlanId, int clientId, [FromBody] UpdateActiveStatusRequest request)
         {
-            await _dietPlanService.UpdateAssignmentActiveStatusAsync(dietPlanId, clientId, isActive);
+            await _dietPlanService.UpdateAssignmentActiveStatusAsync(dietPlanId, clientId, request.IsActive);
             return Ok();
         }
     }

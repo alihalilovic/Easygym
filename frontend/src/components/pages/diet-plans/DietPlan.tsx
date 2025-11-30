@@ -58,6 +58,7 @@ import {
   StickyNote,
 } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
+import { MealTrackingSection } from './MealTrackingSection';
 
 const DAYS_OF_WEEK = [
   'Monday',
@@ -135,6 +136,9 @@ const DietPlanForm = () => {
     meal: Omit<Meal, 'id'>;
     dayIndex: number;
   } | null>(null);
+  const [activeSection, setActiveSection] = useState<'plan' | 'tracking'>(
+    'plan',
+  );
 
   const mealForm = useForm<z.infer<typeof mealFormSchema>>({
     resolver: zodResolver(mealFormSchema),
@@ -287,169 +291,194 @@ const DietPlanForm = () => {
               ? 'Modify your diet plan details and meals'
               : 'Create a new diet plan with meals for each day of the week'}
           </p>
+
+          {isViewMode && (
+            <div className="flex gap-2 mt-4">
+              <Button
+                variant={activeSection === 'plan' ? 'default' : 'outline'}
+                onClick={() => setActiveSection('plan')}
+              >
+                Meal Plan
+              </Button>
+              <Button
+                variant={activeSection === 'tracking' ? 'default' : 'outline'}
+                onClick={() => setActiveSection('tracking')}
+              >
+                Track Meals
+              </Button>
+            </div>
+          )}
         </div>
 
         <div className="p-6">
-          <Form {...dietPlanForm}>
-            <FormWrapper
-              className="w-full space-y-6"
-              onSubmit={dietPlanForm.handleSubmit(onSubmit)}
-            >
-              <FormField
-                control={dietPlanForm.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-base font-semibold">
-                      Diet Plan Name
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="e.g., High Protein Meal Plan"
-                        className="h-11"
-                        disabled={isReadOnly}
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+          {isViewMode && activeSection === 'tracking' ? (
+            <MealTrackingSection readOnly={isUserTrainer} />
+          ) : (
+            <Form {...dietPlanForm}>
+              <FormWrapper
+                className="w-full space-y-6"
+                onSubmit={dietPlanForm.handleSubmit(onSubmit)}
+              >
+                <FormField
+                  control={dietPlanForm.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-base font-semibold">
+                        Diet Plan Name
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="e.g., High Protein Meal Plan"
+                          className="h-11"
+                          disabled={isReadOnly}
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-              <div className="space-y-4">
-                <h3 className="text-xl font-semibold">Weekly Meal Plan</h3>
-                {days.map((day, dayIndex) => (
-                  <div
-                    key={dayIndex}
-                    className="border rounded-lg p-4 bg-accent/20"
-                  >
-                    <div className="flex items-center justify-between mb-3">
-                      <h4 className="text-lg font-semibold">
-                        {DAYS_OF_WEEK[dayIndex]}
-                      </h4>
-                      {!isReadOnly && (
-                        <Button
-                          type="button"
-                          size="sm"
-                          onClick={() => handleAddMeal(dayIndex)}
-                          disabled={day.meals.length >= 10}
-                        >
-                          <Plus className="h-4 w-4 mr-1" />
-                          Add Meal
-                        </Button>
-                      )}
-                    </div>
-
-                    {day.meals.length === 0 ? (
-                      <p className="text-sm text-muted-foreground italic">
-                        {isReadOnly
-                          ? 'No meals for this day.'
-                          : 'No meals added yet. Add at least 1 meal.'}
-                      </p>
-                    ) : (
-                      <div className="space-y-2">
-                        {day.meals.map((meal, mealIndex) => (
-                          <div
-                            key={mealIndex}
-                            className="flex items-center justify-between bg-background rounded p-3 border hover:bg-accent/50 transition-colors cursor-pointer"
-                            onClick={() => setSelectedMeal({ meal, dayIndex })}
+                <div className="space-y-4">
+                  <h3 className="text-xl font-semibold">Weekly Meal Plan</h3>
+                  {days.map((day, dayIndex) => (
+                    <div
+                      key={dayIndex}
+                      className="border rounded-lg p-4 bg-accent/20"
+                    >
+                      <div className="flex items-center justify-between mb-3">
+                        <h4 className="text-lg font-semibold">
+                          {DAYS_OF_WEEK[dayIndex]}
+                        </h4>
+                        {!isReadOnly && (
+                          <Button
+                            type="button"
+                            size="sm"
+                            onClick={() => handleAddMeal(dayIndex)}
+                            disabled={day.meals.length >= 10}
                           >
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2">
-                                <span className="font-medium">{meal.name}</span>
-                                <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">
-                                  {meal.mealType}
-                                </span>
+                            <Plus className="h-4 w-4 mr-1" />
+                            Add Meal
+                          </Button>
+                        )}
+                      </div>
+
+                      {day.meals.length === 0 ? (
+                        <p className="text-sm text-muted-foreground italic">
+                          {isReadOnly
+                            ? 'No meals for this day.'
+                            : 'No meals added yet. Add at least 1 meal.'}
+                        </p>
+                      ) : (
+                        <div className="space-y-2">
+                          {day.meals.map((meal, mealIndex) => (
+                            <div
+                              key={mealIndex}
+                              className="flex items-center justify-between bg-background rounded p-3 border hover:bg-accent/50 transition-colors cursor-pointer"
+                              onClick={() =>
+                                setSelectedMeal({ meal, dayIndex })
+                              }
+                            >
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2">
+                                  <span className="font-medium">
+                                    {meal.name}
+                                  </span>
+                                  <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">
+                                    {meal.mealType}
+                                  </span>
+                                </div>
+                                {meal.description && (
+                                  <p className="text-sm text-muted-foreground mt-1 line-clamp-1">
+                                    {meal.description}
+                                  </p>
+                                )}
                               </div>
-                              {meal.description && (
-                                <p className="text-sm text-muted-foreground mt-1 line-clamp-1">
-                                  {meal.description}
-                                </p>
+                              {!isReadOnly && (
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    removeMeal(dayIndex, mealIndex);
+                                  }}
+                                >
+                                  <Trash2 className="h-4 w-4 text-destructive" />
+                                </Button>
                               )}
                             </div>
-                            {!isReadOnly && (
-                              <Button
-                                type="button"
-                                variant="ghost"
-                                size="icon"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  removeMeal(dayIndex, mealIndex);
-                                }}
-                              >
-                                <Trash2 className="h-4 w-4 text-destructive" />
-                              </Button>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
 
-              <div className="flex gap-4 pt-6 border-t">
-                {!isReadOnly && (
-                  <>
-                    <Button
-                      type="submit"
-                      disabled={
-                        createDietPlan.isPending || updateDietPlan.isPending
-                      }
-                    >
-                      {dietPlanId ? 'Update' : 'Create'} Diet Plan
-                    </Button>
+                <div className="flex gap-4 pt-6 border-t">
+                  {!isReadOnly && (
+                    <>
+                      <Button
+                        type="submit"
+                        disabled={
+                          createDietPlan.isPending || updateDietPlan.isPending
+                        }
+                      >
+                        {dietPlanId ? 'Update' : 'Create'} Diet Plan
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => navigate(routes.DietPlans)}
+                      >
+                        Cancel
+                      </Button>
+                      {dietPlanId && (
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <Button type="button" variant="destructive">
+                              Delete Diet Plan
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent>
+                            <DialogHeader>
+                              <DialogTitle>Delete Diet Plan</DialogTitle>
+                              <DialogDescription>
+                                Are you sure you want to delete this diet plan?
+                                This action cannot be undone.
+                              </DialogDescription>
+                            </DialogHeader>
+                            <DialogFooter>
+                              <DialogClose asChild>
+                                <Button variant="outline">Cancel</Button>
+                              </DialogClose>
+                              <Button
+                                variant="destructive"
+                                onClick={handleDeleteDietPlan}
+                                disabled={deleteDietPlan.isPending}
+                              >
+                                Delete
+                              </Button>
+                            </DialogFooter>
+                          </DialogContent>
+                        </Dialog>
+                      )}
+                    </>
+                  )}
+                  {isReadOnly && (
                     <Button
                       type="button"
                       variant="outline"
                       onClick={() => navigate(routes.DietPlans)}
                     >
-                      Cancel
+                      Back to Diet Plans
                     </Button>
-                    {dietPlanId && (
-                      <Dialog>
-                        <DialogTrigger asChild>
-                          <Button type="button" variant="destructive">
-                            Delete Diet Plan
-                          </Button>
-                        </DialogTrigger>
-                        <DialogContent>
-                          <DialogHeader>
-                            <DialogTitle>Delete Diet Plan</DialogTitle>
-                            <DialogDescription>
-                              Are you sure you want to delete this diet plan?
-                              This action cannot be undone.
-                            </DialogDescription>
-                          </DialogHeader>
-                          <DialogFooter>
-                            <DialogClose asChild>
-                              <Button variant="outline">Cancel</Button>
-                            </DialogClose>
-                            <Button
-                              variant="destructive"
-                              onClick={handleDeleteDietPlan}
-                              disabled={deleteDietPlan.isPending}
-                            >
-                              Delete
-                            </Button>
-                          </DialogFooter>
-                        </DialogContent>
-                      </Dialog>
-                    )}
-                  </>
-                )}
-                {isReadOnly && (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => navigate(routes.DietPlans)}
-                  >
-                    Back to Diet Plans
-                  </Button>
-                )}
-              </div>
-            </FormWrapper>
-          </Form>
+                  )}
+                </div>
+              </FormWrapper>
+            </Form>
+          )}
         </div>
       </div>
 
