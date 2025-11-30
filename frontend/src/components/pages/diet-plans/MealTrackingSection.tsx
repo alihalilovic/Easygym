@@ -45,7 +45,7 @@ export const MealTrackingSection = ({
           <span className="font-medium text-lg">
             {format(selectedDate, 'EEEE, MMMM d, yyyy')}
           </span>
-          {!isToday && (
+          {isToday && (
             <Button variant="ghost" size="sm" onClick={handleToday}>
               Today
             </Button>
