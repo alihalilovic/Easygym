@@ -36,6 +36,7 @@ builder.Services.AddScoped<IInteractionRepository, InteractionRepository>();
 builder.Services.AddScoped<ITrainerClientHistoryRepository, TrainerClientHistoryRepository>();
 builder.Services.AddScoped<IExerciseRepository, ExerciseRepository>();
 builder.Services.AddScoped<IDietPlanRepository, DietPlanRepository>();
+builder.Services.AddScoped<IMealLogRepository, MealLogRepository>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<JwtService>();
 builder.Services.AddScoped<CurrentUserService>();
@@ -47,6 +48,7 @@ builder.Services.AddScoped<ClientService>();
 builder.Services.AddScoped<TrainerService>();
 builder.Services.AddScoped<ExerciseService>();
 builder.Services.AddScoped<DietPlanService>();
+builder.Services.AddScoped<MealLogService>();
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("CorsPolicy", policy =>

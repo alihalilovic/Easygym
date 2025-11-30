@@ -48,7 +48,7 @@ export const requests = {
     instance.post<T>(url, body).then(responseBody),
   put: <T>(url: string, body: object) =>
     instance.put<T>(url, body).then(responseBody),
-  delete: <T>(url: string) => instance.delete<T>(url).then(responseBody),
+  delete: <T>(url: string, request?: object) => instance.delete<T>(url, { data: request ?? {} }).then(responseBody),
 };
 
 const api = {

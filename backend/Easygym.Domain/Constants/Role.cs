@@ -6,6 +6,6 @@ namespace Easygym.Domain.Constants
         public const string Trainer = "trainer";
         public const string Client = "client";
         public const string All = $"{Admin}, {Trainer}, {Client}";
-
+        public const string ClientAndTrainer = $"{Client},{Trainer}";
     }
 }
