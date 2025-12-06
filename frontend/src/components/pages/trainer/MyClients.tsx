@@ -1,5 +1,4 @@
 import {
-  User as UserIcon,
   Mail,
   Calendar,
   UserCheck,
@@ -9,6 +8,7 @@ import {
 import { Button } from '@/components/ui/button';
 import EmptyState from '@/components/ui/widgets/EmptyState';
 import ConnectionHistory from '@/components/ui/widgets/ConnectionHistory';
+import { Avatar } from '@/components/ui/Avatar';
 import { useMyClients, useRemoveClient, useMyClientHistory } from '@/hooks/useConnections';
 import { useNavigate } from 'react-router';
 import { routes } from '@/lib/constants';
@@ -84,9 +84,12 @@ const MyClients = () => {
             className="bg-card rounded-2xl p-6 shadow-sm border hover:shadow-md transition-shadow"
           >
             <div className="flex items-start gap-6">
-              <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                <UserIcon className="h-8 w-8 text-primary" />
-              </div>
+              <Avatar
+                profilePictureUrl={client.profilePictureUrl}
+                userName={client.name}
+                size="lg"
+                className="flex-shrink-0"
+              />
 
               <div className="flex-1 space-y-4">
                 <div>

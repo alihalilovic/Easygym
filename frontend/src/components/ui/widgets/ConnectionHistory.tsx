@@ -1,5 +1,5 @@
-import { User as UserIcon } from 'lucide-react';
 import { User } from '@/types/User';
+import { Avatar } from '@/components/ui/Avatar';
 
 interface ConnectionHistoryItem {
   user: User;
@@ -27,9 +27,12 @@ const ConnectionHistory = ({ title, history }: ConnectionHistoryProps) => {
             className="flex items-center justify-between p-4 bg-muted/50 rounded-lg"
           >
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
-                <UserIcon className="h-5 w-5 text-muted-foreground" />
-              </div>
+              <Avatar
+                profilePictureUrl={item.user.profilePictureUrl}
+                userName={item.user.name}
+                size="sm"
+                className="bg-muted"
+              />
               <div>
                 <p className="font-medium">{item.user.name}</p>
                 <p className="text-sm text-muted-foreground">

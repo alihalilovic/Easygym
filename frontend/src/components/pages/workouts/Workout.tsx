@@ -19,6 +19,7 @@ import { Set, Workout } from '@/types/Workout';
 import { Plus } from 'lucide-react';
 import { routes } from '@/lib/constants';
 import { useNavigate, useParams } from 'react-router';
+import { Avatar } from '@/components/ui/Avatar';
 import {
   Dialog,
   DialogTrigger,
@@ -247,29 +248,54 @@ const WorkoutForm = () => {
         </div>
 
         <div className="p-6">
-          {isUserTrainer && !workoutId && myClients.length > 0 && (
+          {isUserTrainer && myClients.length > 0 && (
             <div className="mb-6 p-4 bg-accent/50 rounded-lg border">
               <label className="text-sm font-semibold mb-3 block">
-                Assign to Client
+                {workoutId ? 'Assigned to Client' : 'Assign to Client'}
               </label>
-              <Select
-                value={selectedTraineeId?.toString()}
-                onValueChange={(value) => setSelectedTraineeId(parseInt(value))}
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Choose a client" />
-                </SelectTrigger>
-                <SelectContent>
-                  {myClients.map((clientConnection) => (
-                    <SelectItem
-                      key={clientConnection.client.id}
-                      value={clientConnection.client.id.toString()}
-                    >
-                      {clientConnection.client.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              {workoutId ? (
+                <div className="flex items-center gap-3 p-3 bg-background rounded-lg border">
+                  <Avatar
+                    profilePictureUrl={
+                      myClients.find((c) => c.client.id === selectedTraineeId)
+                        ?.client.profilePictureUrl
+                    }
+                    userName={
+                      myClients.find((c) => c.client.id === selectedTraineeId)
+                        ?.client.name
+                    }
+                    size="sm"
+                  />
+                  <div className="flex-1">
+                    <p className="font-medium">
+                      {myClients.find((c) => c.client.id === selectedTraineeId)
+                        ?.client.name || 'Unknown Client'}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      This workout is assigned to this client
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <Select
+                  value={selectedTraineeId?.toString()}
+                  onValueChange={(value) => setSelectedTraineeId(parseInt(value))}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Choose a client" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {myClients.map((clientConnection) => (
+                      <SelectItem
+                        key={clientConnection.client.id}
+                        value={clientConnection.client.id.toString()}
+                      >
+                        {clientConnection.client.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
             </div>
           )}
 
