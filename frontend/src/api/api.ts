@@ -10,7 +10,7 @@ import trainerService from './services/trainerService';
 
 axios.defaults.baseURL = import.meta.env.VITE_APP_API_URL;
 
-const instance = axios.create({
+export const instance = axios.create({
   baseURL: import.meta.env.VITE_APP_API_URL,
   timeout: 10000,
   headers: { 'Content-Type': 'application/json' },
