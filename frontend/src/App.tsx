@@ -6,6 +6,7 @@ import Navbar from '@/components/layout/Navbar';
 import { useEffect } from 'react';
 import { authTokenKey } from '@/lib/constants';
 import { useAuth } from '@/components/auth/AuthProvider';
+import KeyboardShortcutProvider from '@/components/keyboard-shortcuts/KeyboardShortcutProvider';
 
 const App = () => {
   const { setMeUser } = useAuth();
@@ -16,12 +17,14 @@ const App = () => {
   }, [setMeUser]);
   return (
     <ThemeProvider defaultTheme="dark" storageKey="ui-theme">
-      <div className="wrapper">
-        <Navbar />
-        <ModeToggle className="absolute top-0 right-0" />
-        <Toaster />
-        <Outlet />
-      </div>
+      <KeyboardShortcutProvider>
+        <div className="wrapper">
+          <Navbar />
+          <ModeToggle className="absolute top-0 right-0" />
+          <Toaster />
+          <Outlet />
+        </div>
+      </KeyboardShortcutProvider>
     </ThemeProvider>
   );
 };
