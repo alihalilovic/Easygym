@@ -63,6 +63,14 @@ const mealLogService = {
   deleteMealMedia: async (request: DeleteMealMediaRequest) => {
     await requests.delete('/meallog/delete-media', request);
   },
+
+  downloadMealMedia: async (mediaUrl: string): Promise<Blob> => {
+    const params = new URLSearchParams({ mediaUrl });
+    const response = await instance.get(`/meallog/download-media?${params.toString()}`, {
+      responseType: 'blob',
+    });
+    return response.data;
+  },
 };
 
 export default mealLogService;

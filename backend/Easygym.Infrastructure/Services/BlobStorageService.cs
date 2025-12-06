@@ -42,4 +42,17 @@ public class BlobStorageService : IBlobStorageService
         var blobClient = new BlobClient(new Uri(blobUrl));
         await blobClient.DeleteIfExistsAsync();
     }
+
+    public async Task<(Stream Stream, string ContentType, string FileName)> DownloadAsync(string blobUrl)
+    {
+        var blobClient = new BlobClient(new Uri(blobUrl));
+
+        var response = await blobClient.DownloadStreamingAsync();
+        var properties = await blobClient.GetPropertiesAsync();
+
+        var fileName = Path.GetFileName(blobClient.Name);
+        var contentType = properties.Value.ContentType;
+
+        return (response.Value.Content, contentType, fileName);
+    }
 }

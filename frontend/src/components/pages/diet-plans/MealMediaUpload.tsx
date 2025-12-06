@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { X, Upload, Loader2 } from 'lucide-react';
+import { X, Upload, Loader2, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import mealLogService from '@/api/services/mealLogService';
@@ -64,6 +64,31 @@ export const MealMediaUpload = ({
     },
   });
 
+  const downloadMutation = useMutation({
+    mutationFn: (mediaUrl: string) =>
+      mealLogService.downloadMealMedia(mediaUrl),
+    onSuccess: (blob, mediaUrl) => {
+      // Extract filename from URL or create a default one
+      const urlParts = mediaUrl.split('/');
+      const filename = urlParts[urlParts.length - 1] || `meal-media-${Date.now()}`;
+
+      // Create download link
+      const downloadUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(downloadUrl);
+
+      toast.success('Media downloaded successfully');
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.message || 'Failed to download media');
+    },
+  });
+
   const handleFileSelect = async (
     event: React.ChangeEvent<HTMLInputElement>,
   ) => {
@@ -112,7 +137,31 @@ export const MealMediaUpload = ({
     fileInputRef.current?.click();
   };
 
-  const isLoading = uploadMutation.isPending || deleteMutation.isPending;
+  const handleDownload = () => {
+    if (!preview && !currentMediaUrl) return;
+
+    const url = currentMediaUrl || preview!;
+
+    // Extract filename from URL or create a default one
+    const urlParts = url.split('/');
+    const filename = urlParts[urlParts.length - 1] || `meal-media-${Date.now()}`;
+
+    // For data URLs (newly uploaded, not yet saved), we can download directly
+    if (url.startsWith('data:')) {
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      toast.success('Download started');
+    } else {
+      // For remote URLs, use the backend proxy endpoint to bypass CORS
+      downloadMutation.mutate(url);
+    }
+  };
+
+  const isLoading = uploadMutation.isPending || deleteMutation.isPending || downloadMutation.isPending;
 
   if (preview) {
     return (
@@ -130,21 +179,32 @@ export const MealMediaUpload = ({
             className="w-full max-h-48 object-cover rounded-lg border"
           />
         )}
-        {!disabled && (
+        <div className="absolute top-2 right-2 flex gap-2">
           <Button
-            variant="destructive"
+            variant="secondary"
             size="icon"
-            className="absolute top-2 right-2"
-            onClick={handleDelete}
+            onClick={handleDownload}
             disabled={isLoading}
+            title="Download media"
           >
-            {isLoading ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <X className="h-4 w-4" />
-            )}
+            <Download className="h-4 w-4" />
           </Button>
-        )}
+          {!disabled && (
+            <Button
+              variant="destructive"
+              size="icon"
+              onClick={handleDelete}
+              disabled={isLoading}
+              title="Delete media"
+            >
+              {isLoading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <X className="h-4 w-4" />
+              )}
+            </Button>
+          )}
+        </div>
       </div>
     );
   }

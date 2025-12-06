@@ -160,5 +160,27 @@ namespace Easygym.Api.Controllers
 
             return Ok(new { message = "Media deleted successfully" });
         }
+
+        // Download meal media (proxy endpoint to bypass CORS)
+        [HttpGet("download-media")]
+        [Authorize(Roles = Role.ClientAndTrainer)]
+        public async Task<IActionResult> DownloadMealMedia([FromQuery] string mediaUrl)
+        {
+            if (string.IsNullOrEmpty(mediaUrl))
+            {
+                return BadRequest(new { message = "Media URL is required" });
+            }
+
+            try
+            {
+                var (stream, contentType, fileName) = await _blobStorageService.DownloadAsync(mediaUrl);
+
+                return File(stream, contentType, fileName);
+            }
+            catch (Exception ex)
+            {
+                return NotFound(new { message = "Media not found", error = ex.Message });
+            }
+        }
     }
 }
