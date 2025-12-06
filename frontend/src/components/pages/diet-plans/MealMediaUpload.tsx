@@ -5,6 +5,8 @@ import { toast } from 'sonner';
 import mealLogService from '@/api/services/mealLogService';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { DeleteMealMediaRequest } from '@/types/MealLog';
+import imageCompression from 'browser-image-compression';
+import { mealLogKeys } from '@/hooks/useMealLog';
 
 interface MealMediaUploadProps {
   mealId: number;
@@ -41,8 +43,7 @@ export const MealMediaUpload = ({
       onUploadSuccess?.(data.mediaUrl);
 
       // Invalidate meal progress queries
-      queryClient.invalidateQueries({ queryKey: ['dailyMealProgress'] });
-      queryClient.invalidateQueries({ queryKey: ['weeklyMealProgress'] });
+      queryClient.invalidateQueries({ queryKey: mealLogKeys.all });
     },
     onError: (error: any) => {
       toast.error(error.response?.data?.message || 'Failed to upload media');
@@ -58,8 +59,7 @@ export const MealMediaUpload = ({
       onDeleteSuccess?.();
 
       // Invalidate meal progress queries
-      queryClient.invalidateQueries({ queryKey: ['dailyMealProgress'] });
-      queryClient.invalidateQueries({ queryKey: ['weeklyMealProgress'] });
+      queryClient.invalidateQueries({ queryKey: mealLogKeys.all });
     },
     onError: (error: any) => {
       toast.error(error.response?.data?.message || 'Failed to delete media');
@@ -95,32 +95,42 @@ export const MealMediaUpload = ({
   const handleFileSelect = async (
     event: React.ChangeEvent<HTMLInputElement>,
   ) => {
-    const file = event.target.files?.[0];
+    let file = event.target.files?.[0];
     if (!file) return;
-
-    // Validate file size (10MB)
-    if (file.size > 10 * 1024 * 1024) {
-      toast.error('File size must not exceed 10MB');
-      return;
-    }
 
     // Validate file type
     const isVideoFile = file.type.startsWith('video/');
     const isImageFile = file.type.startsWith('image/');
+
+    // Validate file size for videos (10MB), images will be compressed anyway
+    if (isVideoFile && file.size > 10 * 1024 * 1024) {
+      toast.error('File size must not exceed 10MB');
+      return;
+    }
 
     if (!isVideoFile && !isImageFile) {
       toast.error('Only images and videos are allowed');
       return;
     }
 
-    setIsVideo(isVideoFile);
+    // Compress image file
+    if (isImageFile) {
+      const options = {
+        maxSizeMB: 2,
+        maxWidthOrHeight: 1920,
+        useWebWorker: true,
+      };
 
-    // Create preview
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setPreview(reader.result as string);
-    };
-    reader.readAsDataURL(file);
+      try {
+        const compressedFile = await imageCompression(file, options);
+        // Re-assign file to the compressed one
+        file = new File([compressedFile], file.name, { type: file.type });
+      } catch (error) {
+        console.log(error);
+      }
+    }
+
+    setIsVideo(isVideoFile);
 
     // Upload file
     uploadMutation.mutate(file);
