@@ -1,9 +1,15 @@
 import { format } from 'date-fns';
-import { useDailyMealProgress, useLogMeal, useUnlogMeal } from '@/hooks/useMealLog';
+import {
+  useDailyMealProgress,
+  useLogMeal,
+  useUnlogMeal,
+} from '@/hooks/useMealLog';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { MealMediaUpload } from './MealMediaUpload';
+import { PhotoProvider, PhotoView } from 'react-photo-view';
+import 'react-photo-view/dist/react-photo-view.css';
 
 interface DailyMealTrackerProps {
   date?: Date;
@@ -17,13 +23,19 @@ export const DailyMealTracker = ({
   readOnly = false,
 }: DailyMealTrackerProps) => {
   const dateString = format(date, 'yyyy-MM-dd');
-  const { data: progress, isLoading } = useDailyMealProgress(dateString, clientId);
+  const { data: progress, isLoading } = useDailyMealProgress(
+    dateString,
+    clientId,
+  );
   const logMeal = useLogMeal();
   const unlogMeal = useUnlogMeal();
 
   const isToday = format(new Date(), 'yyyy-MM-dd') === dateString;
 
-  const handleMealToggle = async (mealId: number, isCurrentlyCompleted: boolean) => {
+  const handleMealToggle = async (
+    mealId: number,
+    isCurrentlyCompleted: boolean,
+  ) => {
     if (readOnly || !isToday) return;
 
     try {
@@ -87,9 +99,14 @@ export const DailyMealTracker = ({
                 <Checkbox
                   id={`meal-${meal.mealId}`}
                   checked={meal.isCompleted}
-                  onCheckedChange={() => handleMealToggle(meal.mealId, meal.isCompleted)}
+                  onCheckedChange={() =>
+                    handleMealToggle(meal.mealId, meal.isCompleted)
+                  }
                   disabled={
-                    readOnly || !isToday || logMeal.isPending || unlogMeal.isPending
+                    readOnly ||
+                    !isToday ||
+                    logMeal.isPending ||
+                    unlogMeal.isPending
                   }
                 />
                 <div className="flex-1">
@@ -101,23 +118,32 @@ export const DailyMealTracker = ({
                   >
                     {meal.mealName}
                   </label>
-                  <p className="text-xs text-muted-foreground mt-1">{meal.mealType}</p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {meal.mealType}
+                  </p>
                   {meal.description && (
-                    <p className="text-sm text-muted-foreground mt-1">{meal.description}</p>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {meal.description}
+                    </p>
                   )}
                   {meal.isCompleted && meal.completedAt && (
                     <p className="text-xs text-green-600 dark:text-green-400 mt-1">
-                      Completed at {format(new Date(meal.completedAt), 'h:mm a')}
+                      Completed at{' '}
+                      {format(new Date(meal.completedAt), 'h:mm a')}
                     </p>
                   )}
-                  {meal.isCompleted && (
-                    <MealMediaUpload
-                      mealId={meal.mealId}
-                      logDate={dateString}
-                      currentMediaUrl={meal.mediaUrl}
-                      disabled={readOnly || !isToday}
-                    />
-                  )}
+                  <PhotoProvider>
+                    {meal.isCompleted && (
+                      <PhotoView src={meal.mediaUrl}>
+                        <MealMediaUpload
+                          mealId={meal.mealId}
+                          logDate={dateString}
+                          currentMediaUrl={meal.mediaUrl}
+                          disabled={readOnly || !isToday}
+                        />
+                      </PhotoView>
+                    )}
+                  </PhotoProvider>
                 </div>
               </div>
             </div>

@@ -12,6 +12,7 @@ interface MealMediaUploadProps {
   currentMediaUrl?: string;
   onUploadSuccess?: (mediaUrl: string) => void;
   onDeleteSuccess?: () => void;
+  onClick?: () => void;
   disabled?: boolean;
 }
 
@@ -21,6 +22,7 @@ export const MealMediaUpload = ({
   currentMediaUrl,
   onUploadSuccess,
   onDeleteSuccess,
+  onClick,
   disabled = false,
 }: MealMediaUploadProps) => {
   const [preview, setPreview] = useState<string | null>(
@@ -70,7 +72,8 @@ export const MealMediaUpload = ({
     onSuccess: (blob, mediaUrl) => {
       // Extract filename from URL or create a default one
       const urlParts = mediaUrl.split('/');
-      const filename = urlParts[urlParts.length - 1] || `meal-media-${Date.now()}`;
+      const filename =
+        urlParts[urlParts.length - 1] || `meal-media-${Date.now()}`;
 
       // Create download link
       const downloadUrl = window.URL.createObjectURL(blob);
@@ -144,7 +147,8 @@ export const MealMediaUpload = ({
 
     // Extract filename from URL or create a default one
     const urlParts = url.split('/');
-    const filename = urlParts[urlParts.length - 1] || `meal-media-${Date.now()}`;
+    const filename =
+      urlParts[urlParts.length - 1] || `meal-media-${Date.now()}`;
 
     // For data URLs (newly uploaded, not yet saved), we can download directly
     if (url.startsWith('data:')) {
@@ -161,12 +165,23 @@ export const MealMediaUpload = ({
     }
   };
 
-  const isLoading = uploadMutation.isPending || deleteMutation.isPending || downloadMutation.isPending;
+  const isVideoCheck =
+    isVideo || currentMediaUrl?.match(/\.(mp4|mov|avi|mkv|webm)$/i);
+
+  const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (e.target instanceof HTMLButtonElement || isVideoCheck) return;
+    onClick?.();
+  };
+
+  const isLoading =
+    uploadMutation.isPending ||
+    deleteMutation.isPending ||
+    downloadMutation.isPending;
 
   if (preview) {
     return (
-      <div className="relative mt-2">
-        {isVideo || currentMediaUrl?.match(/\.(mp4|mov|avi|mkv|webm)$/i) ? (
+      <div className="relative mt-2" onClick={handleClick}>
+        {isVideoCheck ? (
           <video
             src={preview}
             controls
