@@ -8,5 +8,6 @@ namespace Easygym.Domain.Models.Responses
         public DateOnly LogDate { get; set; }
         public DateTime CompletedAt { get; set; }
         public bool IsCompleted { get; set; } // true if not deleted
+        public string? MediaUrl { get; set; }
     }
 }

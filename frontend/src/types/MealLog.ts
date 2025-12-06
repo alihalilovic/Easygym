@@ -5,6 +5,7 @@ export interface MealLogResponse {
   logDate: string; // ISO date string (YYYY-MM-DD)
   completedAt: string; // ISO datetime string
   isCompleted: boolean;
+  mediaUrl?: string;
 }
 
 export interface MealProgressItem {
@@ -14,6 +15,7 @@ export interface MealProgressItem {
   description?: string;
   isCompleted: boolean;
   completedAt?: string;
+  mediaUrl?: string;
 }
 
 export interface DailyMealProgressResponse {
@@ -40,4 +42,10 @@ export interface LogMealRequest {
 export interface UnlogMealRequest {
   mealId: number;
   logDate: string; // YYYY-MM-DD format
+}
+
+export interface DeleteMealMediaRequest {
+  mealId: number;
+  logDate: string; // YYYY-MM-DD format
+  mediaUrl?: string;
 }

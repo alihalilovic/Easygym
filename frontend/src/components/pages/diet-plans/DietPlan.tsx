@@ -340,80 +340,125 @@ const DietPlanForm = () => {
                   )}
                 />
 
-                <div className="space-y-4">
-                  <h3 className="text-xl font-semibold">Weekly Meal Plan</h3>
-                  {days.map((day, dayIndex) => (
-                    <div
-                      key={dayIndex}
-                      className="border rounded-lg p-4 bg-accent/20"
-                    >
-                      <div className="flex items-center justify-between mb-3">
-                        <h4 className="text-lg font-semibold">
-                          {DAYS_OF_WEEK[dayIndex]}
-                        </h4>
-                        {!isReadOnly && (
-                          <Button
-                            type="button"
-                            size="sm"
-                            onClick={() => handleAddMeal(dayIndex)}
-                            disabled={day.meals.length >= 10}
-                          >
-                            <Plus className="h-4 w-4 mr-1" />
-                            Add Meal
-                          </Button>
-                        )}
-                      </div>
+                <div className="space-y-6 w-full">
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-1 bg-primary rounded-full" />
+                    <h3 className="text-2xl font-bold">Weekly Meal Plan</h3>
+                  </div>
 
-                      {day.meals.length === 0 ? (
-                        <p className="text-sm text-muted-foreground italic">
-                          {isReadOnly
-                            ? 'No meals for this day.'
-                            : 'No meals added yet. Add at least 1 meal.'}
-                        </p>
-                      ) : (
-                        <div className="space-y-2">
-                          {day.meals.map((meal, mealIndex) => (
-                            <div
-                              key={mealIndex}
-                              className="flex items-center justify-between bg-background rounded p-3 border hover:bg-accent/50 transition-colors cursor-pointer"
-                              onClick={() =>
-                                setSelectedMeal({ meal, dayIndex })
-                              }
+                  <div className="space-y-4">
+                    {days.map((day, dayIndex) => (
+                      <div
+                        key={dayIndex}
+                        className="group relative border-2 border-border/40 rounded-xl p-5 bg-accent/20 hover:border-primary/30 transition-all duration-200 shadow-sm hover:shadow-md"
+                      >
+                        {/* Day header with gradient background */}
+                        <div className="flex items-center justify-between mb-4 pb-3 border-b border-border/50">
+                          <div className="flex items-center gap-3">
+                            <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/10 text-primary font-bold">
+                              {dayIndex + 1}
+                            </div>
+                            <div>
+                              <h4 className="text-lg font-bold tracking-tight">
+                                {DAYS_OF_WEEK[dayIndex]}
+                              </h4>
+                              <p className="text-xs text-muted-foreground">
+                                {day.meals.length}{' '}
+                                {day.meals.length === 1 ? 'meal' : 'meals'}
+                              </p>
+                            </div>
+                          </div>
+                          {!isReadOnly && (
+                            <Button
+                              type="button"
+                              size="sm"
+                              onClick={() => handleAddMeal(dayIndex)}
+                              disabled={day.meals.length >= 10}
+                              className="shadow-sm"
                             >
-                              <div className="flex-1">
-                                <div className="flex items-center gap-2">
-                                  <span className="font-medium">
-                                    {meal.name}
-                                  </span>
-                                  <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">
-                                    {meal.mealType}
-                                  </span>
+                              <Plus className="h-4 w-4 mr-1" />
+                              Add Meal
+                            </Button>
+                          )}
+                        </div>
+
+                        {/* Meals list */}
+                        {day.meals.length === 0 ? (
+                          <div className="flex flex-col items-center justify-center py-8 px-4 rounded-lg border-2 border-dashed border-border/50 bg-background/50">
+                            <UtensilsCrossed className="h-12 w-12 text-muted-foreground/30 mb-3" />
+                            <p className="text-sm text-muted-foreground font-medium">
+                              {isReadOnly
+                                ? 'No meals planned for this day'
+                                : 'Start by adding your first meal'}
+                            </p>
+                            {!isReadOnly && (
+                              <p className="text-xs text-muted-foreground/70 mt-1">
+                                At least 1 meal required
+                              </p>
+                            )}
+                          </div>
+                        ) : (
+                          <div className="grid gap-3">
+                            {day.meals.map((meal, mealIndex) => (
+                              <div
+                                key={mealIndex}
+                                className="group/meal relative flex items-center gap-4 bg-background/80 backdrop-blur-sm rounded-lg p-4 border border-border/50 hover:border-primary/40 hover:bg-accent/50 transition-all duration-200 cursor-pointer shadow-sm hover:shadow"
+                                onClick={() =>
+                                  setSelectedMeal({ meal, dayIndex })
+                                }
+                              >
+                                {/* Meal icon */}
+                                <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center border border-primary/20">
+                                  <UtensilsCrossed className="h-6 w-6 text-primary" />
                                 </div>
-                                {meal.description && (
-                                  <p className="text-sm text-muted-foreground mt-1 line-clamp-1">
-                                    {meal.description}
-                                  </p>
+
+                                {/* Meal content */}
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center gap-2 mb-1">
+                                    <h5 className="font-semibold text-base truncate">
+                                      {meal.name}
+                                    </h5>
+                                    <span className="flex-shrink-0 text-xs font-medium bg-primary/15 text-primary px-2.5 py-1 rounded-full border border-primary/20">
+                                      {meal.mealType}
+                                    </span>
+                                  </div>
+                                  {meal.description && (
+                                    <p className="text-sm text-muted-foreground line-clamp-1">
+                                      {meal.description}
+                                    </p>
+                                  )}
+                                  {meal.notes && (
+                                    <div className="flex items-center gap-1 mt-1">
+                                      <StickyNote className="h-3 w-3 text-muted-foreground/60" />
+                                      <p className="text-xs text-muted-foreground/80 italic line-clamp-1">
+                                        {meal.notes}
+                                      </p>
+                                    </div>
+                                  )}
+                                </div>
+
+                                {/* Delete button */}
+                                {!isReadOnly && (
+                                  <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="icon"
+                                    className="flex-shrink-0 opacity-0 group-hover/meal:opacity-100 transition-opacity hover:bg-destructive/10 hover:text-destructive"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      removeMeal(dayIndex, mealIndex);
+                                    }}
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
                                 )}
                               </div>
-                              {!isReadOnly && (
-                                <Button
-                                  type="button"
-                                  variant="ghost"
-                                  size="icon"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    removeMeal(dayIndex, mealIndex);
-                                  }}
-                                >
-                                  <Trash2 className="h-4 w-4 text-destructive" />
-                                </Button>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  ))}
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
                 </div>
 
                 <div className="flex gap-4 pt-6 border-t">
