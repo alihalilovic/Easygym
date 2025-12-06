@@ -16,6 +16,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { ImageCropDialog } from './ImageCropDialog';
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
@@ -23,7 +24,9 @@ const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
 export function ProfilePictureUpload() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showCropDialog, setShowCropDialog] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [selectedImageUrl, setSelectedImageUrl] = useState<string | null>(null);
 
   const { data: profilePicture } = useProfilePicture();
   const uploadMutation = useUploadProfilePicture();
@@ -45,20 +48,34 @@ export function ProfilePictureUpload() {
       return;
     }
 
-    // Create preview
+    // Create preview and show crop dialog
     const reader = new FileReader();
     reader.onloadend = () => {
-      setPreviewUrl(reader.result as string);
+      setSelectedImageUrl(reader.result as string);
+      setShowCropDialog(true);
     };
     reader.readAsDataURL(file);
 
-    // Upload file
+    // Reset file input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  const handleCropComplete = (croppedBlob: Blob) => {
+    // Create preview URL from cropped blob
+    const croppedUrl = URL.createObjectURL(croppedBlob);
+    setPreviewUrl(croppedUrl);
+
+    // Convert blob to file and upload
+    const file = new File([croppedBlob], 'profile-picture.jpg', {
+      type: 'image/jpeg',
+    });
+
     uploadMutation.mutate(file, {
       onSettled: () => {
-        // Reset file input
-        if (fileInputRef.current) {
-          fileInputRef.current.value = '';
-        }
+        // Clean up the preview URL
+        URL.revokeObjectURL(croppedUrl);
       },
     });
   };
@@ -134,6 +151,15 @@ export function ProfilePictureUpload() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {selectedImageUrl && (
+        <ImageCropDialog
+          open={showCropDialog}
+          onOpenChange={setShowCropDialog}
+          imageUrl={selectedImageUrl}
+          onCropComplete={handleCropComplete}
+        />
+      )}
     </div>
   );
 }
