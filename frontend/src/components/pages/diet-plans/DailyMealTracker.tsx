@@ -3,6 +3,7 @@ import { useDailyMealProgress, useLogMeal, useUnlogMeal } from '@/hooks/useMealL
 import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
+import { MealMediaUpload } from './MealMediaUpload';
 
 interface DailyMealTrackerProps {
   date?: Date;
@@ -80,34 +81,44 @@ export const DailyMealTracker = ({
           {progress.meals.map((meal) => (
             <div
               key={meal.mealId}
-              className="flex items-start space-x-3 p-3 border rounded-lg hover:bg-accent/50 transition-colors"
+              className="p-3 border rounded-lg hover:bg-accent/50 transition-colors"
             >
-              <Checkbox
-                id={`meal-${meal.mealId}`}
-                checked={meal.isCompleted}
-                onCheckedChange={() => handleMealToggle(meal.mealId, meal.isCompleted)}
-                disabled={
-                  readOnly || !isToday || logMeal.isPending || unlogMeal.isPending
-                }
-              />
-              <div className="flex-1">
-                <label
-                  htmlFor={`meal-${meal.mealId}`}
-                  className={`text-sm font-medium leading-none cursor-pointer ${
-                    !isToday || readOnly ? 'cursor-default' : ''
-                  }`}
-                >
-                  {meal.mealName}
-                </label>
-                <p className="text-xs text-muted-foreground mt-1">{meal.mealType}</p>
-                {meal.description && (
-                  <p className="text-sm text-muted-foreground mt-1">{meal.description}</p>
-                )}
-                {meal.isCompleted && meal.completedAt && (
-                  <p className="text-xs text-green-600 dark:text-green-400 mt-1">
-                    Completed at {format(new Date(meal.completedAt), 'h:mm a')}
-                  </p>
-                )}
+              <div className="flex items-start space-x-3">
+                <Checkbox
+                  id={`meal-${meal.mealId}`}
+                  checked={meal.isCompleted}
+                  onCheckedChange={() => handleMealToggle(meal.mealId, meal.isCompleted)}
+                  disabled={
+                    readOnly || !isToday || logMeal.isPending || unlogMeal.isPending
+                  }
+                />
+                <div className="flex-1">
+                  <label
+                    htmlFor={`meal-${meal.mealId}`}
+                    className={`text-sm font-medium leading-none cursor-pointer ${
+                      !isToday || readOnly ? 'cursor-default' : ''
+                    }`}
+                  >
+                    {meal.mealName}
+                  </label>
+                  <p className="text-xs text-muted-foreground mt-1">{meal.mealType}</p>
+                  {meal.description && (
+                    <p className="text-sm text-muted-foreground mt-1">{meal.description}</p>
+                  )}
+                  {meal.isCompleted && meal.completedAt && (
+                    <p className="text-xs text-green-600 dark:text-green-400 mt-1">
+                      Completed at {format(new Date(meal.completedAt), 'h:mm a')}
+                    </p>
+                  )}
+                  {meal.isCompleted && (
+                    <MealMediaUpload
+                      mealId={meal.mealId}
+                      logDate={dateString}
+                      currentMediaUrl={meal.mediaUrl}
+                      disabled={readOnly || !isToday}
+                    />
+                  )}
+                </div>
               </div>
             </div>
           ))}

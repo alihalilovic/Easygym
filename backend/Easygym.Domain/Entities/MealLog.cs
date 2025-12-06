@@ -18,6 +18,9 @@ namespace Easygym.Domain.Entities
 
         public DateTime CompletedAt { get; set; } = DateTime.UtcNow;
 
+        // Optional media URL for accountability (image or video)
+        public string? MediaUrl { get; set; }
+
         public bool IsDeleted { get; set; } = false;
         public DateTime? DeletedAt { get; set; }
     }

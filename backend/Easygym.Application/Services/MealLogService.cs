@@ -91,7 +91,8 @@ namespace Easygym.Application.Services
                 MealName = meal?.Name ?? "",
                 LogDate = mealLog.LogDate,
                 CompletedAt = mealLog.CompletedAt,
-                IsCompleted = !mealLog.IsDeleted
+                IsCompleted = !mealLog.IsDeleted,
+                MediaUrl = mealLog.MediaUrl
             };
         }
 
@@ -191,7 +192,8 @@ namespace Easygym.Application.Services
                     MealType = meal.MealType,
                     Description = meal.Description,
                     IsCompleted = log != null,
-                    CompletedAt = log?.CompletedAt
+                    CompletedAt = log?.CompletedAt,
+                    MediaUrl = log?.MediaUrl
                 };
             }).ToList();
 

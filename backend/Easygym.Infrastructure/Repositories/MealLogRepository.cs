@@ -15,7 +15,7 @@ namespace Easygym.Infrastructure.Repositories
             _context = context;
         }
 
-        public async Task<MealLog> LogMealAsync(int clientId, int mealId, int assignmentId, DateOnly logDate)
+        public async Task<MealLog> LogMealAsync(int clientId, int mealId, int assignmentId, DateOnly logDate, string? mediaUrl = null)
         {
             // Check if already logged and not deleted
             var existingLog = await _context.MealLogs
@@ -32,6 +32,7 @@ namespace Easygym.Infrastructure.Repositories
                     existingLog.IsDeleted = false;
                     existingLog.DeletedAt = null;
                     existingLog.CompletedAt = DateTime.UtcNow;
+                    existingLog.MediaUrl = mediaUrl;
                     await _context.SaveChangesAsync();
                     return existingLog;
                 }
@@ -44,7 +45,8 @@ namespace Easygym.Infrastructure.Repositories
                 ClientId = clientId,
                 MealId = mealId,
                 DietPlanAssignmentId = assignmentId,
-                LogDate = logDate
+                LogDate = logDate,
+                MediaUrl = mediaUrl
             };
 
             await _context.MealLogs.AddAsync(mealLog);
@@ -78,6 +80,26 @@ namespace Easygym.Infrastructure.Repositories
                 .Include(ml => ml.Meal)
                 .Where(ml => ml.ClientId == clientId && ml.LogDate == date && !ml.IsDeleted)
                 .ToListAsync();
+        }
+
+        public async Task<MealLog?> UpdateMediaUrlAsync(int clientId, int mealId, DateOnly logDate, string? mediaUrl)
+        {
+            var mealLog = await _context.MealLogs
+                .FirstOrDefaultAsync(ml =>
+                    ml.ClientId == clientId &&
+                    ml.MealId == mealId &&
+                    ml.LogDate == logDate &&
+                    !ml.IsDeleted);
+
+            if (mealLog == null)
+            {
+                return null;
+            }
+
+            mealLog.MediaUrl = mediaUrl;
+            await _context.SaveChangesAsync();
+
+            return mealLog;
         }
     }
 }

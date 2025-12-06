@@ -17,5 +17,6 @@ namespace Easygym.Domain.Models.Responses
         public string? Description { get; set; }
         public bool IsCompleted { get; set; }
         public DateTime? CompletedAt { get; set; }
+        public string? MediaUrl { get; set; }
     }
 }

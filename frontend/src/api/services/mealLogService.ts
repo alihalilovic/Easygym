@@ -5,7 +5,10 @@ import {
   MealLogResponse,
   DailyMealProgressResponse,
   WeeklyMealProgressResponse,
+  DeleteMealMediaRequest,
 } from '@/types/MealLog';
+import { instance } from '@/api/api';
+
 
 const mealLogService = {
   logMeal: async (request: LogMealRequest) => {
@@ -37,6 +40,28 @@ const mealLogService = {
       `/meallog/weekly?${params.toString()}`
     );
     return response;
+  },
+
+  uploadMealMedia: async (file: File, mealId: number, logDate: string) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('mealId', mealId.toString());
+    formData.append('logDate', logDate);
+
+    const response = await instance.post<{ mediaUrl: string }>(
+      '/meallog/upload-media',
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      }
+    );
+    return response.data;
+  },
+
+  deleteMealMedia: async (request: DeleteMealMediaRequest) => {
+    await requests.delete('/meallog/delete-media', request);
   },
 };
 
