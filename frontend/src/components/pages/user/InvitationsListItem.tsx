@@ -1,7 +1,6 @@
 import { Invitation, InvitationStatus } from '@/types/Interaction';
 import { Button } from '@/components/ui/button';
 import {
-  User,
   Calendar,
   MessageSquare,
   Check,
@@ -14,6 +13,7 @@ import { toast } from 'sonner';
 import InvitationBadge from '@/components/pages/user/InvitationBadge';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { useResolveInvitation } from '@/hooks/useInvitations';
+import { Avatar } from '@/components/ui/Avatar';
 
 interface InvitationsListItemProps {
   invitation: Invitation;
@@ -58,9 +58,11 @@ const InvitationsListItem = ({ invitation }: InvitationsListItemProps) => {
     >
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-            <User className="h-5 w-5 text-primary" />
-          </div>
+          <Avatar
+            profilePictureUrl={otherUser?.profilePictureUrl}
+            userName={otherUser?.name}
+            size="sm"
+          />
           <div>
             <h3 className="font-semibold text-lg">
               {otherUser?.name || 'Unknown User'}
