@@ -6,6 +6,7 @@ using Easygym.Application.Services;
 using Easygym.Domain.Interfaces;
 using Easygym.Infrastructure.Persistence;
 using Easygym.Infrastructure.Repositories;
+using Easygym.Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -37,6 +38,7 @@ builder.Services.AddScoped<ITrainerClientHistoryRepository, TrainerClientHistory
 builder.Services.AddScoped<IExerciseRepository, ExerciseRepository>();
 builder.Services.AddScoped<IDietPlanRepository, DietPlanRepository>();
 builder.Services.AddScoped<IMealLogRepository, MealLogRepository>();
+builder.Services.AddScoped<IBlobStorageService, BlobStorageService>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<JwtService>();
 builder.Services.AddScoped<CurrentUserService>();

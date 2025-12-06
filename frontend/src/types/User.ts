@@ -11,6 +11,7 @@ export interface User {
   password: string;
   role: UserRole;
   createdAt: Date;
+  profilePictureUrl?: string | null;
 }
 
 export interface TrainerConnection {
