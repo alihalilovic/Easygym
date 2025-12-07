@@ -49,10 +49,12 @@ import {
   useCreateWorkoutSession,
   useDeleteWorkoutSession,
 } from '@/hooks/useWorkoutSessions';
+import { useTranslation } from 'react-i18next';
 
 const WorkoutSession = () => {
   const { userId } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const params = useParams();
   const viewMode = !!params.id;
@@ -109,7 +111,9 @@ const WorkoutSession = () => {
     setSessionStartTime(new Date());
 
     toast.success(
-      `Started workout: ${selectedWorkout.name || 'Unnamed Workout'}`,
+      t('workoutSession.workoutStarted', {
+        name: selectedWorkout.name || t('workoutSession.unnamedWorkout'),
+      }),
     );
   };
 
@@ -163,7 +167,7 @@ const WorkoutSession = () => {
       perceivedDifficulty: workoutSessionForm.getValues('perceivedDifficulty'),
     });
 
-    toast.success('Workout session completed!');
+    toast.success(t('workoutSession.workoutCompleted'));
     navigate(routes.WorkoutSessions);
   };
 
@@ -196,7 +200,7 @@ const WorkoutSession = () => {
     if (!viewMode) return;
 
     await deleteWorkoutSession.mutateAsync(Number(params.id));
-    toast.success('Workout session deleted successfully');
+    toast.success(t('workoutSession.sessionDeleted'));
     navigate(routes.WorkoutSessions);
   };
 
@@ -221,7 +225,9 @@ const WorkoutSession = () => {
         <div className="flex flex-col gap-6">
           <div className="flex flex-col gap-4">
             <h1 className="text-2xl font-bold">
-              {workoutSession?.workout?.name + ' Session' || 'Unnamed Workout'}
+              {workoutSession?.workout?.name
+                ? `${workoutSession.workout.name} ${t('workoutSession.session')}`
+                : t('workoutSession.unnamedWorkout')}
             </h1>
             {workoutSession?.workout?.description && (
               <p className="text-muted-foreground">
@@ -236,11 +242,13 @@ const WorkoutSession = () => {
                 !workoutSession?.notes ? 'w-full' : ''
               }`}
             >
-              <h2 className="text-lg font-semibold mb-4">Session Details</h2>
+              <h2 className="text-lg font-semibold mb-4">
+                {t('workoutSession.sessionDetails')}
+              </h2>
               <div className="flex flex-col gap-3">
                 <div className="flex gap-2 items-center">
                   <CalendarClock className="h-4 w-4" />
-                  <span className="font-medium">Date: </span>
+                  <span className="font-medium">{t('workoutSession.date')}: </span>
                   <span>
                     {new Date(
                       workoutSession?.startTime || '',
@@ -249,7 +257,7 @@ const WorkoutSession = () => {
                 </div>
                 <div className="flex gap-2 items-center whitespace-nowrap">
                   <Clock className="h-4 w-4" />
-                  <span className="font-medium">Duration: </span>
+                  <span className="font-medium">{t('workoutSession.duration')}: </span>
                   <span>
                     {Math.round(
                       (new Date(workoutSession?.endTime || '').getTime() -
@@ -257,13 +265,15 @@ const WorkoutSession = () => {
                         1000 /
                         60,
                     )}{' '}
-                    minutes
+                    {t('workoutSession.minutes')}
                   </span>
                 </div>
                 {workoutSession?.perceivedDifficulty && (
                   <div className="flex gap-2 items-center">
                     <BarChart className="h-4 w-4" />
-                    <span className="font-medium">Difficulty: </span>
+                    <span className="font-medium">
+                      {t('workoutSessions.sessionItem.difficulty')}:{' '}
+                    </span>
                     <span>{workoutSession.perceivedDifficulty}/10</span>
                   </div>
                 )}
@@ -272,7 +282,9 @@ const WorkoutSession = () => {
 
             {workoutSession?.notes && (
               <div className="bg-card rounded-lg shadow-sm border border-border p-4 w-full">
-                <h2 className="text-lg font-semibold mb-4">Notes</h2>
+                <h2 className="text-lg font-semibold mb-4">
+                  {t('workoutSession.notes')}
+                </h2>
                 <p className="text-muted-foreground whitespace-pre-wrap">
                   {workoutSession.notes}
                 </p>
@@ -282,19 +294,26 @@ const WorkoutSession = () => {
 
           <div className="flex flex-col gap-4">
             <div className="bg-card rounded-lg shadow-sm border border-border p-4">
-              <h2 className="text-lg font-semibold mb-4">Workout Details</h2>
+              <h2 className="text-lg font-semibold mb-4">
+                {t('workoutSession.workoutDetails')}
+              </h2>
               <div className="flex flex-col gap-3">
                 <div className="flex gap-2 items-center">
                   <ListIcon className="h-4 w-4" />
-                  <span className="font-medium">Exercises: </span>
+                  <span className="font-medium">
+                    {t('workoutSession.exercises')}:{' '}
+                  </span>
                   <span>{workoutSession?.workout?.sets?.length || 0}</span>
                 </div>
 
                 <div className="flex gap-2 items-center">
                   <TimerIcon className="h-4 w-4" />
-                  <span className="font-medium">Rest time: </span>
+                  <span className="font-medium">
+                    {t('workoutSession.restTime')}:{' '}
+                  </span>
                   <span>
-                    {workoutSession?.workout?.restTimeSeconds || 0} seconds
+                    {workoutSession?.workout?.restTimeSeconds || 0}{' '}
+                    {t('workoutSession.seconds')}
                   </span>
                 </div>
               </div>
@@ -302,7 +321,9 @@ const WorkoutSession = () => {
           </div>
 
           <div className="bg-card rounded-lg shadow-sm border border-border p-4">
-            <h2 className="text-lg font-semibold mb-4">Exercises</h2>
+            <h2 className="text-lg font-semibold mb-4">
+              {t('workoutSession.exercises')}
+            </h2>
             <div className="flex flex-col gap-4">
               {workoutSession?.workout?.sets.map((set) => (
                 <div
@@ -313,7 +334,9 @@ const WorkoutSession = () => {
                   <div className="flex flex-col gap-1 text-sm text-muted-foreground">
                     <div className="flex gap-2 items-center">
                       <RepeatIcon className="h-4 w-4" />
-                      <span>{set.repetitions} repetitions</span>
+                      <span>
+                        {set.repetitions} {t('workoutSession.repetitions')}
+                      </span>
                     </div>
                     {!!set.weight && set.weight > 0 && (
                       <div className="flex gap-2 items-center">
@@ -332,22 +355,21 @@ const WorkoutSession = () => {
 
           <Dialog>
             <Button className="self-start" variant="destructive" asChild>
-              <DialogTrigger>Delete</DialogTrigger>
+              <DialogTrigger>{t('workoutSession.delete')}</DialogTrigger>
             </Button>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Are you absolutely sure?</DialogTitle>
+                <DialogTitle>{t('workoutSession.deleteConfirmTitle')}</DialogTitle>
                 <DialogDescription>
-                  This action cannot be undone. This will permanently delete
-                  your workout session and its related data from our servers.
+                  {t('workoutSession.deleteConfirmDescription')}
                 </DialogDescription>
               </DialogHeader>
               <DialogFooter>
                 <Button variant="destructive" onClick={handleDeleteSession}>
-                  Delete Workout
+                  {t('workoutSession.deleteWorkout')}
                 </Button>
                 <DialogClose asChild>
-                  <Button variant="outline">Cancel</Button>
+                  <Button variant="outline">{t('workoutSession.cancel')}</Button>
                 </DialogClose>
               </DialogFooter>
             </DialogContent>
@@ -357,7 +379,9 @@ const WorkoutSession = () => {
 
       {selectedWorkout?.id && !sessionStarted && (
         <div className="fixed bottom-8 right-8 bg-background">
-          <Button onClick={handleStartSession}>Start Workout</Button>
+          <Button onClick={handleStartSession}>
+            {t('workoutSession.startWorkout')}
+          </Button>
         </div>
       )}
 
@@ -366,16 +390,19 @@ const WorkoutSession = () => {
           <Progress value={currentProgress} className="w-full" />
 
           <div className="text-sm text-muted-foreground">
-            Exercise {currentExerciseIndex + 1} of{' '}
-            {selectedWorkout?.sets?.length || 0}
+            {t('workoutSession.exerciseProgress', {
+              current: currentExerciseIndex + 1,
+              total: selectedWorkout?.sets?.length || 0,
+            })}
           </div>
 
           <div className="bg-card rounded-lg shadow-sm border border-border p-4">
             <div className="mb-4">
               <h3 className="text-xl font-semibold">
                 {showingRest
-                  ? 'Rest Time'
-                  : currentExercise?.exercise.name || 'Exercise'}
+                  ? t('workoutSession.restTimeTitle')
+                  : currentExercise?.exercise.name ||
+                    t('workoutSession.exercises')}
               </h3>
             </div>
             <div className="mb-4">
@@ -385,23 +412,27 @@ const WorkoutSession = () => {
                     {Math.floor(restTimeRemaining / 60)}:
                     {(restTimeRemaining % 60).toString().padStart(2, '0')}
                   </div>
-                  <p>Take a moment to rest before the next exercise.</p>
+                  <p>{t('workoutSession.restMessage')}</p>
                 </div>
               ) : (
                 <div className="flex flex-col gap-4">
                   <div className="flex gap-2 items-center">
                     <RepeatIcon className="h-4 w-4" />
-                    <span className="font-medium">Repetitions: </span>
+                    <span className="font-medium">
+                      {t('workoutSession.repetitionsLabel')}:{' '}
+                    </span>
                     <span>{currentExercise?.repetitions || 0}</span>
                   </div>
 
                   <div className="flex gap-2 items-center">
                     <DumbbellIcon className="h-4 w-4" />
-                    <span className="font-medium">Weight: </span>
+                    <span className="font-medium">
+                      {t('workoutSession.weightLabel')}:{' '}
+                    </span>
                     <span>
                       {currentExercise?.weight && currentExercise?.weight > 0
                         ? `${currentExercise.weight} kg`
-                        : 'No added weight'}
+                        : t('workoutSession.noAddedWeight')}
                     </span>
                   </div>
 
@@ -416,7 +447,9 @@ const WorkoutSession = () => {
             <div className="flex justify-between border-t border-border pt-4">
               {!isLastExercise ? (
                 <Button onClick={handleNext} className="ml-auto">
-                  {showingRest ? 'Skip Rest' : 'Next'}
+                  {showingRest
+                    ? t('workoutSession.skipRest')
+                    : t('workoutSession.next')}
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               ) : (
@@ -425,7 +458,7 @@ const WorkoutSession = () => {
                   className="ml-auto"
                   variant="default"
                 >
-                  End Workout
+                  {t('workoutSession.endWorkout')}
                   <CheckCircle className="ml-2 h-4 w-4" />
                 </Button>
               )}
@@ -440,7 +473,9 @@ const WorkoutSession = () => {
                   name="perceivedDifficulty"
                   render={({ field }) => (
                     <FormItem fullWidth>
-                      <FormLabel>Perceived difficulty</FormLabel>
+                      <FormLabel>
+                        {t('workoutSession.perceivedDifficulty')}
+                      </FormLabel>
                       <FormControl>
                         <Input type="number" min={1} max={10} {...field} />
                       </FormControl>
@@ -453,10 +488,10 @@ const WorkoutSession = () => {
                   name="notes"
                   render={({ field }) => (
                     <FormItem fullWidth>
-                      <FormLabel>Notes</FormLabel>
+                      <FormLabel>{t('workoutSession.notes')}</FormLabel>
                       <FormControl>
                         <Textarea
-                          placeholder="Enter notes about this workout session..."
+                          placeholder={t('workoutSession.notesPlaceholder')}
                           {...field}
                         />
                       </FormControl>
