@@ -11,6 +11,7 @@ interface AuthContextType {
     isUserClient: boolean;
     isUserTrainer: boolean;
     isUserAdmin: boolean;
+    isLoading: boolean;
     setMeUser: () => Promise<User | null>;
     register: (user: UserRegisterRequest) => Promise<User | null>;
     login: (credentials: { email: string; password: string }) => Promise<User | null>;
@@ -21,6 +22,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const [user, setUser] = useState<User | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
     const queryClient = useQueryClient();
 
     // Computed properties
@@ -79,6 +81,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             if (token) {
                 await setMeUser();
             }
+            setIsLoading(false);
         };
 
         initializeAuth();
@@ -90,6 +93,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         isUserClient,
         isUserTrainer,
         isUserAdmin,
+        isLoading,
         setMeUser,
         login,
         register,

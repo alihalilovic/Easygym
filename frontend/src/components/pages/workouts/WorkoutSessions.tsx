@@ -10,10 +10,13 @@ import { usePagedWorkoutSessions } from '@/hooks/useWorkoutSessions';
 import { WorkoutSessionQueryParams } from '@/types/WorkoutSession';
 import { Pagination } from '@/components/ui/pagination';
 import { WorkoutSessionFilters } from './WorkoutSessionFilters';
+import { useTranslation } from 'react-i18next';
+import LanguageSwitcher from '@/components/ui/LanguageSwitcher';
 
 const WorkoutSessions = () => {
   const { userId } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const [queryParams, setQueryParams] = useState<WorkoutSessionQueryParams>({
     pageNumber: 1,
@@ -49,12 +52,15 @@ const WorkoutSessions = () => {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">Workout Sessions</h2>
-        <Button onClick={handleCreateSession}>
-          <PlusCircle className="h-4 w-4" />
-          Start New Session
-        </Button>
+      <div className="flex justify-between items-center flex-wrap gap-4">
+        <h2 className="text-2xl font-bold">{t('workoutSessions.title')}</h2>
+        <div className="flex items-center gap-3">
+          <LanguageSwitcher />
+          <Button onClick={handleCreateSession}>
+            <PlusCircle className="h-4 w-4" />
+            {t('workoutSessions.startNewSession')}
+          </Button>
+        </div>
       </div>
 
       <WorkoutSessionFilters
@@ -66,7 +72,10 @@ const WorkoutSessions = () => {
       {totalCount > 0 && (
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <span>
-            Showing {workoutSessions.length} of {totalCount} sessions
+            {t('workoutSessions.showing', {
+              count: workoutSessions.length,
+              total: totalCount,
+            })}
           </span>
           {isFetching && (
             <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
@@ -105,16 +114,16 @@ const WorkoutSessions = () => {
 
         {workoutSessions.length === 0 && !isLoading && (
           <EmptyState
-            title="No workout sessions found"
+            title={t('workoutSessions.noSessionsFound')}
             description={
               queryParams.searchTerm ||
               queryParams.workoutId ||
               queryParams.startDateFrom ||
               queryParams.startDateTo
-                ? 'Try adjusting your filters to see more results.'
-                : 'Complete your first workout to track your progress and performance.'
+                ? t('workoutSessions.noSessionsWithFilters')
+                : t('workoutSessions.noSessionsDescription')
             }
-            buttonText="Start Your First Session"
+            buttonText={t('workoutSessions.startFirstSession')}
             buttonAction={handleCreateSession}
             buttonIcon={<PlayCircle className="h-4 w-4" />}
           />

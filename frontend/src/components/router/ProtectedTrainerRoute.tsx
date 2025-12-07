@@ -3,7 +3,10 @@ import { routes } from '@/lib/constants';
 import { useAuth } from '@/components/auth/AuthProvider';
 
 const ProtectedTrainerRoute = () => {
-  const { isUserTrainer } = useAuth();
+  const { isUserTrainer, isLoading } = useAuth();
+
+  // Wait for auth initialization before redirecting
+  if (isLoading) return null;
 
   if (!isUserTrainer) return <Navigate to={routes.Profile} replace />;
 

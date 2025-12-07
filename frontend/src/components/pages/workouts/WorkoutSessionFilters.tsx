@@ -26,6 +26,7 @@ import {
 import { useWorkouts } from '@/hooks/useWorkouts';
 import { Badge } from '@/components/ui/badge';
 import { useDebounce } from '@/hooks/useDebounce';
+import { useTranslation } from 'react-i18next';
 
 interface WorkoutSessionFiltersProps {
   filters: WorkoutSessionQueryParams;
@@ -39,6 +40,7 @@ export const WorkoutSessionFilters = ({
   totalItemsShown,
 }: WorkoutSessionFiltersProps) => {
   const { data: workouts = [] } = useWorkouts();
+  const { t } = useTranslation();
   const [showFilters, setShowFilters] = useState(false);
   const [searchValue, setSearchValue] = useState(filters.searchTerm || '');
   const debouncedSearchValue = useDebounce(searchValue, 500);
@@ -101,7 +103,7 @@ export const WorkoutSessionFilters = ({
           disabled={disabled}
         >
           <Filter className="h-4 w-4" />
-          Filters
+          {t('workoutSessions.filters.title')}
           {activeFilterCount > 0 && (
             <Badge variant="secondary" className="ml-1 h-5 px-1.5">
               {activeFilterCount}
@@ -123,7 +125,7 @@ export const WorkoutSessionFilters = ({
             disabled={disabled}
           >
             <X className="h-4 w-4" />
-            Clear All
+            {t('workoutSessions.filters.clearAll')}
           </Button>
         )}
 
@@ -138,9 +140,15 @@ export const WorkoutSessionFilters = ({
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="StartTime">Start Time</SelectItem>
-              <SelectItem value="EndTime">End Time</SelectItem>
-              <SelectItem value="PerceivedDifficulty">Difficulty</SelectItem>
+              <SelectItem value="StartTime">
+                {t('workoutSessions.filters.sortOptions.startTime')}
+              </SelectItem>
+              <SelectItem value="EndTime">
+                {t('workoutSessions.filters.sortOptions.endTime')}
+              </SelectItem>
+              <SelectItem value="PerceivedDifficulty">
+                {t('workoutSessions.filters.sortOptions.difficulty')}
+              </SelectItem>
             </SelectContent>
           </Select>
 
@@ -159,12 +167,12 @@ export const WorkoutSessionFilters = ({
             {filters.sortOrder === 'asc' ? (
               <>
                 <ArrowUp className="h-4 w-4" />
-                Asc
+                {t('workoutSessions.filters.ascending')}
               </>
             ) : (
               <>
                 <ArrowDown className="h-4 w-4" />
-                Desc
+                {t('workoutSessions.filters.descending')}
               </>
             )}
           </Button>
@@ -176,11 +184,11 @@ export const WorkoutSessionFilters = ({
           <div className="space-y-4">
             <div className="flex items-center gap-2 text-sm font-semibold">
               <Search className="h-4 w-4 text-primary" />
-              <span>Search</span>
+              <span>{t('workoutSessions.filters.search')}</span>
             </div>
             <Input
               id="search"
-              placeholder="Search by workout name or notes..."
+              placeholder={t('workoutSessions.filters.searchPlaceholder')}
               value={searchValue}
               onChange={(e) => setSearchValue(e.target.value)}
               className="bg-background"
@@ -190,7 +198,7 @@ export const WorkoutSessionFilters = ({
           <div className="space-y-4">
             <div className="flex items-center gap-2 text-sm font-semibold">
               <List className="h-4 w-4 text-primary" />
-              <span>Workout Type</span>
+              <span>{t('workoutSessions.filters.workoutType')}</span>
             </div>
             <Select
               value={filters.workoutId?.toString() || 'all'}
@@ -202,10 +210,14 @@ export const WorkoutSessionFilters = ({
               }
             >
               <SelectTrigger className="bg-background">
-                <SelectValue placeholder="All workouts" />
+                <SelectValue
+                  placeholder={t('workoutSessions.filters.allWorkouts')}
+                />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All workouts</SelectItem>
+                <SelectItem value="all">
+                  {t('workoutSessions.filters.allWorkouts')}
+                </SelectItem>
                 {workouts.map((workout) => (
                   <SelectItem key={workout.id} value={workout.id.toString()}>
                     {workout.name}
@@ -218,7 +230,7 @@ export const WorkoutSessionFilters = ({
           <div className="space-y-4">
             <div className="flex items-center gap-2 text-sm font-semibold">
               <Calendar className="h-4 w-4 text-primary" />
-              <span>Date Range</span>
+              <span>{t('workoutSessions.filters.dateRange')}</span>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
@@ -226,7 +238,7 @@ export const WorkoutSessionFilters = ({
                   htmlFor="startDateFrom"
                   className="text-xs text-muted-foreground"
                 >
-                  Start Date From
+                  {t('workoutSessions.filters.startDateFrom')}
                 </Label>
                 <Input
                   id="startDateFrom"
@@ -244,7 +256,7 @@ export const WorkoutSessionFilters = ({
                   htmlFor="startDateTo"
                   className="text-xs text-muted-foreground"
                 >
-                  Start Date To
+                  {t('workoutSessions.filters.startDateTo')}
                 </Label>
                 <Input
                   id="startDateTo"
@@ -262,7 +274,7 @@ export const WorkoutSessionFilters = ({
                   htmlFor="endDateFrom"
                   className="text-xs text-muted-foreground"
                 >
-                  End Date From
+                  {t('workoutSessions.filters.endDateFrom')}
                 </Label>
                 <Input
                   id="endDateFrom"
@@ -280,7 +292,7 @@ export const WorkoutSessionFilters = ({
                   htmlFor="endDateTo"
                   className="text-xs text-muted-foreground"
                 >
-                  End Date To
+                  {t('workoutSessions.filters.endDateTo')}
                 </Label>
                 <Input
                   id="endDateTo"
@@ -298,7 +310,7 @@ export const WorkoutSessionFilters = ({
           <div className="space-y-4">
             <div className="flex items-center gap-2 text-sm font-semibold">
               <TrendingUp className="h-4 w-4 text-primary" />
-              <span>Difficulty Range</span>
+              <span>{t('workoutSessions.filters.difficultyRange')}</span>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
@@ -306,14 +318,14 @@ export const WorkoutSessionFilters = ({
                   htmlFor="minDifficulty"
                   className="text-xs text-muted-foreground"
                 >
-                  Minimum (1-10)
+                  {t('workoutSessions.filters.minimum')}
                 </Label>
                 <Input
                   id="minDifficulty"
                   type="number"
                   min="1"
                   max="10"
-                  placeholder="Min"
+                  placeholder={t('workoutSessions.filters.min')}
                   value={filters.minPerceivedDifficulty || ''}
                   onChange={(e) =>
                     handleFilterChange(
@@ -330,14 +342,14 @@ export const WorkoutSessionFilters = ({
                   htmlFor="maxDifficulty"
                   className="text-xs text-muted-foreground"
                 >
-                  Maximum (1-10)
+                  {t('workoutSessions.filters.maximum')}
                 </Label>
                 <Input
                   id="maxDifficulty"
                   type="number"
                   min="1"
                   max="10"
-                  placeholder="Max"
+                  placeholder={t('workoutSessions.filters.max')}
                   value={filters.maxPerceivedDifficulty || ''}
                   onChange={(e) =>
                     handleFilterChange(
@@ -353,14 +365,14 @@ export const WorkoutSessionFilters = ({
 
           <div className="space-y-4 pt-4 border-t">
             <div className="flex items-center gap-2 text-sm font-semibold">
-              <span>Display Options</span>
+              <span>{t('workoutSessions.filters.displayOptions')}</span>
             </div>
             <div className="space-y-2">
               <Label
                 htmlFor="pageSize"
                 className="text-xs text-muted-foreground"
               >
-                Items Per Page
+                {t('workoutSessions.filters.itemsPerPage')}
               </Label>
               <Select
                 value={filters.pageSize?.toString() || '10'}
@@ -372,10 +384,18 @@ export const WorkoutSessionFilters = ({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="5">5 per page</SelectItem>
-                  <SelectItem value="10">10 per page</SelectItem>
-                  <SelectItem value="20">20 per page</SelectItem>
-                  <SelectItem value="50">50 per page</SelectItem>
+                  <SelectItem value="5">
+                    {t('workoutSessions.filters.perPage', { count: 5 })}
+                  </SelectItem>
+                  <SelectItem value="10">
+                    {t('workoutSessions.filters.perPage', { count: 10 })}
+                  </SelectItem>
+                  <SelectItem value="20">
+                    {t('workoutSessions.filters.perPage', { count: 20 })}
+                  </SelectItem>
+                  <SelectItem value="50">
+                    {t('workoutSessions.filters.perPage', { count: 50 })}
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>
