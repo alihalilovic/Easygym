@@ -6,5 +6,7 @@ namespace Easygym.Domain.Interfaces
     {
         Task<User?> GetUserByEmailAsync(string email);
         Task<User> AddUserAsync(User user);
+
+        Task UpdateUserAsync(User user);
     }
 }

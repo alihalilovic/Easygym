@@ -41,5 +41,18 @@ namespace Easygym.Application.Services
                 Role = user.Role,
             };
         }
+
+        public async Task<User> GetCurrentUserEntityAsync()
+        {
+            var authHeader = _httpContextAccessor.HttpContext?.Request.Headers["Authorization"]
+                .FirstOrDefault()?.Replace("Bearer ", "") ?? "";
+
+            var userId = _authService.GetUserIdByTokenAsync(authHeader);
+
+            var user = await _userRepository.GetByIdAsync(userId)
+                ?? throw new UserNotFoundException();
+
+            return user;
+        }
     }
 }
