@@ -1,3 +1,4 @@
+using Easygym.Application.Interfaces;
 using Easygym.Domain.Constants;
 using Easygym.Domain.Entities;
 using Easygym.Domain.Exceptions;
@@ -6,7 +7,7 @@ using Microsoft.AspNetCore.Http;
 
 namespace Easygym.Application.Services
 {
-    public class CurrentUserService
+    public class CurrentUserService : ICurrentUserService
     {
         private readonly AuthService _authService;
         private readonly IGenericRepository<User> _userRepository;

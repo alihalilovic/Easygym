@@ -3,15 +3,17 @@ using Easygym.Domain.Entities;
 using Easygym.Domain.Interfaces;
 using Easygym.Domain.Exceptions;
 using Easygym.Domain.Models.Requests;
+using Easygym.Application.Interfaces;
+
 namespace Easygym.Application.Services
 {
     public class WorkoutService
     {
         private readonly IWorkoutRepository _workoutRepository;
-        private readonly CurrentUserService _currentUserService;
+        private readonly ICurrentUserService _currentUserService;
         private readonly IGenericRepository<Client> _clientRepository;
-        private readonly WorkoutSessionService _workoutSessionService;
-        public WorkoutService(IWorkoutRepository workoutRepository, CurrentUserService currentUserService, IGenericRepository<Client> clientRepository, WorkoutSessionService workoutSessionService)
+        private readonly IWorkoutSessionService _workoutSessionService;
+        public WorkoutService(IWorkoutRepository workoutRepository, ICurrentUserService currentUserService, IGenericRepository<Client> clientRepository, IWorkoutSessionService workoutSessionService)
         {
             _workoutRepository = workoutRepository;
             _currentUserService = currentUserService;

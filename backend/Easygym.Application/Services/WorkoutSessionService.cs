@@ -4,9 +4,11 @@ using Easygym.Domain.Exceptions;
 using Easygym.Domain.Models.Requests;
 using Easygym.Domain.Models.Common;
 using Easygym.Domain.Constants;
+using Easygym.Application.Interfaces;
+
 namespace Easygym.Application.Services
 {
-    public class WorkoutSessionService
+    public class WorkoutSessionService : IWorkoutSessionService
     {
         private readonly IWorkoutSessionRepository _workoutSessionRepository;
         private readonly IWorkoutRepository _workoutRepository;
