@@ -86,6 +86,12 @@ app.UseMiddleware<ExceptionMiddleware>();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+
+    using (var scope = app.Services.CreateScope())
+    {
+        var context = scope.ServiceProvider.GetRequiredService<EasygymDbContext>();
+        DataSeeder.Seed(context);
+    }
 }
 
 app.UseHttpsRedirection();
