@@ -50,8 +50,8 @@ namespace Easygym.Api.Controllers
         [Authorize(Roles = Role.Client)]
         public async Task<IActionResult> CreateWorkoutSession([FromBody] WorkoutSession workoutSession)
         {
-            await _workoutSessionService.CreateWorkoutSessionAsync(workoutSession);
-            return Ok(workoutSession);
+            var result = await _workoutSessionService.CreateWorkoutSessionAsync(workoutSession);
+            return Ok(result);
         }
 
         [HttpPut("{id}")]

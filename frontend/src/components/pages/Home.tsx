@@ -6,10 +6,24 @@ import {
   UsersIcon,
   ClipboardListIcon,
 } from 'lucide-react';
-import { Link } from 'react-router';
+import { Link, useNavigate } from 'react-router';
 import { routes } from '@/lib/constants';
+import { useAuth } from '@/components/auth/AuthProvider';
+import { useEffect } from 'react';
+import { UserRole } from '@/types/User';
 
 const Home = () => {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (user) {
+      const redirectPath =
+        user.role === UserRole.Client ? routes.Dashboard : routes.MyClients;
+      navigate(redirectPath, { replace: true });
+    }
+  }, [user, navigate]);
+
   const scrollToFeatures = () => {
     window.scrollTo({
       top: document.getElementById('features')?.offsetTop,

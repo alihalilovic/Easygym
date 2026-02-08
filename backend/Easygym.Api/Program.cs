@@ -2,6 +2,7 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Easygym.Api.Middlewares;
+using Easygym.Application.Interfaces;
 using Easygym.Application.Services;
 using Easygym.Domain.Interfaces;
 using Easygym.Infrastructure.Persistence;
@@ -41,9 +42,12 @@ builder.Services.AddScoped<IMealLogRepository, MealLogRepository>();
 builder.Services.AddScoped<IBlobStorageService, BlobStorageService>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<JwtService>();
+builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<CurrentUserService>();
+builder.Services.AddScoped<ICurrentUserService>(sp => sp.GetRequiredService<CurrentUserService>());
 builder.Services.AddScoped<WorkoutService>();
 builder.Services.AddScoped<WorkoutSessionService>();
+builder.Services.AddScoped<IWorkoutSessionService>(sp => sp.GetRequiredService<WorkoutSessionService>());
 builder.Services.AddScoped<InvitationService>();
 builder.Services.AddScoped<InteractionService>();
 builder.Services.AddScoped<ClientService>();
@@ -86,6 +90,12 @@ app.UseMiddleware<ExceptionMiddleware>();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+
+    using (var scope = app.Services.CreateScope())
+    {
+        var context = scope.ServiceProvider.GetRequiredService<EasygymDbContext>();
+        DataSeeder.Seed(context);
+    }
 }
 
 app.UseHttpsRedirection();
