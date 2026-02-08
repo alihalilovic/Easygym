@@ -331,7 +331,7 @@ const DietPlanForm = () => {
                         <Input
                           placeholder="e.g., High Protein Meal Plan"
                           className="h-11"
-                          disabled={isReadOnly}
+                          disabled={!!isReadOnly}
                           {...field}
                         />
                       </FormControl>

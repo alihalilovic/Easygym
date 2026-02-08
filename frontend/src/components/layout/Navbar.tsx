@@ -17,6 +17,7 @@ import {
   BookOpen,
   Settings as SettingsIcon,
   UtensilsCrossed,
+  LayoutDashboard,
 } from 'lucide-react';
 import clsx from 'clsx';
 
@@ -85,6 +86,11 @@ const Navbar = () => {
   ];
 
   const clientSpecificLinks: NavbarLink[] = [
+    {
+      to: routes.Dashboard,
+      label: 'Dashboard',
+      icon: <LayoutDashboard />,
+    },
     {
       to: routes.WorkoutSessions,
       label: 'Sessions',

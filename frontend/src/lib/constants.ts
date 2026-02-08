@@ -19,6 +19,7 @@ export const routes = {
   MyTrainer: '/my-trainer',
   MyClients: '/my-clients',
   Settings: '/settings',
+  Dashboard: '/dashboard',
   DietPlans: '/diet-plans',
   CreateDietPlan: '/diet-plan/create',
   EditDietPlan: (id: number) => `/diet-plan/${id}/edit`,

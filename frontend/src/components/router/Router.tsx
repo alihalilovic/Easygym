@@ -20,6 +20,7 @@ import Exercises from '@/components/pages/exercises/Exercises';
 import Settings from '@/components/pages/settings/Settings';
 import DietPlans from '@/components/pages/diet-plans/DietPlans';
 import DietPlan from '@/components/pages/diet-plans/DietPlan';
+import Dashboard from '@/components/pages/Dashboard';
 
 const Router = () => {
   return (
@@ -53,6 +54,7 @@ const Router = () => {
               </Route>
             </Route>
             <Route element={<ProtectedClientRoute />}>
+              <Route path={routes.Dashboard} element={<Dashboard />} />
               <Route
                 path={routes.WorkoutSessions}
                 element={<WorkoutSessions />}
