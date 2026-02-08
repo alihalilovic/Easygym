@@ -1,9 +1,10 @@
-using Easygym.Application.Services;
 using Easygym.Application.Interfaces;
+using Easygym.Application.Services;
+using Easygym.Domain.Constants;
 using Easygym.Domain.Entities;
 using Easygym.Domain.Interfaces;
-using Easygym.Domain.Constants;
 using Easygym.Domain.Models.Requests;
+using Easygym.Domain.Models.Responses;
 using Moq;
 using Xunit;
 using System.Collections.Generic;
@@ -35,10 +36,10 @@ namespace Easygym.Tests
         }
 
         [Fact]
-        public async Task TestCreateWorkout_ValidRequest_ReturnsWorkout()
+        public async Task TestCreateWorkout_ValidRequest_ReturnsWorkoutResponse()
         {
             var traineeId = 1;
-            var currentUser = new User { Id = traineeId, Role = Role.Client, Email = "test@test.com" };
+            var currentUser = new UserResponse { Id = traineeId, Role = Role.Client, Email = "test@test.com", CreatedAt = default };
             var request = new CreateWorkoutRequest
             {
                 TraineeId = traineeId,

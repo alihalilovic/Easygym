@@ -1,9 +1,9 @@
-using Easygym.Domain.Entities;
+using Easygym.Domain.Models.Responses;
 
 namespace Easygym.Application.Interfaces
 {
     public interface ICurrentUserService
     {
-        Task<User> GetCurrentUserAsync();
+        Task<UserResponse> GetCurrentUserAsync();
     }
 }

@@ -1,6 +1,7 @@
 using Easygym.Domain.Constants;
 using Easygym.Domain.Entities;
 using Easygym.Domain.Interfaces;
+using Easygym.Domain.Models.Responses;
 
 namespace Easygym.Application.Services
 {
@@ -15,10 +16,11 @@ namespace Easygym.Application.Services
             _currentUserService = currentUserService;
         }
 
-        public async Task<List<User>> GetClientsForTrainerAsync(int trainerId)
+        public async Task<List<UserResponse>> GetClientsForTrainerAsync(int trainerId)
         {
             await CanAccessTrainer(trainerId);
-            return await _interactionRepository.GetClientsForTrainerAsync(trainerId);
+            var users = await _interactionRepository.GetClientsForTrainerAsync(trainerId);
+            return users.Select(u => u.ToResponse()).ToList();
         }
 
         private async Task CanAccessTrainer(int trainerId)

@@ -3,6 +3,7 @@ using Easygym.Domain.Constants;
 using Easygym.Domain.Entities;
 using Easygym.Domain.Exceptions;
 using Easygym.Domain.Interfaces;
+using Easygym.Domain.Models.Responses;
 
 namespace Easygym.Application.Services
 {
@@ -30,14 +31,14 @@ namespace Easygym.Application.Services
             return await _invitationRepository.GetByIdAsync(id) ?? throw new InvitationNotFoundException();
         }
 
-        public async Task<List<Invitation>> GetInvitations()
+        public async Task<List<InvitationResponse>> GetInvitations()
         {
             var currentUser = await _currentUserService.GetCurrentUserAsync();
-
-            return [.. await _invitationRepository.GetAllAsync(currentUser.Id)];
+            var invitations = await _invitationRepository.GetAllAsync(currentUser.Id);
+            return invitations.Select(MapToResponse).ToList();
         }
 
-        public async Task<Invitation> CreateInvitation(CreateInvitationRequest request)
+        public async Task<InvitationResponse> CreateInvitation(CreateInvitationRequest request)
         {
             var currentUser = await _currentUserService.GetCurrentUserAsync();
             var clientSentInvitation = currentUser.Role == Role.Client;
@@ -94,7 +95,8 @@ namespace Easygym.Application.Services
             };
 
             await CanAccessInvitation(invitation.ClientId, invitation.TrainerId);
-            return await _invitationRepository.AddAsync(invitation);
+            var added = await _invitationRepository.AddAsync(invitation);
+            return MapToResponse(added);
         }
 
         public async Task DeleteInvitation(int id)
@@ -103,26 +105,21 @@ namespace Easygym.Application.Services
             await _invitationRepository.DeleteAsync(invitation);
         }
 
-        public async Task<Invitation> ResolveInvitation(int id, InvitationStatus status)
+        public async Task<InvitationResponse> ResolveInvitation(int id, InvitationStatus status)
         {
             var invitation = await GetInvitation(id);
             await CanAccessInvitation(invitation.ClientId, invitation.TrainerId);
 
-            // Make sure that the client has no trainer yet
             if (status == InvitationStatus.Accepted)
             {
                 var client = await _clientRepository.GetByIdAsync(invitation.ClientId) ?? throw new UserNotFoundException();
                 if (client.TrainerId != null)
-                {
                     throw new ValidationException("Client already has a trainer. Please remove existing trainer first.");
-                }
 
-                // Store the trainer id in the client - EF will automatically handle the relationship
                 client.TrainerId = invitation.TrainerId;
                 client.InvitationAcceptedAt = DateTime.UtcNow;
                 await _clientRepository.UpdateAsync(client);
 
-                // Create a history record for the start of this relationship
                 var history = new TrainerClientHistory
                 {
                     TrainerId = invitation.TrainerId,
@@ -135,11 +132,24 @@ namespace Easygym.Application.Services
 
             invitation.Status = status;
             invitation.ResolvedAt = DateTime.UtcNow;
-
             await _invitationRepository.UpdateAsync(invitation);
 
-            return invitation;
+            return MapToResponse(invitation);
         }
+
+        private static InvitationResponse MapToResponse(Invitation i) => new()
+        {
+            Id = i.Id,
+            ClientId = i.ClientId,
+            Client = i.Client?.ToResponse(),
+            TrainerId = i.TrainerId,
+            Trainer = i.Trainer?.ToResponse(),
+            InitiatorId = i.InitiatorId,
+            Status = i.Status,
+            Message = i.Message,
+            CreatedAt = i.CreatedAt,
+            ResolvedAt = i.ResolvedAt
+        };
 
         public async Task CanAccessInvitation(int clientId, int trainerId)
         {
