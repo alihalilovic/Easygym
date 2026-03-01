@@ -85,5 +85,7 @@ namespace Easygym.Application.Services
                 ConnectionEndedAt = h.EndedAt
             }).ToList();
         }
+
+        
     }
 }

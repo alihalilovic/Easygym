@@ -26,5 +26,35 @@ namespace Easygym.Infrastructure.Repositories
 
             return task.Entity;
         }
+        public async Task<IEnumerable<User>> GetUsersByRoleAsync(string role)
+        {
+            return await _context.Users
+                .Where(u => u.Role == role && !u.IsDeleted)
+                .ToListAsync();
+        }
+        public async Task<User?> GetByIdAsync(int id)
+        {
+            return await _context.Users.FindAsync(id);
+        }
+
+        public async Task<bool> DeleteByIdAsync(int id)
+        {
+            var user = await _context.Users.FindAsync(id);
+
+            if (user == null)
+                return false;
+
+            user.IsDeleted = true;
+
+            await _context.SaveChangesAsync();
+
+            return true;
+        }
+        public async Task UpdateAsync(User user)
+        {
+            _context.Users.Update(user);
+            await _context.SaveChangesAsync();
+        }
+
     }
 }

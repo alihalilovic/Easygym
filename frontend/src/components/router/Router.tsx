@@ -20,6 +20,8 @@ import Exercises from '@/components/pages/exercises/Exercises';
 import Settings from '@/components/pages/settings/Settings';
 import DietPlans from '@/components/pages/diet-plans/DietPlans';
 import DietPlan from '@/components/pages/diet-plans/DietPlan';
+import MyList from '@/components/pages/admin/MyList';
+import ProtectedAdminRoute from '@/components/router/ProtectedAdminRoute';
 
 const Router = () => {
   return (
@@ -65,9 +67,13 @@ const Router = () => {
             </Route>
             <Route element={<ProtectedTrainerRoute />}>
               <Route path={routes.MyClients} element={<MyClients />} />
-            </Route>
             <Route path={routes.Invitations} element={<Invitations />} />
           </Route>
+              <Route element={<ProtectedAdminRoute />}>
+              <Route path={routes.MyList} element={<MyList />} />
+              <Route path={routes.CreateUser} element={<Register />} />
+            </Route>
+            </Route>
         </Route>
       </Routes>
     </BrowserRouter>

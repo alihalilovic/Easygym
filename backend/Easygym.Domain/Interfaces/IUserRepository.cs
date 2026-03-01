@@ -6,5 +6,10 @@ namespace Easygym.Domain.Interfaces
     {
         Task<User?> GetUserByEmailAsync(string email);
         Task<User> AddUserAsync(User user);
+
+        Task<IEnumerable<User>> GetUsersByRoleAsync(string role);
+        Task<User?> GetByIdAsync(int id);
+        Task<bool> DeleteByIdAsync(int id);
+        Task UpdateAsync(User user);
     }
 }

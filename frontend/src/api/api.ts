@@ -7,6 +7,7 @@ import workoutSessionService from '@/api/services/workoutSessionService';
 import interactionService from './services/interactionService';
 import clientService from './services/clientService';
 import trainerService from './services/trainerService';
+import adminService from './services/adminService';
 
 axios.defaults.baseURL = import.meta.env.VITE_APP_API_URL;
 
@@ -59,6 +60,7 @@ const api = {
   interactions: interactionService,
   clients: clientService,
   trainers: trainerService,
+  admin:adminService,
 };
 
 export default api;
