@@ -39,5 +39,32 @@ namespace Easygym.Api.Controllers
             var user = await _currentUserService.GetCurrentUserAsync();
             return Ok(user);
         }
+
+        [HttpPut("me")]
+        public async Task<IActionResult> UpdateProfile(
+            [FromBody] UpdateProfileRequest request)
+        {
+            var user = await _currentUserService.GetCurrentUserEntityAsync();
+
+            if (!string.IsNullOrWhiteSpace(request.Name))
+            {
+                user.Name = request.Name;
+            }
+
+            if (!string.IsNullOrWhiteSpace(request.Password))
+            {
+                if (request.Password != request.ConfirmPassword)
+                    return BadRequest("Passwords do not match");
+
+                await _authService.UpdatePasswordAsync(user, request.Password);
+            }
+            else
+            {
+                await _authService.UpdateUserAsync(user);
+            }
+
+            return NoContent();
+        }
+
     }
 }
