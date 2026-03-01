@@ -90,6 +90,7 @@ namespace Easygym.Application.Services
             }).ToList();
         }
 
+        
         public async Task<DashboardStatsResponse> GetDashboardStatsAsync()
         {
             var currentUser = await _currentUserService.GetCurrentUserAsync();

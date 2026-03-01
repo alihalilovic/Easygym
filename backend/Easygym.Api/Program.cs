@@ -11,6 +11,7 @@ using Easygym.Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using System.Security.Claims;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Logging.ClearProviders();
@@ -55,6 +56,7 @@ builder.Services.AddScoped<TrainerService>();
 builder.Services.AddScoped<ExerciseService>();
 builder.Services.AddScoped<DietPlanService>();
 builder.Services.AddScoped<MealLogService>();
+builder.Services.AddScoped<AdminService>();
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("CorsPolicy", policy =>
@@ -67,19 +69,24 @@ builder.Services.AddCors(options =>
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
 var jwtKey = Encoding.UTF8.GetBytes(jwtSettings["Secret"] ?? "");
 
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
-{
-    options.TokenValidationParameters = new TokenValidationParameters
-    {
-        ValidateIssuer = true,
-        ValidateAudience = true,
-        ValidateLifetime = true,
-        ValidateIssuerSigningKey = true,
-        ValidIssuer = jwtSettings["Issuer"],
-        ValidAudience = jwtSettings["Audience"],
-        IssuerSigningKey = new SymmetricSecurityKey(jwtKey)
-    };
-});
+builder.Services
+  .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+  .AddJwtBearer(options =>
+  {
+      options.TokenValidationParameters = new TokenValidationParameters
+      {
+          ValidateIssuer = true,
+          ValidateAudience = true,
+          ValidateLifetime = true,
+          ValidateIssuerSigningKey = true,
+          ValidIssuer = jwtSettings["Issuer"],
+          ValidAudience = jwtSettings["Audience"],
+          IssuerSigningKey = new SymmetricSecurityKey(jwtKey),
+
+          RoleClaimType = ClaimTypes.Role,
+          NameClaimType = ClaimTypes.NameIdentifier
+      };
+  });
 
 builder.Services.AddAuthorization();
 

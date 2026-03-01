@@ -29,7 +29,7 @@ interface NavbarLink {
 }
 
 const Navbar = () => {
-  const { userId, isUserClient, isUserTrainer, logout } = useAuth();
+  const { userId, isUserClient, isUserTrainer, isUserAdmin, logout } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
@@ -110,11 +110,18 @@ const Navbar = () => {
       icon: <Users />,
     },
   ];
-
+    const adminSpecificLinks: NavbarLink[] = [
+    {
+      to: routes.MyList,
+      label: 'My List',
+      icon: <Users />,
+    },
+  ];
   const allLinks: NavbarLink[] = [
     ...(!userId ? nonAuthLinks : []),
     ...(isUserClient ? clientSpecificLinks : []),
     ...(isUserTrainer ? trainerSpecificLinks : []),
+     ...(isUserAdmin ? adminSpecificLinks : []),
     ...(userId ? authLinks : []),
     ...(userId
       ? [

@@ -16,6 +16,7 @@ namespace Easygym.Domain.Entities
         public required string Role { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.Now;
         public string? ProfilePictureUrl { get; set; }
+        public bool IsDeleted { get; set; } = false;
 
         // Navigation properties
         public Client? Client { get; set; }
