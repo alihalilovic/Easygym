@@ -103,13 +103,13 @@ namespace Easygym.Application.Services
         }
         public async Task UpdateUserAsync(User user)
         {
-            await _userRepository.UpdateUserAsync(user);
+            await _userRepository.UpdateAsync(user);
         }
 
         public async Task UpdatePasswordAsync(User user, string newPassword)
         {
             user.Password = BCrypt.Net.BCrypt.HashPassword(newPassword);
-            await _userRepository.UpdateUserAsync(user);
+            await _userRepository.UpdateAsync(user);
         }
     }
 }
