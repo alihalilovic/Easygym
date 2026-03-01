@@ -15,7 +15,7 @@ import { Input } from '@/components/ui/input';
 import FormWrapper from '@/components/ui/widgets/FormWrapper';
 import { UserRole } from '@/types/User';
 import { useAuth } from '@/components/auth/AuthProvider';
-import { Link } from 'react-router';
+import { Link, useNavigate } from 'react-router';
 import {
   UserPlusIcon,
   ShieldCheckIcon,
@@ -23,9 +23,11 @@ import {
   UserIcon,
 } from 'lucide-react';
 import { PasswordStrengthIndicator } from '@/components/ui/PasswordStrengthIndicator';
+import { routes } from '@/lib/constants';
 
 const Register = () => {
   const { register } = useAuth();
+  const navigate = useNavigate();
 
   const accountTypes = [
     {
@@ -83,6 +85,11 @@ const Register = () => {
 
     if (registerResponse?.id) {
       toast.success('Registered successfully');
+      const redirectPath =
+        registerResponse.role === UserRole.Client
+          ? routes.Dashboard
+          : routes.MyClients;
+      navigate(redirectPath);
     } else {
       toast.error(`Failed to register: ${registerResponse}`);
     }

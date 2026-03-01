@@ -14,11 +14,14 @@ import {
 import { Input } from '@/components/ui/input';
 import FormWrapper from '@/components/ui/widgets/FormWrapper';
 import { useAuth } from '@/components/auth/AuthProvider';
-import { Link } from 'react-router';
+import { Link, useNavigate } from 'react-router';
 import { UsersIcon } from 'lucide-react';
+import { UserRole } from '@/types/User';
+import { routes } from '@/lib/constants';
 
 const Login = () => {
   const { login } = useAuth();
+  const navigate = useNavigate();
 
   const FormSchema = z.object({
     email: z.string().email({
@@ -41,6 +44,11 @@ const Login = () => {
     const loginResponse = await login(data);
     if (loginResponse?.id) {
       toast.success('Logged in successfully');
+      const redirectPath =
+        loginResponse.role === UserRole.Client
+          ? routes.Dashboard
+          : routes.MyClients;
+      navigate(redirectPath);
     } else {
       toast.error(`Failed to login: ${loginResponse}`);
     }

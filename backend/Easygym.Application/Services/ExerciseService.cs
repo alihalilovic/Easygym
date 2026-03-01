@@ -3,6 +3,7 @@ using Easygym.Domain.Entities;
 using Easygym.Domain.Exceptions;
 using Easygym.Domain.Interfaces;
 using Easygym.Domain.Models.Requests;
+using Easygym.Domain.Models.Responses;
 
 namespace Easygym.Application.Services
 {
@@ -17,36 +18,29 @@ namespace Easygym.Application.Services
             _currentUserService = currentUserService;
         }
 
-        public async Task<List<Exercise>> GetExercisesAsync()
+        public async Task<List<ExerciseResponse>> GetExercisesAsync()
         {
             var currentUser = await _currentUserService.GetCurrentUserAsync();
-            return await _exerciseRepository.GetExercisesForUserAsync(currentUser.Id);
+            var exercises = await _exerciseRepository.GetExercisesForUserAsync(currentUser.Id);
+            return exercises.Select(MapToResponse).ToList();
         }
 
-        public async Task<Exercise> GetExerciseAsync(int exerciseId)
+        public async Task<ExerciseResponse> GetExerciseAsync(int exerciseId)
         {
             var currentUser = await _currentUserService.GetCurrentUserAsync();
-            var exercise = await _exerciseRepository.GetExerciseAsync(exerciseId);
-
-            if (exercise == null)
-            {
-                throw new ExerciseNotFoundException();
-            }
+            var exercise = await _exerciseRepository.GetExerciseAsync(exerciseId)
+                ?? throw new ExerciseNotFoundException();
 
             ValidateExerciseAccess(currentUser, exercise);
-
-            return exercise;
+            return MapToResponse(exercise);
         }
 
-        public async Task<Exercise> CreateExerciseAsync(CreateExerciseRequest request)
+        public async Task<ExerciseResponse> CreateExerciseAsync(CreateExerciseRequest request)
         {
             var currentUser = await _currentUserService.GetCurrentUserAsync();
 
-            // Don't allow toggling public status for clients
             if (currentUser.Role == Role.Client && request.IsPublic)
-            {
                 throw new ValidationException("Clients cannot toggle public status for exercises");
-            }
 
             var exercise = new Exercise
             {
@@ -59,22 +53,18 @@ namespace Easygym.Application.Services
             };
 
             await _exerciseRepository.AddExerciseAsync(exercise);
-            return exercise;
+            return MapToResponse(exercise);
         }
 
-        public async Task<Exercise> UpdateExerciseAsync(int exerciseId, UpdateExerciseRequest request)
+        public async Task<ExerciseResponse> UpdateExerciseAsync(int exerciseId, UpdateExerciseRequest request)
         {
             var currentUser = await _currentUserService.GetCurrentUserAsync();
-            var exercise = await _exerciseRepository.GetExerciseAsync(exerciseId);
-
-            if (exercise == null)
-            {
-                throw new ExerciseNotFoundException();
-            }
+            var exercise = await _exerciseRepository.GetExerciseAsync(exerciseId)
+                ?? throw new ExerciseNotFoundException();
 
             ValidateExerciseAccess(currentUser, exercise);
-
-            return await _exerciseRepository.UpdateExerciseAsync(exerciseId, request);
+            var updated = await _exerciseRepository.UpdateExerciseAsync(exerciseId, request);
+            return MapToResponse(updated);
         }
 
         public async Task DeleteExerciseAsync(int exerciseId)
@@ -99,19 +89,27 @@ namespace Easygym.Application.Services
             await _exerciseRepository.DeleteExerciseAsync(exerciseId);
         }
 
-        private static void ValidateExerciseAccess(User currentUser, Exercise exercise)
+        private static ExerciseResponse MapToResponse(Exercise e) => new()
         {
-            // Users can always access their own exercises
-            if (exercise.CreatedById == currentUser.Id)
-            {
-                return;
-            }
+            Id = e.Id,
+            Name = e.Name,
+            Description = e.Description,
+            MuscleGroup = e.MuscleGroup,
+            Instructions = e.Instructions,
+            CreatedById = e.CreatedById,
+            CreatedAt = e.CreatedAt,
+            IsPublic = e.IsPublic
+        };
 
-            // If exercise is not owned by user, check if they have access
+        private static void ValidateExerciseAccess(UserResponse currentUser, Exercise exercise)
+        {
+            if (exercise.CreatedById == currentUser.Id)
+                return;
+
             if (currentUser.Role == Role.Client)
             {
-                if (currentUser.Client?.TrainerId != null &&
-                    exercise.CreatedById == currentUser.Client.TrainerId &&
+                if (currentUser.TrainerId != null &&
+                    exercise.CreatedById == currentUser.TrainerId &&
                     exercise.IsPublic)
                 {
                     return;
@@ -120,10 +118,7 @@ namespace Easygym.Application.Services
             }
 
             if (currentUser.Role == Role.Trainer)
-            {
-                // Trainers can only access their own exercises
                 throw new ForbiddenAccessException();
-            }
         }
     }
 }

@@ -1,8 +1,9 @@
 using Easygym.Domain.Constants;
 using Easygym.Domain.Entities;
-using Easygym.Domain.Interfaces;
 using Easygym.Domain.Exceptions;
+using Easygym.Domain.Interfaces;
 using Easygym.Domain.Models.Requests;
+using Easygym.Domain.Models.Responses;
 
 namespace Easygym.Application.Services
 {
@@ -22,61 +23,47 @@ namespace Easygym.Application.Services
             _clientRepository = clientRepository;
         }
 
-        public async Task<List<DietPlan>> GetDietPlansAsync()
+        public async Task<List<DietPlanResponse>> GetDietPlansAsync()
         {
             var currentUser = await _currentUserService.GetCurrentUserAsync();
 
-            // Clients get their assigned diet plans
             if (currentUser.Role == Role.Client)
             {
                 var dietPlans = await _dietPlanRepository.GetDietPlansForClientAsync(currentUser.Id);
-                return dietPlans;
+                return dietPlans.Select(MapToResponse).ToList();
             }
 
-            // Trainers get all diet plans they created
             if (currentUser.Role == Role.Trainer)
             {
                 var dietPlans = await _dietPlanRepository.GetDietPlansByTrainerAsync(currentUser.Id);
-                return dietPlans;
+                return dietPlans.Select(MapToResponse).ToList();
             }
 
-            // Admins can see all diet plans
             return [];
         }
 
-        public async Task<DietPlan> GetDietPlanAsync(int dietPlanId)
+        public async Task<DietPlanResponse> GetDietPlanAsync(int dietPlanId)
         {
             var currentUser = await _currentUserService.GetCurrentUserAsync();
-            var dietPlan = await _dietPlanRepository.GetDietPlanAsync(dietPlanId);
-
-            if (dietPlan == null)
-            {
-                throw new DietPlanNotFoundException();
-            }
+            var dietPlan = await _dietPlanRepository.GetDietPlanAsync(dietPlanId)
+                ?? throw new DietPlanNotFoundException();
 
             ValidateDietPlanAccess(currentUser, dietPlan);
-
-            return dietPlan;
+            return MapToResponse(dietPlan);
         }
 
-        public async Task<DietPlan> CreateDietPlanAsync(CreateDietPlanRequest request)
+        public async Task<DietPlanResponse> CreateDietPlanAsync(CreateDietPlanRequest request)
         {
             var currentUser = await _currentUserService.GetCurrentUserAsync();
 
-            // Validate each day has 1-10 meals
             foreach (var day in request.Days)
             {
                 if (day.Meals.Count < 1 || day.Meals.Count > 10)
-                {
                     throw new ValidationException("Each day must have between 1 and 10 meals");
-                }
             }
 
-            // Only trainers can create diet plans
             if (currentUser.Role != Role.Trainer)
-            {
                 throw new ForbiddenAccessException();
-            }
 
             var dietPlan = new DietPlan
             {
@@ -96,34 +83,31 @@ namespace Easygym.Application.Services
             };
 
             await _dietPlanRepository.AddDietPlanAsync(dietPlan);
-            return dietPlan;
+            return MapToResponse(dietPlan);
         }
 
-        public async Task<DietPlan> UpdateDietPlanAsync(int dietPlanId, UpdateDietPlanRequest request)
+        public async Task<DietPlanResponse> UpdateDietPlanAsync(int dietPlanId, UpdateDietPlanRequest request)
         {
             var currentUser = await _currentUserService.GetCurrentUserAsync();
-            var dietPlan = await _dietPlanRepository.GetDietPlanAsync(dietPlanId) ?? throw new DietPlanNotFoundException();
+            var dietPlan = await _dietPlanRepository.GetDietPlanAsync(dietPlanId)
+                ?? throw new DietPlanNotFoundException();
+
             ValidateDietPlanAccess(currentUser, dietPlan);
 
-            // Only trainers can update diet plans
             if (currentUser.Role == Role.Client)
-            {
                 throw new ForbiddenAccessException();
-            }
 
-            // Validate days structure if provided
             if (request.Days != null)
             {
                 foreach (var day in request.Days)
                 {
                     if (day.Meals.Count < 1 || day.Meals.Count > 10)
-                    {
                         throw new ValidationException("Each day must have between 1 and 10 meals");
-                    }
                 }
             }
 
-            return await _dietPlanRepository.UpdateDietPlanAsync(dietPlanId, request);
+            var updated = await _dietPlanRepository.UpdateDietPlanAsync(dietPlanId, request);
+            return MapToResponse(updated);
         }
 
         public async Task DeleteDietPlanAsync(int dietPlanId)
@@ -210,25 +194,46 @@ namespace Easygym.Application.Services
             await _dietPlanRepository.UpdateAssignmentActiveStatusAsync(dietPlanId, clientId, isActive);
         }
 
-        private static void ValidateDietPlanAccess(User currentUser, DietPlan dietPlan)
+        private static DietPlanResponse MapToResponse(DietPlan dp) => new()
         {
-            // Clients can only access diet plans assigned to them
+            Id = dp.Id,
+            Name = dp.Name,
+            TrainerId = dp.TrainerId,
+            Days = dp.Days.Select(d => new DietPlanDayResponse
+            {
+                Id = d.Id,
+                DayOfWeek = d.DayOfWeek,
+                Meals = d.Meals.Select(m => new MealResponse
+                {
+                    Id = m.Id,
+                    Name = m.Name,
+                    Description = m.Description,
+                    MealType = m.MealType,
+                    Notes = m.Notes
+                }).ToList()
+            }).ToList(),
+            Assignments = dp.Assignments?.Select(a => new DietPlanAssignmentResponse
+            {
+                Id = a.Id,
+                DietPlanId = a.DietPlanId,
+                ClientId = a.ClientId,
+                IsActive = a.IsActive,
+                AssignedAt = a.AssignedAt
+            }).ToList() ?? [],
+            CreatedAt = dp.CreatedAt
+        };
+
+        private static void ValidateDietPlanAccess(UserResponse currentUser, DietPlan dietPlan)
+        {
             if (currentUser.Role == Role.Client)
             {
                 var hasAssignment = dietPlan.Assignments.Any(a => a.ClientId == currentUser.Id);
                 if (!hasAssignment)
-                {
                     throw new ForbiddenAccessException();
-                }
             }
 
-            // Trainers can only access diet plans they created
             if (currentUser.Role == Role.Trainer && dietPlan.TrainerId != currentUser.Id)
-            {
                 throw new ForbiddenAccessException();
-            }
-
-            // Admins can access all diet plans
         }
     }
 }

@@ -51,6 +51,8 @@ namespace Easygym.Infrastructure.Repositories
             return true;
         }
         public async Task UpdateAsync(User user)
+
+        public async Task UpdateUserAsync(User user)
         {
             _context.Users.Update(user);
             await _context.SaveChangesAsync();

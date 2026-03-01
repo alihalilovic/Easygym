@@ -35,7 +35,7 @@ export interface DietPlan {
 
 export interface CreateDietPlanRequest {
   name: string;
-  days: Omit<DietPlanDay, 'id' | 'meals'> & { meals: Omit<Meal, 'id'>[] }[];
+  days: (Omit<DietPlanDay, 'id' | 'meals'> & { meals: Omit<Meal, 'id'>[] })[];
 }
 
 export interface UpdateDietPlanRequest {

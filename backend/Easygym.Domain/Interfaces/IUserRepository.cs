@@ -11,5 +11,6 @@ namespace Easygym.Domain.Interfaces
         Task<User?> GetByIdAsync(int id);
         Task<bool> DeleteByIdAsync(int id);
         Task UpdateAsync(User user);
+        Task UpdateUserAsync(User user);
     }
 }

@@ -21,6 +21,7 @@ export const routes = {
   MyClients: '/my-clients',
   MyList: '/my-list',
   Settings: '/settings',
+  Dashboard: '/dashboard',
   DietPlans: '/diet-plans',
   CreateDietPlan: '/diet-plan/create',
   EditDietPlan: (id: number) => `/diet-plan/${id}/edit`,

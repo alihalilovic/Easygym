@@ -48,7 +48,7 @@ namespace Easygym.Application.Services
                 {
                     clientConnections.Add(new ClientConnectionResponse
                     {
-                        Client = clientUser,
+                        Client = clientUser.ToResponse(client.TrainerId),
                         InvitationAcceptedAt = client.InvitationAcceptedAt
                     });
                 }
@@ -89,7 +89,7 @@ namespace Easygym.Application.Services
 
             return history.Select(h => new ClientConnectionResponse
             {
-                Client = h.Client!,
+                Client = h.Client!.ToResponse(),
                 InvitationAcceptedAt = h.StartedAt,
                 ConnectionEndedAt = h.EndedAt
             }).ToList();

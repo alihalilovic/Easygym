@@ -65,9 +65,6 @@ const ExerciseCard = ({ exercise, isOwnExercise }: ExerciseCardProps) => {
         </CardHeader>
         <CardContent>
           <div className="flex flex-wrap gap-2">
-            {exercise.category && (
-              <Badge variant="secondary">{exercise.category}</Badge>
-            )}
             {exercise.muscleGroup && (
               <Badge variant="outline">{exercise.muscleGroup}</Badge>
             )}

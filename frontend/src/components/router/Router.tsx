@@ -22,6 +22,7 @@ import DietPlans from '@/components/pages/diet-plans/DietPlans';
 import DietPlan from '@/components/pages/diet-plans/DietPlan';
 import MyList from '@/components/pages/admin/MyList';
 import ProtectedAdminRoute from '@/components/router/ProtectedAdminRoute';
+import Dashboard from '@/components/pages/Dashboard';
 
 const Router = () => {
   return (
@@ -55,6 +56,7 @@ const Router = () => {
               </Route>
             </Route>
             <Route element={<ProtectedClientRoute />}>
+              <Route path={routes.Dashboard} element={<Dashboard />} />
               <Route
                 path={routes.WorkoutSessions}
                 element={<WorkoutSessions />}
