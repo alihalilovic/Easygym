@@ -62,6 +62,7 @@ const Router = () => {
                 element={<WorkoutSessions />}
               />
               <Route path={routes.MyTrainer} element={<MyTrainer />} />
+              <Route path={routes.Invitations} element={<Invitations />} />
               <Route path={routes.WorkoutSession}>
                 <Route path="create" element={<WorkoutSession />} />
                 <Route path=":id" element={<WorkoutSession />} />

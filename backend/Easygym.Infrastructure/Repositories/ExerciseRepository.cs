@@ -102,5 +102,32 @@ namespace Easygym.Infrastructure.Repositories
         {
             return await _context.Sets.AnyAsync(s => s.ExerciseId == exerciseId);
         }
+       public async Task<(List<Exercise> Items, int TotalCount)>
+            GetPagedAsync(int page, int pageSize, string? search)
+        {
+            var query = _context.Exercises
+                .Include(e => e.CreatedBy)
+                .AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                search = search.ToLower();
+
+                query = query.Where(e =>
+                    e.Name.ToLower().Contains(search) ||
+                    e.CreatedBy!.Name.ToLower().Contains(search)
+                );
+            }
+
+            var totalCount = await query.CountAsync();
+
+            var items = await query
+                .OrderByDescending(e => e.CreatedAt)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return (items, totalCount);
+        }
     }
 }

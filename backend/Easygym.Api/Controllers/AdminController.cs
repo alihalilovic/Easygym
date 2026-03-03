@@ -47,6 +47,28 @@ public class AdminController : ControllerBase
 
         return NoContent();
     }
+    [HttpGet("workouts")]
+    public async Task<IActionResult> GetAllWorkouts(
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10,
+        [FromQuery] string? search = null)
+    {
+        var result = await _adminService
+            .GetAllWorkoutsAsync(page, pageSize, search);
+
+        return Ok(result);
+    }
+    [HttpGet("exercises")]
+    public async Task<IActionResult> GetAllExercises(   
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10,
+        [FromQuery] string? search = null)
+        {
+            var result = await _adminService
+                .GetAllExercisesAsync(page, pageSize, search);
+
+            return Ok(result);
+        }
 }
 
 

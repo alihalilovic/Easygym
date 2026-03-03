@@ -11,5 +11,8 @@ namespace Easygym.Domain.Interfaces
         Task DeleteWorkoutAsync(int workoutId);
         Task<Workout> GetWorkoutAsync(int workoutId);
         Task<List<Workout>> GetWorkoutsByTrainerAsync(int trainerId);
+        Task<List<Workout>> GetAllWithRelationsAsync();
+        Task<(List<Workout> Items, int TotalCount)> 
+        GetPagedAsync(int page, int pageSize, string? search);
     }
 }

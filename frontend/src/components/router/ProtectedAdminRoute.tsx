@@ -9,7 +9,7 @@ const ProtectedAdminRoute = () => {
 
   if (!user) return <Navigate to={routes.Login} replace />;
 
-  if (!isUserAdmin) return null;   // ← OVO JE KLJUČ
+  if (!isUserAdmin) return null;  
 
   return <Outlet />;
 };
