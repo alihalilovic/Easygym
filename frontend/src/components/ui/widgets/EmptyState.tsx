@@ -10,8 +10,8 @@ const EmptyState = ({
   title: string;
   description: string;
   buttonText?: string;
-  buttonAction: () => void;
-  buttonIcon: React.ReactNode;
+  buttonAction?: () => void;
+  buttonIcon?: React.ReactNode;
 }) => {
   return (
     <div>

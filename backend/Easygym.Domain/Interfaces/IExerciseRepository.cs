@@ -11,5 +11,7 @@ namespace Easygym.Domain.Interfaces
         Task<Exercise> UpdateExerciseAsync(int exerciseId, UpdateExerciseRequest request);
         Task DeleteExerciseAsync(int exerciseId);
         Task<bool> IsExerciseInUseAsync(int exerciseId);
+        Task<(List<Exercise> Items, int TotalCount)>
+        GetPagedAsync(int page, int pageSize, string? search);
     }
 }

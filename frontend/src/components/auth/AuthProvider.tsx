@@ -54,7 +54,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             return getErrorMessage(error);
         }
     }, [setMeUser]);
-    console.log('ROLE:', user?.role, 'IS ADMIN:', isUserAdmin);
+    console.log('ROLE:', user?.role, 'IS Client:', isUserClient);
     const register = useCallback(async (userData: UserRegisterRequest) => {
         try {
             const token = await api.auth.register(userData);

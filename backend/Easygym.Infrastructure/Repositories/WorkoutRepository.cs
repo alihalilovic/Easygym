@@ -117,6 +117,40 @@ namespace Easygym.Infrastructure.Repositories
                 .Where(w => w.TrainerId == trainerId)
                 .ToListAsync();
         }
+        public async Task<List<Workout>> GetAllWithRelationsAsync()
+        {
+            return await _context.Workouts
+                .Include(w => w.Trainer)
+                .Include(w => w.Trainee)
+                .ToListAsync();
+        }
+        public async Task<(List<Workout> Items, int TotalCount)> 
+        GetPagedAsync(int page, int pageSize, string? search)
+        {
+            var query = _context.Workouts
+                .Include(w => w.Trainer)
+                .Include(w => w.Trainee)
+                .AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                search = search.ToLower();
+                query = query.Where(w =>
+                    w.Name.ToLower().Contains(search) ||
+                    w.Trainer.Name.ToLower().Contains(search) ||
+                    w.Trainee.Name.ToLower().Contains(search)
+                );
+            }
+
+            var totalCount = await query.CountAsync();
+
+            var items = await query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return (items, totalCount);
+        }
 
     }
 }
