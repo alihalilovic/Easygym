@@ -10,14 +10,17 @@ namespace Easygym.Application.Services
         private readonly IUserRepository _userRepository;
         private readonly IWorkoutRepository _workoutRepository;
         private readonly IExerciseRepository _exerciseRepository;
+        private readonly IDietPlanRepository _dietPlanRepository;
         public AdminService(
             IUserRepository userRepository,
             IWorkoutRepository workoutRepository,
-            IExerciseRepository exercisesRepository)
+            IExerciseRepository exercisesRepository,
+            IDietPlanRepository dietPlanRepository)
         {
             _userRepository = userRepository;
             _workoutRepository = workoutRepository;
             _exerciseRepository=exercisesRepository;
+            _dietPlanRepository=dietPlanRepository;
         }
         public async Task<IEnumerable<User>> GetClientsAsync()
         {
@@ -98,6 +101,33 @@ namespace Easygym.Application.Services
                 Page = page,
                 PageSize = pageSize
             };
+        }
+        public async Task<PagedResponse<DietPlanAdminDTO>> GetAllDietPlansAsync(int page, int pageSize, string? search)
+        {
+            var (items, totalCount) = await _dietPlanRepository.GetPagedAsync(page, pageSize, search);
+
+            var mapped = items.Select(d => new DietPlanAdminDTO
+            {
+                Id = d.Id,
+                Name = d.Name,
+                TrainerName = d.Trainer!.Name,
+                ClientName = d.Assignments.FirstOrDefault()?.Client?.Name ?? "-",
+                CreatedAt = d.CreatedAt
+            }).ToList();
+
+            return new PagedResponse<DietPlanAdminDTO>
+            {
+                Items = mapped,
+                TotalCount = totalCount,
+                Page = page,
+                PageSize = pageSize
+            };
+        }
+
+        public async Task<bool> DeleteDietPlanAsync(int id)
+        {
+            await _dietPlanRepository.DeleteDietPlanAsync(id);
+            return true;
         }
     }
 }

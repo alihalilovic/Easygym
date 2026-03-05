@@ -5,12 +5,14 @@ import { ExerciseAdmin, Pagedresponse } from '@/types/AdminExercise';
 export const useAdminExercises = (
   page: number,
   pageSize: number,
-  search: string
+  search: string,
+  isAdmin:boolean,
 ) => {
   return useQuery<Pagedresponse<ExerciseAdmin>>({
     queryKey: ['adminExercises', page, pageSize, search],
     queryFn: () =>
       adminService.getExercises(page, pageSize, search),
     placeholderData: (prev) => prev,
+    enabled:isAdmin,
   });
 };

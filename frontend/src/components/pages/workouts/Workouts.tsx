@@ -22,7 +22,7 @@ const Workouts = () => {
   const {
     data: adminResponse,
     isLoading: adminLoading,
-  } = useAdminWorkouts(page, pageSize, search);
+  } = useAdminWorkouts(page, pageSize, search,isUserAdmin);
 
   const workouts = isUserAdmin
     ? adminResponse?.items ?? []

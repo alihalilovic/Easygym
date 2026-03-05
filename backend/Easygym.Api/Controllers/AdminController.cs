@@ -69,6 +69,26 @@ public class AdminController : ControllerBase
 
             return Ok(result);
         }
+    [HttpGet("dietplans")]
+    public async Task<IActionResult> GetDietPlans(
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 5,
+        [FromQuery] string? search = null)
+    {
+        var result = await _adminService.GetAllDietPlansAsync(page, pageSize, search);
+        return Ok(result);
+    }
+
+    [HttpDelete("dietplans/{id}")]
+    public async Task<IActionResult> DeleteDietPlan(int id)
+    {
+        var result = await _adminService.DeleteDietPlanAsync(id);
+
+        if (!result)
+            return NotFound();
+
+        return NoContent();
+    }
 }
 
 

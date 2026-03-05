@@ -2,12 +2,14 @@ import { useState } from 'react';
 import ExerciseDialog from '@/components/pages/exercises/ExerciseDialog';
 import DeleteExerciseDialog from '@/components/pages/exercises/DeleteExerciseDialog';
 import { Button } from '@/components/ui/button';
-import { PlusCircleIcon, Search } from 'lucide-react';
+import { PlusCircleIcon, Search, Pencil, Trash2, Users } from 'lucide-react';
 import EmptyState from '@/components/ui/widgets/EmptyState';
 import { useExercises } from '@/hooks/useExercises';
 import { useAdminExercises } from '@/hooks/useAdminExercise';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { Badge } from '@/components/ui/badge';
+import { SortableTable, Column } from '@/components/ui/widgets/SortableTable';
+import { Exercise } from '@/types/Exercise';
 
 const Exercises = () => {
   const { isUserAdmin, userId } = useAuth();
@@ -16,15 +18,12 @@ const Exercises = () => {
   const [search, setSearch] = useState('');
   const pageSize = 5;
 
-  const { data: userExercises = [], isLoading: userLoading } =
-    useExercises();
+  const { data: userExercises = [], isLoading: userLoading } = useExercises();
 
   const { data: adminResponse, isLoading: adminLoading } =
-    useAdminExercises(page, pageSize, search);
+    useAdminExercises(page, pageSize, search,isUserAdmin);
 
-  const exercises = isUserAdmin
-    ? adminResponse?.items ?? []
-    : userExercises;
+  const exercises = isUserAdmin ? adminResponse?.items ?? [] : userExercises;
 
   const totalPages = isUserAdmin
     ? Math.ceil((adminResponse?.totalCount ?? 0) / pageSize)
@@ -35,11 +34,103 @@ const Exercises = () => {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [selectedExercise, setSelectedExercise] = useState<any>(null);
+  const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(
+    null
+  );
 
   const handleCreateExercise = () => {
     setIsCreateDialogOpen(true);
   };
+
+  const handleEditExercise = (exercise: Exercise) => {
+    setSelectedExercise(exercise);
+    setIsEditDialogOpen(true);
+  };
+
+  const handleDeleteExercise = (exercise: Exercise) => {
+    setSelectedExercise(exercise);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const columns: Column<Exercise>[] = [
+    {
+      key: 'name',
+      label: 'Name',
+      sortable: true,
+      render: (exercise) => (
+        <div className="flex items-center gap-2">
+          <span className="font-medium">{exercise.name}</span>
+          {exercise.isPublic && (
+            <Badge variant="secondary" className="gap-1">
+              <Users className="h-3 w-3" />
+              Shared
+            </Badge>
+          )}
+        </div>
+      ),
+      className: 'max-w-[200px]',
+    },
+    {
+      key: 'description',
+      label: 'Description',
+      sortable: false,
+      render: (exercise) => (
+        <div className="max-w-md overflow-hidden">
+          <span className="text-muted-foreground line-clamp-2 break-words">
+            {exercise.description || '-'}
+          </span>
+        </div>
+      ),
+      className: 'max-w-[300px] truncate',
+    },
+    {
+      key: 'muscleGroup',
+      label: 'Muscle Group',
+      sortable: true,
+      render: (exercise) =>
+        exercise.muscleGroup ? (
+          <Badge variant="outline">{exercise.muscleGroup}</Badge>
+        ) : (
+          '-'
+        ),
+      className: 'w-[150px]',
+    },
+    {
+      key: 'actions',
+      label: 'Actions',
+      sortable: false,
+      render: (exercise) => {
+        const isOwnExercise = exercise.createdById === userId;
+        return isOwnExercise ? (
+          <div className="flex gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleEditExercise(exercise);
+              }}
+            >
+              <Pencil className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleDeleteExercise(exercise);
+              }}
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </div>
+        ) : (
+          <span className="text-muted-foreground text-sm">View only</span>
+        );
+      },
+      className: 'w-[120px]',
+    },
+  ];
 
   if (isLoading) {
     return <div className="p-6 text-muted-foreground">Loading...</div>;
@@ -47,7 +138,6 @@ const Exercises = () => {
 
   return (
     <div className="flex flex-col gap-6 p-6">
-
       {!isUserAdmin && (
         <Button className="self-start" onClick={handleCreateExercise}>
           <PlusCircleIcon className="h-4 w-4 mr-2" />
@@ -119,19 +209,21 @@ const Exercises = () => {
             </div>
           </>
         ) : (
-          <div className="text-muted-foreground">
-            You have {userExercises.length} exercises.
-          </div>
+          <SortableTable
+            data={userExercises}
+            columns={columns}
+            emptyMessage="No exercises found"
+          />
         )
       ) : (
         <EmptyState
           title="No exercises found"
           description={
             isUserAdmin
-              ? "No exercises match your search."
-              : "Create your first exercise to build your library."
+              ? 'No exercises match your search.'
+              : 'Create your first exercise to build your library.'
           }
-          buttonText={!isUserAdmin ? "Create Exercise" : undefined}
+          buttonText={!isUserAdmin ? 'Create Exercise' : undefined}
           buttonAction={!isUserAdmin ? handleCreateExercise : undefined}
           buttonIcon={!isUserAdmin ? <PlusCircleIcon /> : undefined}
         />

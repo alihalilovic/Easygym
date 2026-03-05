@@ -19,5 +19,6 @@ namespace Easygym.Domain.Interfaces
         Task UnassignDietPlanFromClientAsync(int dietPlanId, int clientId);
         Task DeactivateAllAssignmentsForClientAsync(int clientId);
         Task UpdateAssignmentActiveStatusAsync(int dietPlanId, int clientId, bool isActive);
+        Task<(List<DietPlan> Items, int TotalCount)> GetPagedAsync(int page, int pageSize, string? search);
     }
 }

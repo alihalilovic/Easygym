@@ -226,5 +226,34 @@ namespace Easygym.Infrastructure.Repositories
                 await _context.SaveChangesAsync();
             }
         }
+        public async Task<(List<DietPlan> Items, int TotalCount)> GetPagedAsync(int page, int pageSize, string? search)
+        {
+            var query = _context.DietPlans
+                .Include(d => d.Trainer)
+                .Include(d => d.Assignments)
+                    .ThenInclude(a => a.Client)
+                .AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                var s = search.ToLower();
+
+                query = query.Where(d =>
+                    d.Name.ToLower().Contains(s) ||
+                    (d.Trainer != null && d.Trainer.Name.ToLower().Contains(s)) ||
+                    d.Assignments.Any(a => a.Client != null && a.Client.Name.ToLower().Contains(s))
+                );
+            }
+
+            var totalCount = await query.CountAsync();
+
+            var items = await query
+                .OrderByDescending(d => d.CreatedAt)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return (items, totalCount);
+        }
     }
 }
