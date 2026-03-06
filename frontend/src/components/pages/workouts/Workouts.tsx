@@ -1,65 +1,84 @@
-import { useState } from 'react';
-import WorkoutCard from '@/components/pages/workouts/WorkoutCard';
-import { Button } from '@/components/ui/button';
-import { useNavigate } from 'react-router';
-import { routes } from '@/lib/constants';
-import { PlusCircleIcon, Search } from 'lucide-react';
-import EmptyState from '@/components/ui/widgets/EmptyState';
-import { useWorkouts } from '@/hooks/useWorkouts';
-import { useAdminWorkouts } from '@/hooks/useAdminWorkouts';
-import { useAuth } from '@/components/auth/AuthProvider';
+import { useState, useMemo } from 'react'
+import WorkoutCard from '@/components/pages/workouts/WorkoutCard'
+import { Button } from '@/components/ui/button'
+import { useNavigate } from 'react-router'
+import { routes } from '@/lib/constants'
+import { PlusCircleIcon, Search, ArrowUp, ArrowDown } from 'lucide-react'
+import EmptyState from '@/components/ui/widgets/EmptyState'
+import { useWorkouts } from '@/hooks/useWorkouts'
+import { useAdminWorkouts } from '@/hooks/useAdminWorkouts'
+import { useAuth } from '@/components/auth/AuthProvider'
+import { useTranslation } from 'react-i18next'
+import LanguageSwitcher from '@/components/ui/LanguageSwitcher'
 
 const Workouts = () => {
-  const navigate = useNavigate();
-  const { isUserAdmin } = useAuth();
+  const navigate = useNavigate()
+  const { isUserAdmin } = useAuth()
+  const { t } = useTranslation()
 
-  const [search, setSearch] = useState('');
-  const [page, setPage] = useState(1);
-  const pageSize = 5;
+  const [search, setSearch] = useState('')
+  const [page, setPage] = useState(1)
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
 
-  const { data: userWorkouts = [], isLoading: userLoading } = useWorkouts();
+  const pageSize = 5
 
-  const {
-    data: adminResponse,
-    isLoading: adminLoading,
-  } = useAdminWorkouts(page, pageSize, search,isUserAdmin);
+  const { data: userWorkouts = [], isLoading: userLoading } = useWorkouts()
 
-  const workouts = isUserAdmin
-    ? adminResponse?.items ?? []
-    : userWorkouts;
+  const { data: adminResponse, isLoading: adminLoading } =
+    useAdminWorkouts(page, pageSize, search, isUserAdmin)
 
-  const totalCount = isUserAdmin
-    ? adminResponse?.totalCount ?? 0
-    : 0;
+  const workouts = isUserAdmin ? adminResponse?.items ?? [] : userWorkouts
 
-  const totalPages = isUserAdmin
-    ? Math.ceil(totalCount / pageSize)
-    : 0;
+  const totalCount = isUserAdmin ? adminResponse?.totalCount ?? 0 : 0
 
-  const isLoading = isUserAdmin ? adminLoading : userLoading;
+  const totalPages = isUserAdmin ? Math.ceil(totalCount / pageSize) : 0
+
+  const isLoading = isUserAdmin ? adminLoading : userLoading
 
   const handleCreateWorkout = () => {
-    navigate(routes.CreateWorkout);
-  };
+    navigate(routes.CreateWorkout)
+  }
 
   const handleSearchChange = (value: string) => {
-    setSearch(value);
-    setPage(1);
-  };
+    setSearch(value)
+    setPage(1)
+  }
+
+  const handleSort = () => {
+    setSortDirection((prev) => (prev === 'asc' ? 'desc' : 'asc'))
+  }
+
+  const sortedWorkouts = useMemo(() => {
+    const sorted = [...workouts].sort((a: any, b: any) => {
+      const aValue = a.name.toLowerCase()
+      const bValue = b.name.toLowerCase()
+
+      if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1
+      if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1
+      return 0
+    })
+
+    return sorted
+  }, [workouts, sortDirection])
 
   if (isLoading) {
-    return <div className="p-6 text-muted-foreground">Loading workouts...</div>;
+    return <div className="p-6 text-muted-foreground">{t('common.loading')}</div>
   }
 
   return (
     <div className="flex flex-col gap-6 p-6">
+
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold">Workouts</h2>
+        <h2 className="text-2xl font-bold">
+          {t('workouts.title')}
+        </h2>
+
+        {isUserAdmin && <LanguageSwitcher />}
 
         {!isUserAdmin && (
           <Button onClick={handleCreateWorkout}>
             <PlusCircleIcon className="h-4 w-4 mr-2" />
-            Create Workout
+            {t('workouts.create')}
           </Button>
         )}
       </div>
@@ -70,8 +89,8 @@ const Workouts = () => {
           type="text"
           placeholder={
             isUserAdmin
-              ? 'Search by workout, trainer or client...'
-              : 'Search workouts...'
+              ? t('workouts.searchAdmin')
+              : t('workouts.search')
           }
           value={search}
           onChange={(e) => handleSearchChange(e.target.value)}
@@ -79,47 +98,85 @@ const Workouts = () => {
         />
       </div>
 
-      {workouts.length > 0 ? (
+      {sortedWorkouts.length > 0 ? (
         isUserAdmin ? (
           <>
             <div className="overflow-x-auto rounded-xl border bg-card shadow-sm">
               <table className="min-w-full text-sm">
+
                 <thead className="bg-muted/50 text-muted-foreground uppercase text-xs tracking-wide">
                   <tr>
-                    <th className="px-6 py-3 text-left">Workout</th>
-                    <th className="px-6 py-3 text-left">Trainer</th>
-                    <th className="px-6 py-3 text-left">Client</th>
-                    <th className="px-6 py-3 text-left">Created</th>
+
+                    <th
+                      className="px-6 py-3 text-left cursor-pointer"
+                      onClick={handleSort}
+                    >
+                      <div className="flex items-center gap-2">
+                        {t('workouts.workout')}
+                        {sortDirection === 'asc' ? (
+                          <ArrowUp className="h-3 w-3" />
+                        ) : (
+                          <ArrowDown className="h-3 w-3" />
+                        )}
+                      </div>
+                    </th>
+
+                    <th className="px-6 py-3 text-left">
+                      {t('workouts.trainer')}
+                    </th>
+
+                    <th className="px-6 py-3 text-left">
+                      {t('workouts.client')}
+                    </th>
+
+                    <th className="px-6 py-3 text-left">
+                      {t('workouts.created')}
+                    </th>
+
                   </tr>
                 </thead>
+
                 <tbody className="divide-y">
-                  {workouts.map((w: any) => (
+                  {sortedWorkouts.map((w: any) => (
                     <tr key={w.id} className="hover:bg-muted/40 transition-colors">
-                      <td className="px-6 py-4 font-medium">{w.name}</td>
-                      <td className="px-6 py-4">{w.trainerName}</td>
-                      <td className="px-6 py-4">{w.clientName}</td>
+
+                      <td className="px-6 py-4 font-medium">
+                        {w.name}
+                      </td>
+
+                      <td className="px-6 py-4">
+                        {w.trainerName}
+                      </td>
+
+                      <td className="px-6 py-4">
+                        {w.clientName}
+                      </td>
+
                       <td className="px-6 py-4 text-muted-foreground">
                         {new Date(w.createdAt).toLocaleDateString()}
                       </td>
+
                     </tr>
                   ))}
                 </tbody>
+
               </table>
             </div>
 
-            {/* PAGINATION */}
             <div className="flex items-center justify-between mt-4">
+
               <div className="text-sm text-muted-foreground">
-                Page {page} of {totalPages}
+                {t('common.page')} {page} {t('common.of')} {totalPages}
               </div>
 
               <div className="flex gap-2">
+
                 <Button
                   variant="outline"
                   disabled={page === 1}
                   onClick={() => setPage((prev) => prev - 1)}
                 >
-                  Previous
+                  {t('common.previous')}
                 </Button>
 
                 <Button
@@ -127,8 +184,9 @@ const Workouts = () => {
                   disabled={page === totalPages}
                   onClick={() => setPage((prev) => prev + 1)}
                 >
-                  Next
+                  {t('common.next')}
                 </Button>
+
               </div>
             </div>
           </>
@@ -143,14 +201,14 @@ const Workouts = () => {
         <>
           {isUserAdmin ? (
             <EmptyState
-              title="No workouts found"
-              description="No workouts match your search."
+              title={t('workouts.noResults')}
+              description={t('workouts.noResultsDescription')}
             />
           ) : (
             <EmptyState
-              title="No workouts yet"
-              description="Create your first workout to get started."
-              buttonText="Create Your First Workout"
+              title={t('workouts.noWorkouts')}
+              description={t('workouts.createFirst')}
+              buttonText={t('workouts.createFirstButton')}
               buttonAction={handleCreateWorkout}
               buttonIcon={<PlusCircleIcon className="h-4 w-4" />}
             />
@@ -158,7 +216,7 @@ const Workouts = () => {
         </>
       )}
     </div>
-  );
-};
+  )
+}
 
-export default Workouts;
+export default Workouts
