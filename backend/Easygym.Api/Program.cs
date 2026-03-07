@@ -101,6 +101,7 @@ if (app.Environment.IsDevelopment())
     using (var scope = app.Services.CreateScope())
     {
         var context = scope.ServiceProvider.GetRequiredService<EasygymDbContext>();
+        context.Database.Migrate();
         DataSeeder.Seed(context);
     }
 }
