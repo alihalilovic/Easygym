@@ -70,11 +70,6 @@ const Navbar = () => {
       icon: <BookOpen />,
     },
     {
-      to: routes.Invitations,
-      label: 'Invitations',
-      icon: <Mail />,
-    },
-    {
       to: routes.Profile,
       label: 'Profile',
       icon: <User />,
@@ -102,6 +97,11 @@ const Navbar = () => {
       label: 'My Trainer',
       icon: <User />,
     },
+        {
+      to: routes.Invitations,
+      label: 'Invitations',
+      icon: <Mail />,
+    },
   ];
 
   const trainerSpecificLinks: NavbarLink[] = [
@@ -109,6 +109,11 @@ const Navbar = () => {
       to: routes.MyClients,
       label: 'My Clients',
       icon: <Users />,
+    },
+        {
+      to: routes.Invitations,
+      label: 'Invitations',
+      icon: <Mail />,
     },
   ];
     const adminSpecificLinks: NavbarLink[] = [
