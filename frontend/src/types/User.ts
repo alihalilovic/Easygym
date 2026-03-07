@@ -11,6 +11,7 @@ export interface User {
   password: string;
   role: UserRole;
   createdAt: Date;
+  deletedAt?: Date | null;
   profilePictureUrl?: string | null;
 }
 

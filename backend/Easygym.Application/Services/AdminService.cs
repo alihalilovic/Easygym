@@ -3,6 +3,7 @@ using Easygym.Domain.Entities;
 using Easygym.Domain.Interfaces;
 using Easygym.Application.DTOs.Admin;
 using Easygym.Application.DTOs.Common;
+
 namespace Easygym.Application.Services
 {
     public class AdminService
@@ -11,26 +12,43 @@ namespace Easygym.Application.Services
         private readonly IWorkoutRepository _workoutRepository;
         private readonly IExerciseRepository _exerciseRepository;
         private readonly IDietPlanRepository _dietPlanRepository;
+        private readonly ITrainerRepository _trainerRepository;
+        private readonly IGenericRepository<Client> _clientRepository;
+
         public AdminService(
             IUserRepository userRepository,
             IWorkoutRepository workoutRepository,
             IExerciseRepository exercisesRepository,
-            IDietPlanRepository dietPlanRepository)
+            IDietPlanRepository dietPlanRepository,
+            ITrainerRepository trainerRepository,
+             IGenericRepository<Client> clientRepository)
         {
             _userRepository = userRepository;
             _workoutRepository = workoutRepository;
-            _exerciseRepository=exercisesRepository;
-            _dietPlanRepository=dietPlanRepository;
+            _exerciseRepository = exercisesRepository;
+            _dietPlanRepository = dietPlanRepository;
+            _trainerRepository=trainerRepository;
+            _clientRepository=clientRepository;
         }
+
         public async Task<IEnumerable<User>> GetClientsAsync()
         {
-            return await _userRepository.GetUsersByRoleAsync(Role.Client);
+            var users = await _userRepository.GetUsersByRoleAsync(Role.Client);
+            return users.Where(u => !u.IsDeleted);
         }
 
         public async Task<IEnumerable<User>> GetTrainersAsync()
         {
-            return await _userRepository.GetUsersByRoleAsync(Role.Trainer);
+            var users = await _userRepository.GetUsersByRoleAsync(Role.Trainer);
+            return users.Where(u => !u.IsDeleted);
         }
+
+        public async Task<IEnumerable<User>> GetDeletedUsersAsync()
+        {
+            var users = await _userRepository.GetAllAsync();
+            return users.Where(u => u.IsDeleted);
+        }
+
         public async Task<bool> DeleteUserAsync(int userId)
         {
             var user = await _userRepository.GetByIdAsync(userId);
@@ -38,8 +56,59 @@ namespace Easygym.Application.Services
             if (user == null || user.Role == Role.Admin)
                 return false;
 
-            return await _userRepository.DeleteByIdAsync(userId);
+            user.IsDeleted = true;
+            user.DeletedAt = DateTime.Now;
+
+            await _userRepository.UpdateAsync(user);
+
+            return true;
         }
+
+        public async Task<bool> RestoreUserAsync(int userId)
+        {
+            var user = await _userRepository.GetByIdAsync(userId);
+
+            if (user == null)
+                return false;
+
+            user.IsDeleted = false;
+            user.DeletedAt = null;
+
+            await _userRepository.UpdateAsync(user);
+
+            return true;
+        }
+
+       public async Task<bool> PermanentlyDeleteUserAsync(int id)
+        {
+            var user = await _userRepository.GetByIdAsync(id);
+
+            if (user == null || user.Role == Role.Admin)
+                return false;
+
+            if (user.Role == Role.Client)
+            {
+                var client = await _clientRepository.GetByIdAsync(id);
+                if (client != null)
+                {
+                    await _clientRepository.DeleteAsync(client);
+                }
+            }
+
+            if (user.Role == Role.Trainer)
+            {
+                var trainer = await _trainerRepository.GetByIdAsync(id);
+                if (trainer != null)
+                {
+                    await _trainerRepository.DeleteAsync(trainer);
+                }
+            }
+
+            await _userRepository.DeletePermanentAsync(id);
+
+            return true;
+        }
+
         public async Task<bool> UpdateUserAsync(int id, UpdateUserRequest request)
         {
             var user = await _userRepository.GetByIdAsync(id);
@@ -54,7 +123,8 @@ namespace Easygym.Application.Services
 
             return true;
         }
-        public async Task<PagedResponse<WorkoutAdminDTO>> 
+
+        public async Task<PagedResponse<WorkoutAdminDTO>>
         GetAllWorkoutsAsync(int page, int pageSize, string? search)
         {
             var (items, totalCount) =
@@ -77,8 +147,9 @@ namespace Easygym.Application.Services
                 PageSize = pageSize
             };
         }
+
         public async Task<PagedResponse<ExerciseAdminDto>>
-            GetAllExercisesAsync(int page, int pageSize, string? search)
+        GetAllExercisesAsync(int page, int pageSize, string? search)
         {
             if (page <= 0) page = 1;
             if (pageSize <= 0) pageSize = 10;
@@ -102,9 +173,12 @@ namespace Easygym.Application.Services
                 PageSize = pageSize
             };
         }
-        public async Task<PagedResponse<DietPlanAdminDTO>> GetAllDietPlansAsync(int page, int pageSize, string? search)
+
+        public async Task<PagedResponse<DietPlanAdminDTO>>
+        GetAllDietPlansAsync(int page, int pageSize, string? search)
         {
-            var (items, totalCount) = await _dietPlanRepository.GetPagedAsync(page, pageSize, search);
+            var (items, totalCount) =
+                await _dietPlanRepository.GetPagedAsync(page, pageSize, search);
 
             var mapped = items.Select(d => new DietPlanAdminDTO
             {
@@ -128,6 +202,63 @@ namespace Easygym.Application.Services
         {
             await _dietPlanRepository.DeleteDietPlanAsync(id);
             return true;
+        }
+
+       public bool BackupDatabase()
+        {
+            var backendPath = Directory.GetCurrentDirectory();
+
+            var projectRoot = Directory.GetParent(backendPath)!.Parent!.FullName;
+
+            var dbPath = Path.Combine(backendPath, "easygym.db");
+
+            var backupFolder = Path.Combine(projectRoot, "db-backups");
+
+            if (!Directory.Exists(backupFolder))
+                Directory.CreateDirectory(backupFolder);
+
+            var backupFile = $"easygym.db.bak.{DateTime.Now:yyyyMMdd_HHmmss}";
+
+            var backupPath = Path.Combine(backupFolder, backupFile);
+
+            File.Copy(dbPath, backupPath, true);
+
+            return true;
+        }
+
+       public bool RestoreDatabase(string fileName)
+        {
+            var backendPath = Directory.GetCurrentDirectory();
+
+            var projectRoot = Directory.GetParent(backendPath)!.Parent!.FullName;
+
+            var dbPath = Path.Combine(backendPath, "easygym.db");
+
+            var backupFolder = Path.Combine(projectRoot, "db-backups");
+
+            var backupPath = Path.Combine(backupFolder, fileName);
+
+            if (!File.Exists(backupPath))
+                return false;
+
+            File.Copy(backupPath, dbPath, true);
+
+            return true;
+        }
+        public List<string> GetBackups()
+        {
+            var projectRoot = Directory.GetParent(Directory.GetCurrentDirectory())!.Parent!.FullName;
+
+            var backupFolder = Path.Combine(projectRoot, "db-backups");
+
+            if (!Directory.Exists(backupFolder))
+                return new List<string>();
+
+            var files = Directory.GetFiles(backupFolder)
+                .Select(Path.GetFileName)
+                .ToList();
+
+            return files;
         }
     }
 }

@@ -23,7 +23,8 @@ import DietPlan from '@/components/pages/diet-plans/DietPlan';
 import MyList from '@/components/pages/admin/MyList';
 import ProtectedAdminRoute from '@/components/router/ProtectedAdminRoute';
 import Dashboard from '@/components/pages/Dashboard';
-
+import Restore from '@/components/pages/restore/Restore';
+import AdminBackup from '@/components/pages/back/AdminBackup';
 const Router = () => {
   return (
     <BrowserRouter>
@@ -74,6 +75,8 @@ const Router = () => {
               <Route element={<ProtectedAdminRoute />}>
               <Route path={routes.MyList} element={<MyList />} />
               <Route path={routes.CreateUser} element={<Register />} />
+              <Route path={routes.Restore} element={<Restore />} />
+              <Route path={routes.Back} element={<AdminBackup />} />
             </Route>
             </Route>
         </Route>

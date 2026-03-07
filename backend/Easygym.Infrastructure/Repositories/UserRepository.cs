@@ -55,7 +55,23 @@ namespace Easygym.Infrastructure.Repositories
                 _context.Users.Update(user);
                 await _context.SaveChangesAsync();
         }
+        public async Task<IEnumerable<User>> GetAllAsync()
+        {
+            return await _context.Users.ToListAsync();
+        }
+        public async Task<bool> DeletePermanentAsync(int id)
+        {
+            var user = await _context.Users.FindAsync(id);
 
+            if (user == null)
+                return false;
+
+            _context.Users.Remove(user);
+
+            await _context.SaveChangesAsync();
+
+            return true;
+        }
 
     }
 }
