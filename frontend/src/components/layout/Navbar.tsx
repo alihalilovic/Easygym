@@ -18,6 +18,7 @@ import {
   Settings as SettingsIcon,
   UtensilsCrossed,
   LayoutDashboard,
+  RotateCcw,
 } from 'lucide-react';
 import clsx from 'clsx';
 
@@ -116,6 +117,16 @@ const Navbar = () => {
       label: 'My List',
       icon: <Users />,
     },
+    {
+    to: routes.Restore,
+    label: 'Restore Users',
+    icon: <RotateCcw />,
+  },
+      {
+    to: routes.Back,
+    label: 'Backup',
+    icon: <RotateCcw />,
+  },
   ];
   const allLinks: NavbarLink[] = [
     ...(!userId ? nonAuthLinks : []),

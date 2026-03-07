@@ -27,6 +27,14 @@ public class AdminController : ControllerBase
     {
         return Ok(await _adminService.GetTrainersAsync());
     }
+
+    [HttpGet("deleted-users")]
+    public async Task<IActionResult> GetDeletedUsers()
+    {
+        var users = await _adminService.GetDeletedUsersAsync();
+        return Ok(users);
+    }
+
     [HttpDelete("users/{id}")]
     public async Task<IActionResult> DeleteUser(int id)
     {
@@ -37,6 +45,18 @@ public class AdminController : ControllerBase
 
         return NoContent();
     }
+
+    [HttpPost("users/{id}/restore")]
+    public async Task<IActionResult> RestoreUser(int id)
+    {
+        var result = await _adminService.RestoreUserAsync(id);
+
+        if (!result)
+            return NotFound("User not found");
+
+        return Ok();
+    }
+
     [HttpPut("users/{id}")]
     public async Task<IActionResult> UpdateUser(int id, [FromBody] UpdateUserRequest request)
     {
@@ -47,6 +67,7 @@ public class AdminController : ControllerBase
 
         return NoContent();
     }
+
     [HttpGet("workouts")]
     public async Task<IActionResult> GetAllWorkouts(
         [FromQuery] int page = 1,
@@ -58,17 +79,19 @@ public class AdminController : ControllerBase
 
         return Ok(result);
     }
+
     [HttpGet("exercises")]
-    public async Task<IActionResult> GetAllExercises(   
+    public async Task<IActionResult> GetAllExercises(
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 10,
         [FromQuery] string? search = null)
-        {
-            var result = await _adminService
-                .GetAllExercisesAsync(page, pageSize, search);
+    {
+        var result = await _adminService
+            .GetAllExercisesAsync(page, pageSize, search);
 
-            return Ok(result);
-        }
+        return Ok(result);
+    }
+
     [HttpGet("dietplans")]
     public async Task<IActionResult> GetDietPlans(
         [FromQuery] int page = 1,
@@ -89,6 +112,41 @@ public class AdminController : ControllerBase
 
         return NoContent();
     }
+    [HttpDelete("users/{id}/permanent")]
+    public async Task<IActionResult> PermanentDeleteUser(int id)
+    {
+        var result = await _adminService.PermanentlyDeleteUserAsync(id);
+
+        if (!result)
+            return NotFound();
+
+        return NoContent();
+    }
+    [HttpPost("backup")]
+    public IActionResult BackupDatabase()
+    {
+        var result = _adminService.BackupDatabase();
+
+        if (!result)
+            return BadRequest();
+
+        return Ok("Backup created");
+    }
+
+    [HttpPost("restore")]
+    public IActionResult RestoreDatabase([FromQuery] string file)
+    {
+        var result = _adminService.RestoreDatabase(file);
+
+        if (!result)
+            return NotFound();
+
+        return Ok("Database restored");
+    }
+    [HttpGet("backups")]
+    public IActionResult GetBackups()
+    {
+        var backups = _adminService.GetBackups();
+        return Ok(backups);
+    }
 }
-
-

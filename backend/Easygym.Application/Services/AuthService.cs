@@ -66,9 +66,15 @@ namespace Easygym.Application.Services
         public async Task<string> LoginAsync(string email, string password)
         {
             var user = await _userRepository.GetUserByEmailAsync(email);
+
             if (user == null)
             {
                 throw new UserNotFoundException();
+            }
+
+            if (user.IsDeleted)
+            {
+                throw new InvalidCredentialsException();
             }
 
             if (!VerifyPassword(password, user.Password))

@@ -69,6 +69,56 @@ namespace Easygym.Infrastructure.Persistence
 
             modelBuilder.Entity<MealLog>()
                 .HasIndex(ml => new { ml.ClientId, ml.LogDate });
+                // Workout -> Trainee (User)
+            modelBuilder.Entity<Workout>()
+                .HasOne(w => w.Trainee)
+                .WithMany()
+                .HasForeignKey(w => w.TraineeId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Workout -> Trainer (User)
+            modelBuilder.Entity<Workout>()
+                .HasOne(w => w.Trainer)
+                .WithMany()
+                .HasForeignKey(w => w.TrainerId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            // Exercise -> CreatedBy (User)
+            modelBuilder.Entity<Exercise>()
+                .HasOne(e => e.CreatedBy)
+                .WithMany()
+                .HasForeignKey(e => e.CreatedById)
+                .OnDelete(DeleteBehavior.Cascade);
+
+                modelBuilder.Entity<Client>()
+                    .HasOne(c => c.Trainer)
+                    .WithMany(t => t.Clients)
+                    .HasForeignKey(c => c.TrainerId)
+                    .OnDelete(DeleteBehavior.SetNull);
+
+            modelBuilder.Entity<DietPlan>()
+                .HasOne(dp => dp.Trainer)
+                .WithMany()
+                .HasForeignKey(dp => dp.TrainerId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            modelBuilder.Entity<DietPlanAssignment>()
+                .HasOne(dpa => dpa.Client)
+                .WithMany()
+                .HasForeignKey(dpa => dpa.ClientId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<MealLog>()
+                .HasOne(ml => ml.Client)
+                .WithMany()
+                .HasForeignKey(ml => ml.ClientId)
+                .OnDelete(DeleteBehavior.Cascade);
+                
+            modelBuilder.Entity<WorkoutSession>()
+            .HasOne(ws => ws.Workout)
+            .WithMany()
+            .HasForeignKey(ws => ws.WorkoutId)
+            .OnDelete(DeleteBehavior.Cascade);
         }
 
         public DbSet<User> Users { get; set; }

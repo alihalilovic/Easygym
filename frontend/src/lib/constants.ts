@@ -20,6 +20,8 @@ export const routes = {
   MyTrainer: '/my-trainer',
   MyClients: '/my-clients',
   MyList: '/my-list',
+  Restore:'/restore',
+  Back:'/backup',
   Settings: '/settings',
   Dashboard: '/dashboard',
   DietPlans: '/diet-plans',

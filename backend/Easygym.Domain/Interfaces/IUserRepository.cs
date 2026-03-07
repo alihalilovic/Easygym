@@ -8,8 +8,10 @@ namespace Easygym.Domain.Interfaces
         Task<User> AddUserAsync(User user);
 
         Task<IEnumerable<User>> GetUsersByRoleAsync(string role);
+        Task<IEnumerable<User>> GetAllAsync();
         Task<User?> GetByIdAsync(int id);
         Task<bool> DeleteByIdAsync(int id);
         Task UpdateAsync(User user);
+        Task<bool> DeletePermanentAsync(int id);
     }
 }

@@ -3,6 +3,7 @@ using System;
 using Easygym.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Easygym.Infrastructure.Migrations
 {
     [DbContext(typeof(EasygymDbContext))]
-    partial class EasygymDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260307092458_AddUserSoftDelete")]
+    partial class AddUserSoftDelete
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.3");
@@ -448,8 +451,7 @@ namespace Easygym.Infrastructure.Migrations
 
                     b.HasOne("Easygym.Domain.Entities.Trainer", "Trainer")
                         .WithMany("Clients")
-                        .HasForeignKey("TrainerId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .HasForeignKey("TrainerId");
 
                     b.Navigation("Trainer");
                 });
@@ -459,7 +461,7 @@ namespace Easygym.Infrastructure.Migrations
                     b.HasOne("Easygym.Domain.Entities.User", "Trainer")
                         .WithMany()
                         .HasForeignKey("TrainerId")
-                        .OnDelete(DeleteBehavior.SetNull)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Trainer");
@@ -609,8 +611,7 @@ namespace Easygym.Infrastructure.Migrations
 
                     b.HasOne("Easygym.Domain.Entities.User", "Trainer")
                         .WithMany()
-                        .HasForeignKey("TrainerId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .HasForeignKey("TrainerId");
 
                     b.Navigation("Trainee");
 
@@ -628,7 +629,7 @@ namespace Easygym.Infrastructure.Migrations
                     b.HasOne("Easygym.Domain.Entities.Workout", "Workout")
                         .WithMany()
                         .HasForeignKey("WorkoutId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Trainee");
