@@ -43,6 +43,10 @@ const MyList = () => {
   const [editEmail, setEditEmail] = useState("");
   const [saving, setSaving] = useState(false);
 
+  const [inlineUserId, setInlineUserId] = useState<number | null>(null);
+  const [inlineField, setInlineField] = useState<"name" | "email" | null>(null);
+  const [inlineValue, setInlineValue] = useState("");
+
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
   const [selectedName, setSelectedName] = useState("all");
@@ -84,8 +88,7 @@ const MyList = () => {
           user.name.toLowerCase().includes(search.toLowerCase());
 
         const matchesRole =
-          roleFilter === "all" ||
-          user.role.toLowerCase() === roleFilter;
+          roleFilter === "all" || user.role.toLowerCase() === roleFilter;
 
         const matchesName =
           selectedName === "all" || user.name === selectedName;
@@ -121,8 +124,6 @@ const MyList = () => {
 
   const handleUpdate = async () => {
     if (!editingUser) return;
-    if (!editName.trim()) return;
-    if (!/^\S+@\S+\.\S+$/.test(editEmail)) return;
 
     try {
       setSaving(true);
@@ -151,6 +152,39 @@ const MyList = () => {
     } finally {
       setSaving(false);
     }
+  };
+
+  const startInlineEdit = (user: User, field: "name" | "email") => {
+    setInlineUserId(user.id);
+    setInlineField(field);
+    setInlineValue(user[field]);
+  };
+
+  const cancelInlineEdit = () => {
+    setInlineUserId(null);
+    setInlineField(null);
+    setInlineValue("");
+  };
+
+  const saveInlineEdit = async (user: User) => {
+    if (!inlineField) return;
+
+    const updated = {
+      name: inlineField === "name" ? inlineValue : user.name,
+      email: inlineField === "email" ? inlineValue : user.email,
+    };
+
+    await adminService.updateUser(user.id, updated);
+
+    setClients((prev) =>
+      prev.map((u) => (u.id === user.id ? { ...u, ...updated } : u))
+    );
+
+    setTrainers((prev) =>
+      prev.map((u) => (u.id === user.id ? { ...u, ...updated } : u))
+    );
+
+    cancelInlineEdit();
   };
 
   if (loading) {
@@ -223,7 +257,7 @@ const MyList = () => {
               <SelectContent>
                 <SelectItem value="all">All Emails</SelectItem>
                 {uniqueEmails.map((email) => (
-                  <SelectItem  key={email} value={email}>
+                  <SelectItem key={email} value={email}>
                     {email}
                   </SelectItem>
                 ))}
@@ -255,15 +289,51 @@ const MyList = () => {
               className="flex items-center gap-4 p-3 rounded-lg bg-muted/50"
             >
               <Avatar userName={user.name} size="sm" />
+
               <div className="flex-1 min-w-0">
-                <p className="font-medium truncate">{user.name}</p>
-                <p className="text-sm text-muted-foreground truncate">
-                  {user.email}
-                </p>
+                {inlineUserId === user.id && inlineField === "name" ? (
+                  <Input
+                    autoFocus
+                    value={inlineValue}
+                    onChange={(e) => setInlineValue(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") saveInlineEdit(user);
+                      if (e.key === "Escape") cancelInlineEdit();
+                    }}
+                  />
+                ) : (
+                  <p
+                    className="font-medium truncate cursor-pointer hover:bg-muted"
+                    onDoubleClick={() => startInlineEdit(user, "name")}
+                  >
+                    {user.name}
+                  </p>
+                )}
+
+                {inlineUserId === user.id && inlineField === "email" ? (
+                  <Input
+                    autoFocus
+                    value={inlineValue}
+                    onChange={(e) => setInlineValue(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") saveInlineEdit(user);
+                      if (e.key === "Escape") cancelInlineEdit();
+                    }}
+                  />
+                ) : (
+                  <p
+                    className="text-sm text-muted-foreground truncate cursor-pointer hover:bg-muted"
+                    onDoubleClick={() => startInlineEdit(user, "email")}
+                  >
+                    {user.email}
+                  </p>
+                )}
               </div>
+
               <Badge variant="secondary" className="capitalize">
                 {user.role}
               </Badge>
+
               <div className="flex gap-2">
                 <Button
                   variant="outline"
@@ -272,6 +342,7 @@ const MyList = () => {
                 >
                   Edit
                 </Button>
+
                 <Button
                   variant="destructive"
                   size="sm"
