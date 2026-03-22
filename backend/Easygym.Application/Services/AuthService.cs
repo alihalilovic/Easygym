@@ -26,7 +26,7 @@ namespace Easygym.Application.Services
         public async Task<string> RegisterAsync(string? name, string email, string password, string role)
         {
             role = role.ToLower();
-            if (!new[] { Role.Admin, Role.Trainer, Role.Client }.Contains(role, StringComparer.Ordinal))
+            if (!new[] { Role.Trainer, Role.Client }.Contains(role, StringComparer.Ordinal))
             {
                 throw new InvalidRoleException();
             }
@@ -52,8 +52,7 @@ namespace Easygym.Application.Services
             var entityActions = new Dictionary<string, Func<Task>>
             {
                 [Role.Client] = () => _clientRepository.AddAsync(new Client { Id = addedUser.Id }),
-                [Role.Trainer] = () => _trainerRepository.AddAsync(new Trainer { Id = addedUser.Id }),
-                [Role.Admin] = () => _adminRepository.AddAsync(new Admin { Id = addedUser.Id })
+                [Role.Trainer] = () => _trainerRepository.AddAsync(new Trainer { Id = addedUser.Id })
             };
 
             // Save user to db according to role

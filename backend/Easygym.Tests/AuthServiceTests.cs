@@ -62,6 +62,17 @@ namespace Easygym.Tests
         }
 
         [Fact]
+        public async Task TestRegister_AdminRole_ThrowsInvalidRoleException()
+        {
+            var email = "admin@example.com";
+            var password = "password123";
+            var name = "Admin User";
+
+            await Assert.ThrowsAsync<InvalidRoleException>(() =>
+                _authService.RegisterAsync(name, email, password, Role.Admin));
+        }
+
+        [Fact]
         public async Task TestLogin_InvalidPassword_ThrowsException()
         {
             var email = "test@example.com";

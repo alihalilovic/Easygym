@@ -18,7 +18,6 @@ import { useAuth } from '@/components/auth/AuthProvider';
 import { Link, useNavigate } from 'react-router';
 import {
   UserPlusIcon,
-  ShieldCheckIcon,
   DumbbellIcon,
   UserIcon,
 } from 'lucide-react';
@@ -42,12 +41,6 @@ const Register = () => {
       label: 'Trainer',
       description: 'Lead and manage sessions',
     },
-    {
-      value: UserRole.Admin,
-      icon: ShieldCheckIcon,
-      label: 'Admin',
-      description: 'Full system access',
-    },
   ];
 
   const FormSchema = z
@@ -62,7 +55,7 @@ const Register = () => {
       confirmPassword: z.string().min(8, {
         message: 'Password must be at least 8 characters.',
       }),
-      role: z.enum(Object.values(UserRole) as [UserRole, ...UserRole[]]),
+      role: z.enum([UserRole.Client, UserRole.Trainer]),
     })
     .refine((data) => data.password === data.confirmPassword, {
       message: "Passwords don't match",
