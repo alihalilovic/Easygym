@@ -15,6 +15,7 @@ namespace Easygym.Api.Controllers
         private readonly IBlobStorageService _blobStorageService;
         private readonly CurrentUserService _currentUserService;
         private readonly IMealLogRepository _mealLogRepository;
+        private readonly ILogger<MealLogController> _logger;
         private const long MaxFileSize = 10 * 1024 * 1024; // 10MB
         private static readonly string[] AllowedImageExtensions = [".jpg", ".jpeg", ".png", ".gif", ".webp"];
         private static readonly string[] AllowedVideoExtensions = [".mp4", ".mov", ".avi", ".mkv", ".webm"];
@@ -24,12 +25,14 @@ namespace Easygym.Api.Controllers
             MealLogService mealLogService,
             IBlobStorageService blobStorageService,
             CurrentUserService currentUserService,
-            IMealLogRepository mealLogRepository)
+            IMealLogRepository mealLogRepository,
+            ILogger<MealLogController> logger)
         {
             _mealLogService = mealLogService;
             _blobStorageService = blobStorageService;
             _currentUserService = currentUserService;
             _mealLogRepository = mealLogRepository;
+            _logger = logger;
         }
 
         // Log a meal for the current client
@@ -122,9 +125,14 @@ namespace Easygym.Api.Controllers
                 {
                     await _blobStorageService.DeleteAsync(url);
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // Ignore deletion errors
+                    _logger.LogWarning(
+                        ex,
+                        "Failed to clean up uploaded meal media blob after missing meal log. User {UserId}, MealId {MealId}, Blob URL: {BlobUrl}",
+                        currentUser.Id,
+                        mealId,
+                        url);
                 }
                 return NotFound(new { message = "Meal log not found. Please log the meal first before uploading media." });
             }
@@ -152,9 +160,14 @@ namespace Easygym.Api.Controllers
                 {
                     await _blobStorageService.DeleteAsync(request.MediaUrl);
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // Continue even if blob deletion fails
+                    _logger.LogWarning(
+                        ex,
+                        "Failed to delete meal media blob for user {UserId}, meal {MealId}. Blob URL: {BlobUrl}",
+                        currentUser.Id,
+                        request.MealId,
+                        request.MediaUrl);
                 }
             }
 

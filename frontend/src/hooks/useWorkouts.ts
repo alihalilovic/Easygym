@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import workoutService from '@/api/services/workoutService';
-import { CreateWorkoutRequest, UpdateWorkoutRequest } from '@/types/Workout';
+import { CreateWorkoutRequest, UpdateWorkoutRequest, Workout } from '@/types/Workout';
 
 export const workoutKeys = {
   all: ['workouts'] as const,
@@ -10,14 +10,14 @@ export const workoutKeys = {
 };
 
 export const useWorkouts = () => {
-  return useQuery({
+  return useQuery<Workout[]>({
     queryKey: workoutKeys.lists(),
     queryFn: () => workoutService.getWorkouts(),
   });
 };
 
 export const useWorkout = (workoutId: number, enabled = true) => {
-  return useQuery({
+  return useQuery<Workout>({
     queryKey: workoutKeys.detail(workoutId),
     queryFn: () => workoutService.getWorkout(workoutId),
     enabled: enabled && workoutId > 0,

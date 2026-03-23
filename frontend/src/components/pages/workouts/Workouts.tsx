@@ -10,6 +10,8 @@ import { useAdminWorkouts } from '@/hooks/useAdminWorkouts'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { useTranslation } from 'react-i18next'
 import LanguageSwitcher from '@/components/ui/LanguageSwitcher'
+import { Workout } from '@/types/Workout'
+import { WorkoutAdmin } from '@/types/AdminWorkout'
 
 const Workouts = () => {
   const navigate = useNavigate()
@@ -26,8 +28,6 @@ const Workouts = () => {
 
   const { data: adminResponse, isLoading: adminLoading } =
     useAdminWorkouts(page, pageSize, search, isUserAdmin)
-
-  const workouts = isUserAdmin ? adminResponse?.items ?? [] : userWorkouts
 
   const totalCount = isUserAdmin ? adminResponse?.totalCount ?? 0 : 0
 
@@ -48,8 +48,10 @@ const Workouts = () => {
     setSortDirection((prev) => (prev === 'asc' ? 'desc' : 'asc'))
   }
 
-  const sortedWorkouts = useMemo(() => {
-    const sorted = [...workouts].sort((a: any, b: any) => {
+  const sortedAdminWorkouts = useMemo<WorkoutAdmin[]>(() => {
+    const adminWorkouts = adminResponse?.items ?? []
+
+    return [...adminWorkouts].sort((a, b) => {
       const aValue = a.name.toLowerCase()
       const bValue = b.name.toLowerCase()
 
@@ -57,9 +59,20 @@ const Workouts = () => {
       if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1
       return 0
     })
+  }, [adminResponse?.items, sortDirection])
 
-    return sorted
-  }, [workouts, sortDirection])
+  const sortedUserWorkouts = useMemo<Workout[]>(() => {
+    return [...userWorkouts].sort((a, b) => {
+      const aValue = (a.name ?? '').toLowerCase()
+      const bValue = (b.name ?? '').toLowerCase()
+
+      if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1
+      if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1
+      return 0
+    })
+  }, [userWorkouts, sortDirection])
+
+  const displayedWorkouts = isUserAdmin ? sortedAdminWorkouts : sortedUserWorkouts
 
   if (isLoading) {
     return <div className="p-6 text-muted-foreground">{t('common.loading')}</div>
@@ -98,7 +111,7 @@ const Workouts = () => {
         />
       </div>
 
-      {sortedWorkouts.length > 0 ? (
+      {displayedWorkouts.length > 0 ? (
         isUserAdmin ? (
           <>
             <div className="overflow-x-auto rounded-xl border bg-card shadow-sm">
@@ -137,7 +150,7 @@ const Workouts = () => {
                 </thead>
 
                 <tbody className="divide-y">
-                  {sortedWorkouts.map((w: any) => (
+                  {sortedAdminWorkouts.map((w) => (
                     <tr key={w.id} className="hover:bg-muted/40 transition-colors">
 
                       <td className="px-6 py-4 font-medium">
@@ -192,7 +205,7 @@ const Workouts = () => {
           </>
         ) : (
           <div className="workout-card-wrapper">
-            {userWorkouts.map((workout: any) => (
+            {sortedUserWorkouts.map((workout) => (
               <WorkoutCard key={workout.id} workout={workout} />
             ))}
           </div>

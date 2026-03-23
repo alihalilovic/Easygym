@@ -14,6 +14,7 @@ namespace Easygym.Api.Controllers
         private readonly IBlobStorageService _blobStorageService;
         private readonly IGenericRepository<User> _userRepository;
         private readonly CurrentUserService _currentUserService;
+        private readonly ILogger<ProfilePictureController> _logger;
         private const long MaxFileSize = 5 * 1024 * 1024; // 5MB
         private static readonly string[] AllowedExtensions = [".jpg", ".jpeg", ".png", ".gif", ".webp"];
         private static readonly string[] AllowedContentTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
@@ -21,11 +22,13 @@ namespace Easygym.Api.Controllers
         public ProfilePictureController(
             IBlobStorageService blobStorageService,
             IGenericRepository<User> userRepository,
-            CurrentUserService currentUserService)
+            CurrentUserService currentUserService,
+            ILogger<ProfilePictureController> logger)
         {
             _blobStorageService = blobStorageService;
             _userRepository = userRepository;
             _currentUserService = currentUserService;
+            _logger = logger;
         }
 
         [HttpPost("upload")]
@@ -66,9 +69,13 @@ namespace Easygym.Api.Controllers
                 {
                     await _blobStorageService.DeleteAsync(user.ProfilePictureUrl);
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // Ignore errors when deleting old picture
+                    _logger.LogWarning(
+                        ex,
+                        "Failed to delete previous profile picture blob for user {UserId}. Blob URL: {BlobUrl}",
+                        user.Id,
+                        user.ProfilePictureUrl);
                 }
             }
 
@@ -106,9 +113,13 @@ namespace Easygym.Api.Controllers
             {
                 await _blobStorageService.DeleteAsync(user.ProfilePictureUrl);
             }
-            catch
+            catch (Exception ex)
             {
-                // Continue even if blob deletion fails
+                _logger.LogWarning(
+                    ex,
+                    "Failed to delete profile picture blob for user {UserId}. Blob URL: {BlobUrl}",
+                    user.Id,
+                    user.ProfilePictureUrl);
             }
 
             // Remove profile picture URL from user

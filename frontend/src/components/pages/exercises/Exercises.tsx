@@ -12,6 +12,7 @@ import { SortableTable, Column } from '@/components/ui/widgets/SortableTable'
 import { Exercise } from '@/types/Exercise'
 import LanguageSwitcher from '@/components/ui/LanguageSwitcher'
 import { useTranslation } from 'react-i18next'
+import { ExerciseAdmin } from '@/types/AdminExercise'
 
 const Exercises = () => {
   const { isUserAdmin, userId } = useAuth()
@@ -221,7 +222,7 @@ const Exercises = () => {
                 </thead>
 
                 <tbody className="divide-y">
-                  {sortedExercises.map((e: any) => (
+                  {sortedExercises.map((e: ExerciseAdmin) => (
                     <tr key={e.id} className="hover:bg-muted/40">
 
                       <td className="px-6 py-4 font-medium">

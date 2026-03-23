@@ -28,7 +28,7 @@ interface SortableTableProps<T> {
   rowClassName?: string;
 }
 
-export function SortableTable<T extends Record<string, any>>({
+export function SortableTable<T extends object>({
   data,
   columns,
   onRowClick,
@@ -58,8 +58,8 @@ export function SortableTable<T extends Record<string, any>>({
   const sortedData = [...data];
   if (sortKey && sortDirection) {
     sortedData.sort((a, b) => {
-      const aValue = a[sortKey];
-      const bValue = b[sortKey];
+      const aValue = (a as Record<string, unknown>)[sortKey];
+      const bValue = (b as Record<string, unknown>)[sortKey];
 
       if (aValue == null && bValue == null) return 0;
       if (aValue == null) return sortDirection === 'asc' ? 1 : -1;
@@ -134,7 +134,7 @@ export function SortableTable<T extends Record<string, any>>({
                   <TableCell key={column.key} className={column.className}>
                     {column.render
                       ? column.render(item)
-                      : (item[column.key] as React.ReactNode)}
+                      : ((item as Record<string, unknown>)[column.key] as React.ReactNode)}
                   </TableCell>
                 ))}
               </TableRow>

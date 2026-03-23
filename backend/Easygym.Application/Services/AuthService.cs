@@ -117,8 +117,10 @@ namespace Easygym.Application.Services
         {
             return BCrypt.Net.BCrypt.Verify(password, passwordHash);
         }
-        public async Task UpdateUserAsync(User user)
+
+        public async Task UpdateBasicProfileAsync(User user, string? name)
         {
+            user.Name = name;
             await _userRepository.UpdateAsync(user);
         }
 
