@@ -2,6 +2,7 @@ import { format, startOfWeek } from 'date-fns';
 import { useWeeklyMealProgress } from '@/hooks/useMealLog';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
+import { parseLocalDate } from '@/lib/dates';
 
 interface WeeklyMealProgressProps {
   startDate?: Date;
@@ -38,7 +39,7 @@ export const WeeklyMealProgress = ({
           {weeklyProgress.dailyProgress.map((day) => (
             <div key={day.date} className="space-y-2">
               <div className="flex justify-between text-sm">
-                <span className="font-medium">{format(new Date(day.date), 'EEEE, MMM d')}</span>
+                <span className="font-medium">{format(parseLocalDate(day.date), 'EEEE, MMM d')}</span>
                 <span className="text-muted-foreground">
                   {day.completedMeals}/{day.totalMeals} meals
                 </span>

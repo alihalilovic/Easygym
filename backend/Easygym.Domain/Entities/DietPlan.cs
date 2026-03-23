@@ -11,6 +11,6 @@ namespace Easygym.Domain.Entities
         public User? Trainer { get; set; }
         public required List<DietPlanDay> Days { get; set; }
         public List<DietPlanAssignment> Assignments { get; set; } = [];
-        public DateTime CreatedAt { get; set; } = DateTime.Now;
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     }
 }

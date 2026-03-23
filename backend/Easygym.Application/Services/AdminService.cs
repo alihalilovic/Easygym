@@ -57,7 +57,7 @@ namespace Easygym.Application.Services
                 return false;
 
             user.IsDeleted = true;
-            user.DeletedAt = DateTime.Now;
+            user.DeletedAt = DateTime.UtcNow;
 
             await _userRepository.UpdateAsync(user);
 
@@ -217,7 +217,7 @@ namespace Easygym.Application.Services
             if (!Directory.Exists(backupFolder))
                 Directory.CreateDirectory(backupFolder);
 
-            var backupFile = $"easygym.db.bak.{DateTime.Now:yyyyMMdd_HHmmss}";
+            var backupFile = $"easygym.db.bak.{DateTime.UtcNow:yyyyMMdd_HHmmss}";
 
             var backupPath = Path.Combine(backupFolder, backupFile);
 

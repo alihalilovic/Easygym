@@ -133,7 +133,7 @@ namespace Easygym.Application.Services
 
             if (uniqueDates.Any())
             {
-                var today = DateTime.Today;
+                var today = DateTime.UtcNow.Date;
                 // If the last workout was today or yesterday, the streak is alive
                 if (uniqueDates.First() == today || uniqueDates.First() == today.AddDays(-1))
                 {
@@ -166,7 +166,7 @@ namespace Easygym.Application.Services
 
             // 5. Recent Activities (Past)
             var recentActivities = allSessions
-                .Where(ws => ws.StartTime <= DateTime.Now)
+                .Where(ws => ws.StartTime <= DateTime.UtcNow)
                 .OrderByDescending(ws => ws.StartTime)
                 .Take(5)
                 .Select(MapToResponse)
@@ -174,7 +174,7 @@ namespace Easygym.Application.Services
 
             // 6. Upcoming Sessions (Future)
             var upcomingSessions = allSessions
-                .Where(ws => ws.StartTime > DateTime.Now)
+                .Where(ws => ws.StartTime > DateTime.UtcNow)
                 .OrderBy(ws => ws.StartTime)
                 .Take(5)
                 .Select(MapToResponse)

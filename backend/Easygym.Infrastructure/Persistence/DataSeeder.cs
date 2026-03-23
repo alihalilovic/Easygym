@@ -17,7 +17,7 @@ namespace Easygym.Infrastructure.Persistence
                         Email = "admin@easygym.com",
                         Password = BCrypt.Net.BCrypt.HashPassword("Admin123!"),
                         Role = Role.Admin,
-                        CreatedAt = DateTime.Now
+                        CreatedAt = DateTime.UtcNow
                     },
                     new User
                     {
@@ -25,7 +25,7 @@ namespace Easygym.Infrastructure.Persistence
                         Email = "trainer@easygym.com",
                         Password = BCrypt.Net.BCrypt.HashPassword("Trainer123!"),
                         Role = Role.Trainer,
-                        CreatedAt = DateTime.Now
+                        CreatedAt = DateTime.UtcNow
                     },
                     new User
                     {
@@ -33,7 +33,7 @@ namespace Easygym.Infrastructure.Persistence
                         Email = "client1@easygym.com",
                         Password = BCrypt.Net.BCrypt.HashPassword("Client123!"),
                         Role = Role.Client,
-                        CreatedAt = DateTime.Now
+                        CreatedAt = DateTime.UtcNow
                     },
                     new User
                     {
@@ -41,7 +41,7 @@ namespace Easygym.Infrastructure.Persistence
                         Email = "client2@easygym.com",
                         Password = BCrypt.Net.BCrypt.HashPassword("Client123!"),
                         Role = Role.Client,
-                        CreatedAt = DateTime.Now
+                        CreatedAt = DateTime.UtcNow
                     }
                 };
 

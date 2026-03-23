@@ -8,6 +8,6 @@ namespace Easygym.Domain.Entities
         public required int ClientId { get; set; }
         public User? Client { get; set; }
         public bool IsActive { get; set; }
-        public DateTime AssignedAt { get; set; } = DateTime.Now;
+        public DateTime AssignedAt { get; set; } = DateTime.UtcNow;
     }
 }

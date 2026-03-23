@@ -16,6 +16,6 @@ namespace Easygym.Domain.Entities
         public required List<Set> Sets { get; set; }
         [Range(0, 600)] // 10 minutes
         public int RestTimeSeconds { get; set; }
-        public DateTime CreatedAt { get; set; } = DateTime.Now;
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     }
 }

@@ -14,7 +14,7 @@ namespace Easygym.Domain.Entities
         [JsonIgnore]
         public string Password { get; set; } = string.Empty;
         public required string Role { get; set; }
-        public DateTime CreatedAt { get; set; } = DateTime.Now;
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public string? ProfilePictureUrl { get; set; }
         public bool IsDeleted { get; set; } = false;
         public DateTime? DeletedAt { get; set; }

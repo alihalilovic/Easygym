@@ -14,6 +14,7 @@ import { format } from 'date-fns';
 import { Loader2 } from 'lucide-react';
 import { Link } from 'react-router';
 import { routes } from '@/lib/constants';
+import { parseLocalDate } from '@/lib/dates';
 
 const Dashboard = () => {
   const [stats, setStats] = useState<DashboardStatsResponse | null>(null);
@@ -91,7 +92,7 @@ const Dashboard = () => {
                   fontSize={12}
                   tickLine={false}
                   axisLine={false}
-                  tickFormatter={(value) => format(new Date(value), 'MMM dd')}
+                  tickFormatter={(value) => format(parseLocalDate(value), 'MMM dd')}
                 />
                 <YAxis
                   stroke="#888888"

@@ -40,7 +40,7 @@ namespace Easygym.Application.Services
             }
 
             // Validate log date (must be today only)
-            var today = DateOnly.FromDateTime(DateTime.Today);
+            var today = DateOnly.FromDateTime(DateTime.UtcNow);
 
             if (request.LogDate != today)
             {
