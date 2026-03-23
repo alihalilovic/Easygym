@@ -1,5 +1,6 @@
 using Easygym.Api.Models.Requests;
 using Easygym.Application.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Easygym.Api.Controllers
@@ -33,6 +34,7 @@ namespace Easygym.Api.Controllers
             return Ok(new AuthTokenResponse { Token = token });
         }
 
+        [Authorize]
         [HttpGet("me")]
         public async Task<IActionResult> Me()
         {
@@ -40,6 +42,7 @@ namespace Easygym.Api.Controllers
             return Ok(user);
         }
 
+        [Authorize]
         [HttpPut("me")]
         public async Task<IActionResult> UpdateProfile(
             [FromBody] UpdateProfileRequest request)

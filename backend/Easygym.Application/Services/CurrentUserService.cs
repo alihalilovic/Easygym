@@ -4,23 +4,22 @@ using Easygym.Domain.Exceptions;
 using Easygym.Domain.Interfaces;
 using Easygym.Domain.Models.Responses;
 using Microsoft.AspNetCore.Http;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 
 namespace Easygym.Application.Services
 {
     public class CurrentUserService : ICurrentUserService
     {
-        private readonly AuthService _authService;
         private readonly IGenericRepository<User> _userRepository;
         private readonly IGenericRepository<Client> _clientRepository;
         private readonly IHttpContextAccessor _httpContextAccessor;
 
         public CurrentUserService(
-            AuthService authService,
             IGenericRepository<User> userRepository,
             IGenericRepository<Client> clientRepository,
             IHttpContextAccessor httpContextAccessor)
         {
-            _authService = authService;
             _userRepository = userRepository;
             _clientRepository = clientRepository;
             _httpContextAccessor = httpContextAccessor;
@@ -28,10 +27,7 @@ namespace Easygym.Application.Services
 
         public async Task<UserResponse> GetCurrentUserAsync()
         {
-            var authHeader = _httpContextAccessor.HttpContext?.Request.Headers["Authorization"]
-                .FirstOrDefault()?.Replace("Bearer ", "") ?? "";
-
-            var userId = _authService.GetUserIdByTokenAsync(authHeader);
+            var userId = GetCurrentUserId();
             var user = await _userRepository.GetByIdAsync(userId) ?? throw new UserNotFoundException();
 
             int? trainerId = null;
@@ -55,15 +51,33 @@ namespace Easygym.Application.Services
 
         public async Task<User> GetCurrentUserEntityAsync()
         {
-            var authHeader = _httpContextAccessor.HttpContext?.Request.Headers["Authorization"]
-                .FirstOrDefault()?.Replace("Bearer ", "") ?? "";
-
-            var userId = _authService.GetUserIdByTokenAsync(authHeader);
+            var userId = GetCurrentUserId();
 
             var user = await _userRepository.GetByIdAsync(userId)
                 ?? throw new UserNotFoundException();
 
             return user;
+        }
+
+        private int GetCurrentUserId()
+        {
+            var principal = _httpContextAccessor.HttpContext?.User;
+
+            if (principal?.Identity?.IsAuthenticated != true)
+            {
+                throw new MissingTokenException();
+            }
+
+            var userIdClaim = principal.Claims.FirstOrDefault(claim =>
+                claim.Type == JwtRegisteredClaimNames.Sub ||
+                claim.Type == ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrWhiteSpace(userIdClaim) || !int.TryParse(userIdClaim, out var userId))
+            {
+                throw new InvalidTokenException("Can't get user id from validated claims");
+            }
+
+            return userId;
         }
     }
 }
