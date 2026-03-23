@@ -236,7 +236,22 @@ namespace Easygym.Application.Services
 
             var backupFolder = Path.Combine(projectRoot, "db-backups");
 
-            var backupPath = Path.Combine(backupFolder, fileName);
+            if (string.IsNullOrWhiteSpace(fileName) ||
+                fileName.Contains("..", StringComparison.Ordinal) ||
+                fileName.Contains("/", StringComparison.Ordinal) ||
+                fileName.Contains("\\", StringComparison.Ordinal))
+            {
+                return false;
+            }
+
+            var backupFolderFullPath = Path.GetFullPath(backupFolder);
+            var backupPath = Path.GetFullPath(Path.Combine(backupFolderFullPath, fileName));
+
+            var backupFolderPrefix = backupFolderFullPath.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
+                + Path.DirectorySeparatorChar;
+
+            if (!backupPath.StartsWith(backupFolderPrefix, StringComparison.OrdinalIgnoreCase))
+                return false;
 
             if (!File.Exists(backupPath))
                 return false;
