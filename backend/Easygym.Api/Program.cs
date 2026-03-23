@@ -8,6 +8,7 @@ using Easygym.Domain.Interfaces;
 using Easygym.Infrastructure.Persistence;
 using Easygym.Infrastructure.Repositories;
 using Easygym.Infrastructure.Services;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -30,6 +31,21 @@ builder.Services.AddControllers()
         // Handle circular references automatically
         options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
     });
+
+builder.Services.Configure<ApiBehaviorOptions>(options =>
+{
+    options.InvalidModelStateResponseFactory = context =>
+    {
+        var problemDetails = new ValidationProblemDetails(context.ModelState)
+        {
+            Status = StatusCodes.Status400BadRequest,
+            Title = "Request validation failed",
+            Type = "https://tools.ietf.org/html/rfc9110#section-15.5.1"
+        };
+
+        return new BadRequestObjectResult(problemDetails);
+    };
+});
 
 builder.Services.AddOpenApi();
 builder.Services.AddHttpContextAccessor();

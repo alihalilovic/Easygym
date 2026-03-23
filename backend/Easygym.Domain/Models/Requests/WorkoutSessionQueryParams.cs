@@ -10,17 +10,26 @@ namespace Easygym.Domain.Models.Requests
         [Range(1, 100)]
         public int PageSize { get; set; } = 10;
 
+        [StringLength(100)]
         public string? SearchTerm { get; set; }
 
+        [Range(1, int.MaxValue)]
         public int? WorkoutId { get; set; }
         public DateTime? StartDateFrom { get; set; }
         public DateTime? StartDateTo { get; set; }
         public DateTime? EndDateFrom { get; set; }
         public DateTime? EndDateTo { get; set; }
+
+        [Range(1, 10)]
         public int? MinPerceivedDifficulty { get; set; }
+
+        [Range(1, 10)]
         public int? MaxPerceivedDifficulty { get; set; }
 
+        [StringLength(50)]
         public string SortBy { get; set; } = "StartTime";
+
+        [RegularExpression("^(asc|desc)$", ErrorMessage = "SortOrder must be 'asc' or 'desc'.")]
         public string SortOrder { get; set; } = "desc"; // asc or desc
     }
 }

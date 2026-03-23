@@ -7,7 +7,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Easygym.Api.Controllers
 {
-    public class InvitationController : Controller
+    [Route("api/[controller]")]
+    public class InvitationController : ApiControllerBase
     {
         private readonly InvitationService _invitationService;
 

@@ -4,12 +4,12 @@ using Easygym.Domain.Interfaces;
 using Easygym.Domain.Models.Requests;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.ComponentModel.DataAnnotations;
 
 namespace Easygym.Api.Controllers
 {
     [Route("api/[controller]")]
-    [ApiController]
-    public class MealLogController : ControllerBase
+    public class MealLogController : ApiControllerBase
     {
         private readonly MealLogService _mealLogService;
         private readonly IBlobStorageService _blobStorageService;
@@ -55,7 +55,7 @@ namespace Easygym.Api.Controllers
         // Trainers: must specify clientId query param
         [HttpGet("daily")]
         [Authorize(Roles = Role.ClientAndTrainer)]
-        public async Task<IActionResult> GetDailyProgress([FromQuery] DateOnly date, [FromQuery] int? clientId = null)
+        public async Task<IActionResult> GetDailyProgress([FromQuery] DateOnly date, [FromQuery][Range(1, int.MaxValue)] int? clientId = null)
         {
             var progress = await _mealLogService.GetDailyProgressAsync(date, clientId);
             return Ok(progress);
@@ -64,7 +64,7 @@ namespace Easygym.Api.Controllers
         // Get weekly progress starting from a specific date
         [HttpGet("weekly")]
         [Authorize(Roles = Role.ClientAndTrainer)]
-        public async Task<IActionResult> GetWeeklyProgress([FromQuery] DateOnly startDate, [FromQuery] int? clientId = null)
+        public async Task<IActionResult> GetWeeklyProgress([FromQuery] DateOnly startDate, [FromQuery][Range(1, int.MaxValue)] int? clientId = null)
         {
             var progress = await _mealLogService.GetWeeklyProgressAsync(startDate, clientId);
             return Ok(progress);
@@ -73,7 +73,7 @@ namespace Easygym.Api.Controllers
         // Upload media for a meal log
         [HttpPost("upload-media")]
         [Authorize(Roles = Role.Client)]
-        public async Task<IActionResult> UploadMealMedia([FromForm] IFormFile file, [FromForm] int mealId, [FromForm] string logDate)
+        public async Task<IActionResult> UploadMealMedia([FromForm][Required] IFormFile file, [FromForm][Range(1, int.MaxValue)] int mealId, [FromForm][Required] string logDate)
         {
             if (file == null || file.Length == 0)
             {
@@ -164,13 +164,8 @@ namespace Easygym.Api.Controllers
         // Download meal media (proxy endpoint to bypass CORS)
         [HttpGet("download-media")]
         [Authorize(Roles = Role.ClientAndTrainer)]
-        public async Task<IActionResult> DownloadMealMedia([FromQuery] string mediaUrl)
+        public async Task<IActionResult> DownloadMealMedia([FromQuery][Required][Url] string mediaUrl)
         {
-            if (string.IsNullOrEmpty(mediaUrl))
-            {
-                return BadRequest(new { message = "Media URL is required" });
-            }
-
             try
             {
                 var (stream, contentType, fileName) = await _blobStorageService.DownloadAsync(mediaUrl);

@@ -6,7 +6,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Easygym.Api.Controllers
 {
-    public class DietPlanController : Controller
+    [Route("api/[controller]")]
+    public class DietPlanController : ApiControllerBase
     {
         private readonly DietPlanService _dietPlanService;
 

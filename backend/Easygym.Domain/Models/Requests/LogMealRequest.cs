@@ -4,7 +4,7 @@ namespace Easygym.Domain.Models.Requests
 {
     public class LogMealRequest
     {
-        [Required]
+        [Range(1, int.MaxValue)]
         public required int MealId { get; set; }
 
         [Required]

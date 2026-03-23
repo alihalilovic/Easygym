@@ -7,8 +7,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Easygym.Api.Controllers
 {
+    [Route("api/[controller]")]
     [Authorize]
-    public class UserController : Controller
+    public class UserController : ApiControllerBase
     {
         private readonly UserService _userService;
         private readonly IGenericRepository<User> _userRepository;

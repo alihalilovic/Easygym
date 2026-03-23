@@ -3,150 +3,156 @@ using Easygym.Domain.Constants;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Easygym.Application.DTOs.Admin;
+using System.ComponentModel.DataAnnotations;
 
-[ApiController]
-[Route("api/admin")]
-[Authorize(Roles = Role.Admin)]
-public class AdminController : ControllerBase
+namespace Easygym.Api.Controllers
 {
-    private readonly AdminService _adminService;
-
-    public AdminController(AdminService adminService)
+    [Route("api/admin")]
+    [Authorize(Roles = Role.Admin)]
+    public class AdminController : ApiControllerBase
     {
-        _adminService = adminService;
-    }
+        private readonly AdminService _adminService;
 
-    [HttpGet("clients")]
-    public async Task<IActionResult> GetClients()
-    {
-        return Ok(await _adminService.GetClientsAsync());
-    }
+        public AdminController(AdminService adminService)
+        {
+            _adminService = adminService;
+        }
 
-    [HttpGet("trainers")]
-    public async Task<IActionResult> GetTrainers()
-    {
-        return Ok(await _adminService.GetTrainersAsync());
-    }
+        [HttpGet("clients")]
+        public async Task<IActionResult> GetClients()
+        {
+            return Ok(await _adminService.GetClientsAsync());
+        }
 
-    [HttpGet("deleted-users")]
-    public async Task<IActionResult> GetDeletedUsers()
-    {
-        var users = await _adminService.GetDeletedUsersAsync();
-        return Ok(users);
-    }
+        [HttpGet("trainers")]
+        public async Task<IActionResult> GetTrainers()
+        {
+            return Ok(await _adminService.GetTrainersAsync());
+        }
 
-    [HttpDelete("users/{id}")]
-    public async Task<IActionResult> DeleteUser(int id)
-    {
-        var result = await _adminService.DeleteUserAsync(id);
+        [HttpGet("deleted-users")]
+        public async Task<IActionResult> GetDeletedUsers()
+        {
+            var users = await _adminService.GetDeletedUsersAsync();
+            return Ok(users);
+        }
 
-        if (!result)
-            return NotFound("User not found");
+        [HttpDelete("users/{id}")]
+        public async Task<IActionResult> DeleteUser([Range(1, int.MaxValue)] int id)
+        {
+            var result = await _adminService.DeleteUserAsync(id);
 
-        return NoContent();
-    }
+            if (!result)
+                return NotFound("User not found");
 
-    [HttpPost("users/{id}/restore")]
-    public async Task<IActionResult> RestoreUser(int id)
-    {
-        var result = await _adminService.RestoreUserAsync(id);
+            return NoContent();
+        }
 
-        if (!result)
-            return NotFound("User not found");
+        [HttpPost("users/{id}/restore")]
+        public async Task<IActionResult> RestoreUser([Range(1, int.MaxValue)] int id)
+        {
+            var result = await _adminService.RestoreUserAsync(id);
 
-        return Ok();
-    }
+            if (!result)
+                return NotFound("User not found");
 
-    [HttpPut("users/{id}")]
-    public async Task<IActionResult> UpdateUser(int id, [FromBody] UpdateUserRequest request)
-    {
-        var result = await _adminService.UpdateUserAsync(id, request);
+            return Ok();
+        }
 
-        if (!result)
-            return NotFound("User not found");
+        [HttpPut("users/{id}")]
+        public async Task<IActionResult> UpdateUser([Range(1, int.MaxValue)] int id, [FromBody] UpdateUserRequest request)
+        {
+            var result = await _adminService.UpdateUserAsync(id, request);
 
-        return NoContent();
-    }
+            if (!result)
+                return NotFound("User not found");
 
-    [HttpGet("workouts")]
-    public async Task<IActionResult> GetAllWorkouts(
-        [FromQuery] int page = 1,
-        [FromQuery] int pageSize = 10,
-        [FromQuery] string? search = null)
-    {
-        var result = await _adminService
-            .GetAllWorkoutsAsync(page, pageSize, search);
+            return NoContent();
+        }
 
-        return Ok(result);
-    }
+        [HttpGet("workouts")]
+        public async Task<IActionResult> GetAllWorkouts(
+            [FromQuery][Range(1, int.MaxValue)] int page = 1,
+            [FromQuery][Range(1, 100)] int pageSize = 10,
+            [FromQuery] string? search = null)
+        {
+            var result = await _adminService
+                .GetAllWorkoutsAsync(page, pageSize, search);
 
-    [HttpGet("exercises")]
-    public async Task<IActionResult> GetAllExercises(
-        [FromQuery] int page = 1,
-        [FromQuery] int pageSize = 10,
-        [FromQuery] string? search = null)
-    {
-        var result = await _adminService
-            .GetAllExercisesAsync(page, pageSize, search);
+            return Ok(result);
+        }
 
-        return Ok(result);
-    }
+        [HttpGet("exercises")]
+        public async Task<IActionResult> GetAllExercises(
+            [FromQuery][Range(1, int.MaxValue)] int page = 1,
+            [FromQuery][Range(1, 100)] int pageSize = 10,
+            [FromQuery] string? search = null)
+        {
+            var result = await _adminService
+                .GetAllExercisesAsync(page, pageSize, search);
 
-    [HttpGet("dietplans")]
-    public async Task<IActionResult> GetDietPlans(
-        [FromQuery] int page = 1,
-        [FromQuery] int pageSize = 5,
-        [FromQuery] string? search = null)
-    {
-        var result = await _adminService.GetAllDietPlansAsync(page, pageSize, search);
-        return Ok(result);
-    }
+            return Ok(result);
+        }
 
-    [HttpDelete("dietplans/{id}")]
-    public async Task<IActionResult> DeleteDietPlan(int id)
-    {
-        var result = await _adminService.DeleteDietPlanAsync(id);
+        [HttpGet("dietplans")]
+        public async Task<IActionResult> GetDietPlans(
+            [FromQuery][Range(1, int.MaxValue)] int page = 1,
+            [FromQuery][Range(1, 100)] int pageSize = 5,
+            [FromQuery] string? search = null)
+        {
+            var result = await _adminService.GetAllDietPlansAsync(page, pageSize, search);
+            return Ok(result);
+        }
 
-        if (!result)
-            return NotFound();
+        [HttpDelete("dietplans/{id}")]
+        public async Task<IActionResult> DeleteDietPlan([Range(1, int.MaxValue)] int id)
+        {
+            var result = await _adminService.DeleteDietPlanAsync(id);
 
-        return NoContent();
-    }
-    [HttpDelete("users/{id}/permanent")]
-    public async Task<IActionResult> PermanentDeleteUser(int id)
-    {
-        var result = await _adminService.PermanentlyDeleteUserAsync(id);
+            if (!result)
+                return NotFound();
 
-        if (!result)
-            return NotFound();
+            return NoContent();
+        }
 
-        return NoContent();
-    }
-    [HttpPost("backup")]
-    public IActionResult BackupDatabase()
-    {
-        var result = _adminService.BackupDatabase();
+        [HttpDelete("users/{id}/permanent")]
+        public async Task<IActionResult> PermanentDeleteUser([Range(1, int.MaxValue)] int id)
+        {
+            var result = await _adminService.PermanentlyDeleteUserAsync(id);
 
-        if (!result)
-            return BadRequest();
+            if (!result)
+                return NotFound();
 
-        return Ok("Backup created");
-    }
+            return NoContent();
+        }
 
-    [HttpPost("restore")]
-    public IActionResult RestoreDatabase([FromQuery] string file)
-    {
-        var result = _adminService.RestoreDatabase(file);
+        [HttpPost("backup")]
+        public IActionResult BackupDatabase()
+        {
+            var result = _adminService.BackupDatabase();
 
-        if (!result)
-            return NotFound();
+            if (!result)
+                return BadRequest();
 
-        return Ok("Database restored");
-    }
-    [HttpGet("backups")]
-    public IActionResult GetBackups()
-    {
-        var backups = _adminService.GetBackups();
-        return Ok(backups);
+            return Ok("Backup created");
+        }
+
+        [HttpPost("restore")]
+        public IActionResult RestoreDatabase([FromQuery][Required][MinLength(1)] string file)
+        {
+            var result = _adminService.RestoreDatabase(file);
+
+            if (!result)
+                return NotFound();
+
+            return Ok("Database restored");
+        }
+
+        [HttpGet("backups")]
+        public IActionResult GetBackups()
+        {
+            var backups = _adminService.GetBackups();
+            return Ok(backups);
+        }
     }
 }

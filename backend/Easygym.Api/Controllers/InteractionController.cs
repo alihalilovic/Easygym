@@ -4,8 +4,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Easygym.Api.Controllers
 {
+    [Route("api/[controller]")]
     [Authorize]
-    public class InteractionController : Controller
+    public class InteractionController : ApiControllerBase
     {
         private readonly InteractionService _interactionService;
 

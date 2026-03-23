@@ -5,7 +5,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Easygym.Api.Controllers
 {
-    public class ClientController : Controller
+    [Route("api/[controller]")]
+    public class ClientController : ApiControllerBase
     {
         private readonly ClientService _clientService;
 

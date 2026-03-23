@@ -8,10 +8,12 @@ using Easygym.Domain.Entities;
 using Easygym.Domain.Models.Requests;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.ComponentModel.DataAnnotations;
 
 namespace Easygym.Api.Controllers
 {
-    public class WorkoutSessionController : Controller
+    [Route("api/[controller]")]
+    public class WorkoutSessionController : ApiControllerBase
     {
         private readonly WorkoutSessionService _workoutSessionService;
 
@@ -22,7 +24,7 @@ namespace Easygym.Api.Controllers
 
         [HttpGet("trainee/{traineeId}")]
         [Authorize(Roles = Role.All)]
-        public async Task<IActionResult> GetWorkoutSessionsForTrainee(int traineeId)
+        public async Task<IActionResult> GetWorkoutSessionsForTrainee([Range(1, int.MaxValue)] int traineeId)
         {
             var workoutSessions = await _workoutSessionService.GetWorkoutSessionsForTraineeAsync(traineeId);
             return Ok(workoutSessions);
@@ -31,7 +33,7 @@ namespace Easygym.Api.Controllers
         [HttpGet("trainee/{traineeId}/paged")]
         [Authorize(Roles = Role.All)]
         public async Task<IActionResult> GetPagedWorkoutSessionsForTrainee(
-            int traineeId,
+            [Range(1, int.MaxValue)] int traineeId,
             [FromQuery] WorkoutSessionQueryParams queryParams)
         {
             var pagedSessions = await _workoutSessionService.GetPagedWorkoutSessionsForTraineeAsync(traineeId, queryParams);
@@ -40,7 +42,7 @@ namespace Easygym.Api.Controllers
 
         [HttpGet("{id}")]
         [Authorize(Roles = Role.All)]
-        public async Task<IActionResult> GetWorkoutSession(int id)
+        public async Task<IActionResult> GetWorkoutSession([Range(1, int.MaxValue)] int id)
         {
             var workoutSession = await _workoutSessionService.GetWorkoutSessionAsync(id);
             return Ok(workoutSession);
@@ -50,21 +52,28 @@ namespace Easygym.Api.Controllers
         [Authorize(Roles = Role.Client)]
         public async Task<IActionResult> CreateWorkoutSession([FromBody] WorkoutSession workoutSession)
         {
+            if (workoutSession.EndTime <= workoutSession.StartTime)
+            {
+                ModelState.AddModelError(nameof(workoutSession.EndTime), "EndTime must be later than StartTime.");
+                return ValidationProblem(ModelState);
+            }
+
             var result = await _workoutSessionService.CreateWorkoutSessionAsync(workoutSession);
             return Ok(result);
         }
 
         [HttpPut("{id}")]
         [Authorize(Roles = Role.Client)]
-        public async Task<IActionResult> UpdateWorkoutSession(int id, [FromBody] UpdateWorkoutSessionRequest workoutSession)
+        public async Task<IActionResult> UpdateWorkoutSession([Range(1, int.MaxValue)] int id, [FromBody] UpdateWorkoutSessionRequest workoutSession)
         {
+            workoutSession.Id = id;
             await _workoutSessionService.UpdateWorkoutSessionAsync(workoutSession);
             return Ok();
         }
 
         [HttpDelete("{id}")]
         [Authorize(Roles = Role.Client)]
-        public async Task<IActionResult> DeleteWorkoutSession(int id)
+        public async Task<IActionResult> DeleteWorkoutSession([Range(1, int.MaxValue)] int id)
         {
             await _workoutSessionService.DeleteWorkoutSessionAsync(id);
             return Ok();

@@ -3,13 +3,13 @@ using Easygym.Domain.Entities;
 using Easygym.Domain.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.ComponentModel.DataAnnotations;
 
 namespace Easygym.Api.Controllers
 {
-    [ApiController]
     [Route("api/profile-picture")]
     [Authorize]
-    public class ProfilePictureController : ControllerBase
+    public class ProfilePictureController : ApiControllerBase
     {
         private readonly IBlobStorageService _blobStorageService;
         private readonly IGenericRepository<User> _userRepository;
@@ -29,7 +29,7 @@ namespace Easygym.Api.Controllers
         }
 
         [HttpPost("upload")]
-        public async Task<IActionResult> UploadProfilePicture(IFormFile file)
+        public async Task<IActionResult> UploadProfilePicture([FromForm][Required] IFormFile file)
         {
             if (file == null || file.Length == 0)
             {
