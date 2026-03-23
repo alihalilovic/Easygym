@@ -9,7 +9,7 @@ const ProtectedAdminRoute = () => {
 
   if (!user) return <Navigate to={routes.Login} replace />;
 
-  if (!isUserAdmin) return null;  
+  if (!isUserAdmin) return <Navigate to={routes.Profile} replace />;
 
   return <Outlet />;
 };

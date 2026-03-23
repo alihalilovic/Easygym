@@ -49,6 +49,7 @@ const Router = () => {
             <Route path={routes.Exercises} element={<Exercises />} />
             <Route path={routes.Settings} element={<Settings />} />
             <Route path={routes.DietPlans} element={<DietPlans />} />
+            <Route path={routes.Invitations} element={<Invitations />} />
             <Route path="/diet-plan/:id" element={<DietPlan />} />
             <Route element={<ProtectedTrainerRoute />}>
               <Route path="/diet-plan">
@@ -70,8 +71,7 @@ const Router = () => {
             </Route>
             <Route element={<ProtectedTrainerRoute />}>
               <Route path={routes.MyClients} element={<MyClients />} />
-            <Route path={routes.Invitations} element={<Invitations />} />
-          </Route>
+            </Route>
               <Route element={<ProtectedAdminRoute />}>
               <Route path={routes.MyList} element={<MyList />} />
               <Route path={routes.CreateUser} element={<Register />} />

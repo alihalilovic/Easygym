@@ -16,7 +16,8 @@ namespace Easygym.Infrastructure.Repositories
 
         public async Task<User?> GetUserByEmailAsync(string email)
         {
-            return await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+            var normalizedEmail = email.Trim().ToLower();
+            return await _context.Users.FirstOrDefaultAsync(u => u.Email != null && u.Email.ToLower() == normalizedEmail);
         }
 
         public async Task<User> AddUserAsync(User user)

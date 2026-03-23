@@ -1,5 +1,6 @@
 using System.Dynamic;
 using System.IdentityModel.Tokens.Jwt;
+using System.Text.RegularExpressions;
 using Easygym.Domain.Constants;
 using Easygym.Domain.Entities;
 using Easygym.Domain.Exceptions;
@@ -9,6 +10,12 @@ namespace Easygym.Application.Services
 {
     public class AuthService
     {
+        private static readonly System.ComponentModel.DataAnnotations.EmailAddressAttribute EmailAddressValidator = new();
+        private static readonly Regex LowercaseRegex = new("[a-z]", RegexOptions.Compiled);
+        private static readonly Regex UppercaseRegex = new("[A-Z]", RegexOptions.Compiled);
+        private static readonly Regex DigitRegex = new("\\d", RegexOptions.Compiled);
+        private static readonly Regex SpecialCharacterRegex = new("[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?]", RegexOptions.Compiled);
+
         private readonly JwtService _jwtService;
         private readonly IUserRepository _userRepository;
         private readonly IGenericRepository<Client> _clientRepository;
@@ -25,13 +32,16 @@ namespace Easygym.Application.Services
 
         public async Task<string> RegisterAsync(string? name, string email, string password, string role)
         {
+            var normalizedEmail = NormalizeAndValidateEmail(email);
             role = role.ToLower();
             if (!new[] { Role.Trainer, Role.Client }.Contains(role, StringComparer.Ordinal))
             {
                 throw new InvalidRoleException();
             }
 
-            var userExists = await _userRepository.GetUserByEmailAsync(email);
+            ValidatePasswordStrength(password);
+
+            var userExists = await _userRepository.GetUserByEmailAsync(normalizedEmail);
             if (userExists != null)
             {
                 throw new UserAlreadyExistsException();
@@ -41,7 +51,7 @@ namespace Easygym.Application.Services
             var user = new User
             {
                 Name = name,
-                Email = email,
+                Email = normalizedEmail,
                 Password = passwordHash,
                 Role = role,
             };
@@ -64,7 +74,8 @@ namespace Easygym.Application.Services
 
         public async Task<string> LoginAsync(string email, string password)
         {
-            var user = await _userRepository.GetUserByEmailAsync(email);
+            var normalizedEmail = NormalizeAndValidateEmail(email);
+            var user = await _userRepository.GetUserByEmailAsync(normalizedEmail);
 
             if (user == null)
             {
@@ -113,8 +124,56 @@ namespace Easygym.Application.Services
 
         public async Task UpdatePasswordAsync(User user, string newPassword)
         {
+            ValidatePasswordStrength(newPassword);
             user.Password = BCrypt.Net.BCrypt.HashPassword(newPassword);
             await _userRepository.UpdateAsync(user);
+        }
+
+        private static void ValidatePasswordStrength(string password)
+        {
+            var errors = new List<string>();
+
+            if (password.Length < 8)
+            {
+                errors.Add("at least 8 characters");
+            }
+
+            if (!LowercaseRegex.IsMatch(password))
+            {
+                errors.Add("one lowercase letter");
+            }
+
+            if (!UppercaseRegex.IsMatch(password))
+            {
+                errors.Add("one uppercase letter");
+            }
+
+            if (!DigitRegex.IsMatch(password))
+            {
+                errors.Add("one number");
+            }
+
+            if (!SpecialCharacterRegex.IsMatch(password))
+            {
+                errors.Add("one special character");
+            }
+
+            if (errors.Count > 0)
+            {
+                throw new ValidationException($"Password must contain {string.Join(", ", errors)}.");
+            }
+        }
+
+        private static string NormalizeAndValidateEmail(string email)
+        {
+            var normalizedEmail = email.Trim().ToLowerInvariant();
+
+            if (!EmailAddressValidator.IsValid(normalizedEmail))
+            {
+                throw new ValidationException("Invalid email format.");
+            }
+
+            return normalizedEmail;
         }
     }
 }

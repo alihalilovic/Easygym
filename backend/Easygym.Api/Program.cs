@@ -14,6 +14,11 @@ using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
 var builder = WebApplication.CreateBuilder(args);
 
+var appBasePath = AppContext.BaseDirectory;
+builder.Configuration
+    .AddJsonFile(Path.Combine(appBasePath, "appsettings.json"), optional: true, reloadOnChange: true)
+    .AddJsonFile(Path.Combine(appBasePath, $"appsettings.{builder.Environment.EnvironmentName}.json"), optional: true, reloadOnChange: true);
+
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 

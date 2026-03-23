@@ -28,7 +28,7 @@ namespace Easygym.Api.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetUser(string id)
+        public async Task<IActionResult> GetUser(int id)
         {
             var user = await _userService.GetUserAsync(id);
             if (user == null) return NotFound();
@@ -37,7 +37,7 @@ namespace Easygym.Api.Controllers
 
         [Authorize(Roles = Role.Admin)]
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteUser(string id)
+        public async Task<IActionResult> DeleteUser(int id)
         {
             var user = await _userRepository.GetByIdAsync(id);
             if (user == null) return NotFound();

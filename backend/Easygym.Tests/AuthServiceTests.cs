@@ -48,7 +48,7 @@ namespace Easygym.Tests
         public async Task TestRegister_ValidData_ReturnsToken()
         {
             var email = "test@example.com";
-            var password = "password123";
+            var password = "Password123!";
             var role = Role.Client;
             var name = "Test User";
 
@@ -62,10 +62,29 @@ namespace Easygym.Tests
         }
 
         [Fact]
+        public async Task TestRegister_NormalizesEmailBeforeLookupAndSave()
+        {
+            var email = " Test@Example.com ";
+            var normalizedEmail = "test@example.com";
+            var password = "Password123!";
+            var role = Role.Client;
+            var name = "Test User";
+
+            _userRepositoryMock.Setup(x => x.GetUserByEmailAsync(normalizedEmail)).ReturnsAsync((User?)null);
+            _userRepositoryMock.Setup(x => x.AddUserAsync(It.Is<User>(u => u.Email == normalizedEmail))).ReturnsAsync(new User { Id = 1, Email = normalizedEmail, Role = role });
+
+            var token = await _authService.RegisterAsync(name, email, password, role);
+
+            Assert.NotNull(token);
+            _userRepositoryMock.Verify(x => x.GetUserByEmailAsync(normalizedEmail), Times.Once);
+            _userRepositoryMock.Verify(x => x.AddUserAsync(It.Is<User>(u => u.Email == normalizedEmail)), Times.Once);
+        }
+
+        [Fact]
         public async Task TestRegister_AdminRole_ThrowsInvalidRoleException()
         {
             var email = "admin@example.com";
-            var password = "password123";
+            var password = "Password123!";
             var name = "Admin User";
 
             await Assert.ThrowsAsync<InvalidRoleException>(() =>
@@ -73,10 +92,29 @@ namespace Easygym.Tests
         }
 
         [Fact]
-        public async Task TestLogin_InvalidPassword_ThrowsException()
+        public async Task TestRegister_WeakPassword_ThrowsValidationException()
         {
             var email = "test@example.com";
             var password = "password123";
+            var role = Role.Client;
+            var name = "Test User";
+
+            await Assert.ThrowsAsync<ValidationException>(() =>
+                _authService.RegisterAsync(name, email, password, role));
+        }
+
+        [Fact]
+        public async Task TestRegister_InvalidEmail_ThrowsValidationException()
+        {
+            await Assert.ThrowsAsync<ValidationException>(() =>
+                _authService.RegisterAsync("Test User", " not-an-email ", "Password123!", Role.Client));
+        }
+
+        [Fact]
+        public async Task TestLogin_InvalidPassword_ThrowsException()
+        {
+            var email = "test@example.com";
+            var password = "Password123!";
             var wrongPassword = "wrongpassword";
             var passwordHash = BCrypt.Net.BCrypt.HashPassword(password);
             var user = new User { Id = 1, Email = email, Password = passwordHash, Role = Role.Client };
@@ -84,6 +122,22 @@ namespace Easygym.Tests
             _userRepositoryMock.Setup(x => x.GetUserByEmailAsync(email)).ReturnsAsync(user);
 
             await Assert.ThrowsAsync<InvalidCredentialsException>(() => _authService.LoginAsync(email, wrongPassword));
+        }
+
+        [Fact]
+        public async Task TestLogin_NormalizesEmailBeforeLookup()
+        {
+            var normalizedEmail = "test@example.com";
+            var password = "Password123!";
+            var passwordHash = BCrypt.Net.BCrypt.HashPassword(password);
+            var user = new User { Id = 1, Email = normalizedEmail, Password = passwordHash, Role = Role.Client };
+
+            _userRepositoryMock.Setup(x => x.GetUserByEmailAsync(normalizedEmail)).ReturnsAsync(user);
+
+            var token = await _authService.LoginAsync(" Test@Example.com ", password);
+
+            Assert.NotNull(token);
+            _userRepositoryMock.Verify(x => x.GetUserByEmailAsync(normalizedEmail), Times.Once);
         }
     }
 }

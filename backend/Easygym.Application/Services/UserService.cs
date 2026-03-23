@@ -27,7 +27,7 @@ namespace Easygym.Application.Services
             return userList.Select(u => u.ToResponse(clients.GetValueOrDefault(u.Id)?.TrainerId));
         }
 
-        public async Task<UserResponse?> GetUserAsync(string id)
+        public async Task<UserResponse?> GetUserAsync(int id)
         {
             var user = await _userRepository.GetByIdAsync(id);
             if (user == null) return null;

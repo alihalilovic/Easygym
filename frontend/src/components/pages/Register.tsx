@@ -83,7 +83,9 @@ const Register = () => {
         const redirectPath =
           registerResponse.role === UserRole.Client
             ? routes.Dashboard
-            : routes.MyClients;
+            : registerResponse.role === UserRole.Trainer
+              ? routes.MyClients
+              : routes.MyList;
         navigate(redirectPath);
         return;
       }
