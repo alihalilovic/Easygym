@@ -1,8 +1,10 @@
 using Easygym.Application.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Easygym.Api.Controllers
 {
+    [Authorize]
     public class InteractionController : Controller
     {
         private readonly InteractionService _interactionService;

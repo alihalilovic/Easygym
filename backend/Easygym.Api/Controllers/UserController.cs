@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Easygym.Api.Controllers
 {
+    [Authorize]
     public class UserController : Controller
     {
         private readonly UserService _userService;
