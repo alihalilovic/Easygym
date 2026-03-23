@@ -2,6 +2,7 @@ import { createContext, useContext, useState, useEffect, useCallback, ReactNode 
 import { useQueryClient } from '@tanstack/react-query';
 import api from '@/api/api';
 import { authTokenKey } from '@/lib/constants';
+import { notifyError } from '@/lib/utils';
 import { UserRegisterRequest, UserRole, User } from '@/types/User';
 
 interface AuthContextType {
@@ -36,7 +37,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             setUser(userData);
             return userData;
         } catch (error) {
-            console.error('Failed to fetch user:', error);
+            notifyError(error, 'Failed to fetch user');
             setUser(null);
             return null;
         }

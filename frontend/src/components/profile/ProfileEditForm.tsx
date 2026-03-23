@@ -4,6 +4,7 @@ import userService from '@/api/services/userService';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { notifyError } from '@/lib/utils';
 
 const ProfileEditForm = ({ user, onCancel, onSuccess }: any) => {
   const { setMeUser } = useAuth();
@@ -32,8 +33,7 @@ const ProfileEditForm = ({ user, onCancel, onSuccess }: any) => {
       await setMeUser();
       onSuccess();
     } catch (err) {
-      console.error(err);
-      alert('Failed to update profile');
+      notifyError(err, 'Failed to update profile');
     } finally {
       setLoading(false);
     }

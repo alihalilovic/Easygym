@@ -21,6 +21,7 @@ import { CreateExerciseRequest } from '@/types/Exercise';
 import exerciseService from '@/api/services/exerciseService';
 import { useQueryClient } from '@tanstack/react-query';
 import { exerciseKeys } from '@/hooks/useExercises';
+import { notifyError } from '@/lib/utils';
 
 type ImportFormat = 'csv' | 'json';
 
@@ -142,7 +143,7 @@ const ExercisesImporter = () => {
           await exerciseService.createExercise(exercise);
           successfulExercises.push(exercise.name);
         } catch (error) {
-          console.error(`Failed to import exercise "${exercise.name}":`, error);
+          notifyError(error, `Failed to import exercise "${exercise.name}"`);
           failedExercises.push(exercise.name);
         }
       }
@@ -169,10 +170,7 @@ const ExercisesImporter = () => {
         );
       }
     } catch (error) {
-      console.error('Import error:', error);
-      toast.error(
-        error instanceof Error ? error.message : 'Failed to import exercises',
-      );
+      notifyError(error, 'Failed to import exercises');
     } finally {
       setIsImporting(false);
       // Reset file input

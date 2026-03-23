@@ -41,6 +41,10 @@ namespace Easygym.Infrastructure.Persistence
                 .HasForeignKey<Trainer>(t => t.Id)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            modelBuilder.Entity<User>()
+                .HasIndex(u => u.Email)
+                .IsUnique();
+
             // Configure WorkoutSession to NOT cascade delete when Workout is deleted
             // This preserves workout session history even after workouts are removed
             modelBuilder.Entity<WorkoutSession>()
@@ -69,6 +73,53 @@ namespace Easygym.Infrastructure.Persistence
 
             modelBuilder.Entity<MealLog>()
                 .HasIndex(ml => new { ml.ClientId, ml.LogDate });
+
+            modelBuilder.Entity<WorkoutSession>()
+                .HasIndex(ws => new { ws.TraineeId, ws.StartTime });
+
+            modelBuilder.Entity<WorkoutSession>()
+                .HasIndex(ws => new { ws.TraineeId, ws.EndTime });
+
+            modelBuilder.Entity<WorkoutSession>()
+                .HasIndex(ws => new { ws.TraineeId, ws.WorkoutId, ws.StartTime });
+
+            modelBuilder.Entity<Workout>()
+                .HasIndex(w => new { w.TraineeId, w.CreatedAt });
+
+            modelBuilder.Entity<Workout>()
+                .HasIndex(w => new { w.TrainerId, w.CreatedAt });
+
+            modelBuilder.Entity<Exercise>()
+                .HasIndex(e => new { e.CreatedById, e.CreatedAt });
+
+            modelBuilder.Entity<Exercise>()
+                .HasIndex(e => new { e.CreatedById, e.IsPublic, e.CreatedAt });
+
+            modelBuilder.Entity<DietPlan>()
+                .HasIndex(dp => new { dp.TrainerId, dp.CreatedAt });
+
+            modelBuilder.Entity<DietPlanAssignment>()
+                .HasIndex(dpa => new { dpa.DietPlanId, dpa.ClientId })
+                .IsUnique();
+
+            modelBuilder.Entity<DietPlanAssignment>()
+                .HasIndex(dpa => new { dpa.ClientId, dpa.IsActive });
+
+            modelBuilder.Entity<Invitation>()
+                .HasIndex(i => new { i.ClientId, i.TrainerId });
+
+            modelBuilder.Entity<Invitation>()
+                .HasIndex(i => new { i.ClientId, i.Status });
+
+            modelBuilder.Entity<Invitation>()
+                .HasIndex(i => new { i.TrainerId, i.Status });
+
+            modelBuilder.Entity<TrainerClientHistory>()
+                .HasIndex(h => new { h.ClientId, h.EndedAt });
+
+            modelBuilder.Entity<TrainerClientHistory>()
+                .HasIndex(h => new { h.TrainerId, h.EndedAt });
+
                 // Workout -> Trainee (User)
             modelBuilder.Entity<Workout>()
                 .HasOne(w => w.Trainee)

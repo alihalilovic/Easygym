@@ -3,6 +3,7 @@ using System;
 using Easygym.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Easygym.Infrastructure.Migrations
 {
     [DbContext(typeof(EasygymDbContext))]
-    partial class EasygymDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260323143013_AddQueryIndexes")]
+    partial class AddQueryIndexes
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.3");
@@ -64,6 +67,8 @@ namespace Easygym.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("TrainerId");
+
                     b.HasIndex("TrainerId", "CreatedAt");
 
                     b.ToTable("DietPlans");
@@ -89,7 +94,11 @@ namespace Easygym.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("ClientId");
+
                     b.HasIndex("ClientId", "IsActive");
+
+                    b.HasIndex("DietPlanId");
 
                     b.HasIndex("DietPlanId", "ClientId")
                         .IsUnique();
@@ -150,6 +159,8 @@ namespace Easygym.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CreatedById");
+
                     b.HasIndex("CreatedById", "CreatedAt");
 
                     b.HasIndex("CreatedById", "IsPublic", "CreatedAt");
@@ -186,9 +197,13 @@ namespace Easygym.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("ClientId");
+
                     b.HasIndex("ClientId", "Status");
 
                     b.HasIndex("ClientId", "TrainerId");
+
+                    b.HasIndex("TrainerId");
 
                     b.HasIndex("TrainerId", "Status");
 
@@ -329,7 +344,11 @@ namespace Easygym.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("ClientId");
+
                     b.HasIndex("ClientId", "EndedAt");
+
+                    b.HasIndex("TrainerId");
 
                     b.HasIndex("TrainerId", "EndedAt");
 
@@ -406,7 +425,11 @@ namespace Easygym.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("TraineeId");
+
                     b.HasIndex("TraineeId", "CreatedAt");
+
+                    b.HasIndex("TrainerId");
 
                     b.HasIndex("TrainerId", "CreatedAt");
 
@@ -439,13 +462,15 @@ namespace Easygym.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("WorkoutId");
+                    b.HasIndex("TraineeId");
 
                     b.HasIndex("TraineeId", "EndTime");
 
                     b.HasIndex("TraineeId", "StartTime");
 
                     b.HasIndex("TraineeId", "WorkoutId", "StartTime");
+
+                    b.HasIndex("WorkoutId");
 
                     b.ToTable("WorkoutSessions");
                 });

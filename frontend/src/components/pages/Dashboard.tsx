@@ -15,6 +15,7 @@ import { Loader2 } from 'lucide-react';
 import { Link } from 'react-router';
 import { routes } from '@/lib/constants';
 import { parseLocalDate } from '@/lib/dates';
+import { notifyError } from '@/lib/utils';
 
 const Dashboard = () => {
   const [stats, setStats] = useState<DashboardStatsResponse | null>(null);
@@ -26,7 +27,7 @@ const Dashboard = () => {
         const response = await clientService.getDashboardStats();
         setStats(response);
       } catch (error) {
-        console.error('Failed to fetch dashboard stats', error);
+        notifyError(error, 'Failed to fetch dashboard stats');
       } finally {
         setLoading(false);
       }

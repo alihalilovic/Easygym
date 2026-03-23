@@ -11,6 +11,7 @@ import { Download, FileJson, FileText } from 'lucide-react';
 import { toast } from 'sonner';
 import { useExercises } from '@/hooks/useExercises';
 import clsx from 'clsx';
+import { notifyError } from '@/lib/utils';
 
 type ExportFormat = 'csv' | 'json';
 
@@ -92,8 +93,7 @@ const ExercisesExporter = () => {
         toast.success(`Exported ${exercises.length} exercises to JSON`);
       }
     } catch (error) {
-      console.error('Export error:', error);
-      toast.error('Failed to export exercises');
+      notifyError(error, 'Failed to export exercises');
     } finally {
       setIsExporting(false);
     }

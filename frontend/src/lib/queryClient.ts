@@ -1,5 +1,5 @@
 import { QueryClient } from '@tanstack/react-query';
-import { toast } from 'sonner';
+import { notifyError } from '@/lib/utils';
 
 export const queryClient = new QueryClient({
     defaultOptions: {
@@ -10,8 +10,7 @@ export const queryClient = new QueryClient({
         },
         mutations: {
             onError: (error) => {
-                const message = error instanceof Error ? error.message : 'An unexpected error occurred';
-                toast.error(message);
+                notifyError(error);
             },
         },
     },

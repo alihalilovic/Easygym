@@ -7,6 +7,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { DeleteMealMediaRequest } from '@/types/MealLog';
 import imageCompression from 'browser-image-compression';
 import { mealLogKeys } from '@/hooks/useMealLog';
+import { notifyError } from '@/lib/utils';
 
 interface MealMediaUploadProps {
   mealId: number;
@@ -126,7 +127,7 @@ export const MealMediaUpload = ({
         // Re-assign file to the compressed one
         file = new File([compressedFile], file.name, { type: file.type });
       } catch (error) {
-        console.log(error);
+        notifyError(error, 'Failed to process image before upload');
       }
     }
 
