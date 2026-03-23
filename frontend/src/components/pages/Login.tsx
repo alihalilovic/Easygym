@@ -18,6 +18,7 @@ import { Link, useNavigate } from 'react-router';
 import { UsersIcon } from 'lucide-react';
 import { UserRole } from '@/types/User';
 import { routes } from '@/lib/constants';
+import { getErrorMessage } from '@/lib/utils';
 
 const Login = () => {
   const { login } = useAuth();
@@ -41,16 +42,21 @@ const Login = () => {
   });
 
   const onSubmit = async (data: z.infer<typeof FormSchema>) => {
-    const loginResponse = await login(data);
-    if (loginResponse?.id) {
-      toast.success('Logged in successfully');
-      const redirectPath =
-        loginResponse.role === UserRole.Client
-          ? routes.Dashboard
-          : routes.MyClients;
-      navigate(redirectPath);
-    } else {
-      toast.error(`Failed to login: ${loginResponse}`);
+    try {
+      const loginResponse = await login(data);
+      if (loginResponse?.id) {
+        toast.success('Logged in successfully');
+        const redirectPath =
+          loginResponse.role === UserRole.Client
+            ? routes.Dashboard
+            : routes.MyClients;
+        navigate(redirectPath);
+        return;
+      }
+
+      toast.error('Failed to login');
+    } catch (error) {
+      toast.error(`Failed to login: ${getErrorMessage(error)}`);
     }
   };
 

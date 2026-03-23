@@ -11,6 +11,10 @@ import adminService from './services/adminService';
 
 axios.defaults.baseURL = import.meta.env.VITE_APP_API_URL;
 
+export type ApiError = Error & {
+  status?: number;
+};
+
 export const instance = axios.create({
   baseURL: import.meta.env.VITE_APP_API_URL,
   timeout: 10000,
@@ -37,7 +41,10 @@ instance.interceptors.response.use(
       error.response?.data?.message ||
       error.message ||
       'An unexpected error occurred';
-    return Promise.reject(new Error(message));
+    const apiError: ApiError = Object.assign(new Error(message), {
+      status: error.response?.status,
+    });
+    return Promise.reject(apiError);
   },
 );
 

@@ -3,7 +3,6 @@ import { useQueryClient } from '@tanstack/react-query';
 import api from '@/api/api';
 import { authTokenKey } from '@/lib/constants';
 import { UserRegisterRequest, UserRole, User } from '@/types/User';
-import { getErrorMessage } from '@/lib/utils';
 
 interface AuthContextType {
     user: User | null;
@@ -43,26 +42,32 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }
     }, []);
 
-    const login = useCallback(async ({ email, password }: { email: string; password: string }) => {
+    const login = useCallback(async ({ email, password }: { email: string; password: string }): Promise<User | null> => {
         try {
             const token = await api.auth.login({ email, password });
             if (token) {
                 localStorage.setItem(authTokenKey, token);
                 return await setMeUser();
             }
+            return null;
         } catch (error) {
-            return getErrorMessage(error);
+            localStorage.removeItem(authTokenKey);
+            setUser(null);
+            throw error;
         }
     }, [setMeUser]);
-    const register = useCallback(async (userData: UserRegisterRequest) => {
+    const register = useCallback(async (userData: UserRegisterRequest): Promise<User | null> => {
         try {
             const token = await api.auth.register(userData);
             if (token) {
                 localStorage.setItem(authTokenKey, token);
                 return await setMeUser();
             }
+            return null;
         } catch (error) {
-            return getErrorMessage(error);
+            localStorage.removeItem(authTokenKey);
+            setUser(null);
+            throw error;
         }
     }, [setMeUser]);
 

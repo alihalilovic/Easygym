@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import { PasswordStrengthIndicator } from '@/components/ui/PasswordStrengthIndicator';
 import { routes } from '@/lib/constants';
+import { getErrorMessage } from '@/lib/utils';
 
 const Register = () => {
   const { register } = useAuth();
@@ -74,17 +75,22 @@ const Register = () => {
   });
 
   const onSubmit = async (data: z.infer<typeof FormSchema>) => {
-    const registerResponse = await register(data);
+    try {
+      const registerResponse = await register(data);
 
-    if (registerResponse?.id) {
-      toast.success('Registered successfully');
-      const redirectPath =
-        registerResponse.role === UserRole.Client
-          ? routes.Dashboard
-          : routes.MyClients;
-      navigate(redirectPath);
-    } else {
-      toast.error(`Failed to register: ${registerResponse}`);
+      if (registerResponse?.id) {
+        toast.success('Registered successfully');
+        const redirectPath =
+          registerResponse.role === UserRole.Client
+            ? routes.Dashboard
+            : routes.MyClients;
+        navigate(redirectPath);
+        return;
+      }
+
+      toast.error('Failed to register');
+    } catch (error) {
+      toast.error(`Failed to register: ${getErrorMessage(error)}`);
     }
   };
 
